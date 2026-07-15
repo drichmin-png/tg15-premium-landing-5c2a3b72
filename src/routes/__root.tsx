@@ -83,18 +83,21 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "T.G.15 Tirzepatida 15mg/0,5mL. Emagrecimento eficaz, controle glicêmico e melhora do perfil lipídico. Compra segura no site oficial.",
       },
-      { property: "og:title", content: "T.G.15 — Tirzepatida 15mg/0,5mL" },
+      { property: "og:title", content: "T.G.15 — Tirzepatida 15mg/0,5mL | Site Oficial" },
       {
         property: "og:description",
         content:
-          "Ciência, tecnologia e resultados para uma transformação completa. Site oficial T.G.15.",
+          "T.G.15 Tirzepatida 15mg/0,5mL. Emagrecimento eficaz, controle glicêmico e melhora do perfil lipídico. Compra segura no site oficial.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "T.G.15 — Tirzepatida 15mg/0,5mL | Site Oficial" },
+      { name: "twitter:description", content: "T.G.15 Tirzepatida 15mg/0,5mL. Emagrecimento eficaz, controle glicêmico e melhora do perfil lipídico. Compra segura no site oficial." },
+      { property: "og:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/MubFXRfVZ2PNNChI0T9PhYrvoDs2/social-images/social-1784133680203-ChatGPT_Image_8_de_jul._de_2026,_14_39_58.webp" },
+      { name: "twitter:image", content: "https://storage.googleapis.com/gpt-engineer-file-uploads/MubFXRfVZ2PNNChI0T9PhYrvoDs2/social-images/social-1784133680203-ChatGPT_Image_8_de_jul._de_2026,_14_39_58.webp" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
