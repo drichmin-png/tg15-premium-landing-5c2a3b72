@@ -1,3 +1,4 @@
+import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Header } from "@/components/site/Header";
 import { Footer } from "@/components/site/Footer";
@@ -19,7 +20,7 @@ export const Route = createFileRoute("/")({
 function Index() {
   const s = useAdmin();
 
-  const renderers: Record<BlockId, () => JSX.Element> = {
+  const renderers: Record<BlockId, () => React.ReactElement> = {
     hero: () => <Hero />,
     trust: () => <TrustBar />,
     produto: () => (
