@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Check, ChevronLeft, CreditCard, Lock, QrCode, ShieldCheck, Truck, FileText } from "lucide-react";
 import { cart, useCart } from "@/lib/cart-store";
 import { BOX_SAVINGS, formatBRL, variants } from "@/lib/product";
@@ -26,7 +26,8 @@ function Checkout() {
   const state = useCart();
   const nav = useNavigate();
   const [step, setStep] = useState(1);
-  const [orderId] = useState(() => "TG-" + Math.random().toString(36).slice(2, 8).toUpperCase());
+  const [orderId, setOrderId] = useState("TG-XXXXXX");
+  useEffect(() => { setOrderId("TG-" + Math.random().toString(36).slice(2, 8).toUpperCase()); }, []);
 
   const v = variants[state.variant];
   const subtotal = v.price * state.qty;
