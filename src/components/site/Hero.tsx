@@ -1,7 +1,9 @@
 import { ShieldCheck } from "lucide-react";
 import { media } from "@/lib/product";
+import { useAdmin } from "@/lib/admin-store";
 
 export function Hero() {
+  const { hero } = useAdmin();
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 -z-10">
