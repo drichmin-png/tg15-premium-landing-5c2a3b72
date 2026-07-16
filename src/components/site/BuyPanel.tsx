@@ -53,9 +53,12 @@ export function BuyPanel() {
 
       <div id="comprar" className="grid gap-3">
         <div className="eyebrow">Escolha sua opção</div>
-        {(["single", "box"] as const).map((id) => {
+        {(["single", "box"] as const).filter((id) => (id === "single" ? singleActive : boxActive)).map((id) => {
           const variant = variants[id];
-          const selected = state.variant === id;
+          const selected = activeVariant === id;
+          const price = dynPrice[id];
+          const name = dynName[id];
+          const badge = id === "box" ? boxBadge : undefined;
           return (
             <button
               key={id}
@@ -66,9 +69,9 @@ export function BuyPanel() {
                   : "border-border bg-card hover:border-primary/40"
               }`}
             >
-              {variant.badge && (
+              {badge && (
                 <span className="absolute -top-3 left-4 rounded-full gradient-brand px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-md shadow-primary/30">
-                  {variant.badge}
+                  {badge}
                 </span>
               )}
               <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-sand">
@@ -76,9 +79,9 @@ export function BuyPanel() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline justify-between gap-2">
-                  <div className="font-semibold text-ink">{variant.name}</div>
+                  <div className="font-semibold text-ink">{name}</div>
                   <div className="text-lg font-bold text-ink whitespace-nowrap">
-                    {formatBRL(variant.price)}
+                    {formatBRL(price)}
                   </div>
                 </div>
                 <div className="mt-0.5 text-xs text-muted-foreground">
