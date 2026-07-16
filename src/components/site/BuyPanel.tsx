@@ -1,15 +1,26 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Check, Minus, Plus, Shield, Truck, Award } from "lucide-react";
 import { cart, useCart } from "@/lib/cart-store";
-import { BOX_PRICE, BOX_SAVINGS, BOX_UNIT_TOTAL, SINGLE_PRICE, formatBRL, variants } from "@/lib/product";
+import { formatBRL, variants } from "@/lib/product";
+import { useAdmin } from "@/lib/admin-store";
 
 export function BuyPanel() {
   const state = useCart();
   const nav = useNavigate();
-  const v = variants[state.variant];
-  const unitPrice = v.price;
+  const { products } = useAdmin();
+  const singleActive = products.single.active;
+  const boxActive = products.box.active;
+  const dynPrice = { single: products.single.price, box: products.box.price };
+  const dynName = { single: products.single.name, box: products.box.name };
+  const boxBadge = products.box.badge;
+  const BOX_UNIT_TOTAL = dynPrice.single * 4;
+  const BOX_SAVINGS = Math.max(0, BOX_UNIT_TOTAL - dynPrice.box);
+  const activeVariant = state.variant === "single" && !singleActive ? "box" : state.variant === "box" && !boxActive ? "single" : state.variant;
+  const v = variants[activeVariant];
+  const unitPrice = dynPrice[activeVariant];
   const total = unitPrice * state.qty;
-  const savings = state.variant === "box" ? BOX_SAVINGS * state.qty : 0;
+  const savings = activeVariant === "box" ? BOX_SAVINGS * state.qty : 0;
+  const BOX_PRICE = dynPrice.box;
 
   return (
     <div className="flex flex-col gap-6">
