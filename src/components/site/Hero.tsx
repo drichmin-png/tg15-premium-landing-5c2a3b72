@@ -13,20 +13,19 @@ export function Hero() {
       <div className="container-x grid gap-10 py-10 md:py-16 lg:grid-cols-[1.1fr_1fr] items-center">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/[0.06] px-4 py-1.5 text-xs font-semibold text-primary-deep">
-            <ShieldCheck className="h-3.5 w-3.5" /> Tecnologia Avançada · Resultados Reais
+            <ShieldCheck className="h-3.5 w-3.5" /> {hero.eyebrow}
           </div>
           <h1 className="heading-display mt-6 text-4xl md:text-5xl lg:text-6xl text-ink">
-            Transforme
+            {hero.titleLine1}
             <br />
-            <span className="text-gradient-brand">sua jornada</span>
+            <span className="text-gradient-brand">{hero.titleLine2}</span>
           </h1>
           <div className="mt-6 h-[2px] w-32 gradient-brand rounded-full" />
           <p className="mt-6 text-lg md:text-xl font-semibold text-ink">
-            Recupere sua <span className="text-gradient-brand">melhor versão</span>
+            {hero.subtitle}
           </p>
           <p className="mt-3 max-w-md text-muted-foreground">
-            Ciência, tecnologia e resultados para uma transformação completa com
-            <strong className="text-ink"> T.G.15 Tirzepatida 15mg/0,5mL</strong>.
+            {hero.description}
           </p>
           <div className="mt-8 flex flex-wrap gap-3">
             <a
@@ -34,7 +33,7 @@ export function Hero() {
               className="btn-shine relative inline-flex items-center gap-2 rounded-full gradient-brand px-6 py-3.5 text-sm font-bold text-white shadow-xl shadow-primary/30 transition-transform hover:scale-[1.02]"
             >
               <span className="btn-shine-inner" />
-              <span className="relative">Comprar Agora</span>
+              <span className="relative">{hero.ctaLabel}</span>
             </a>
             <a
               href="#beneficios"
