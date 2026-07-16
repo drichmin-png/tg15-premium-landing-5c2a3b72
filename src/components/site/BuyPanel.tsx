@@ -1,15 +1,26 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Check, Minus, Plus, Shield, Truck, Award } from "lucide-react";
 import { cart, useCart } from "@/lib/cart-store";
-import { BOX_PRICE, BOX_SAVINGS, BOX_UNIT_TOTAL, SINGLE_PRICE, formatBRL, variants } from "@/lib/product";
+import { formatBRL, variants } from "@/lib/product";
+import { useAdmin } from "@/lib/admin-store";
 
 export function BuyPanel() {
   const state = useCart();
   const nav = useNavigate();
-  const v = variants[state.variant];
-  const unitPrice = v.price;
+  const { products } = useAdmin();
+  const singleActive = products.single.active;
+  const boxActive = products.box.active;
+  const dynPrice = { single: products.single.price, box: products.box.price };
+  const dynName = { single: products.single.name, box: products.box.name };
+  const boxBadge = products.box.badge;
+  const BOX_UNIT_TOTAL = dynPrice.single * 4;
+  const BOX_SAVINGS = Math.max(0, BOX_UNIT_TOTAL - dynPrice.box);
+  const activeVariant = state.variant === "single" && !singleActive ? "box" : state.variant === "box" && !boxActive ? "single" : state.variant;
+  const v = variants[activeVariant];
+  const unitPrice = dynPrice[activeVariant];
   const total = unitPrice * state.qty;
-  const savings = state.variant === "box" ? BOX_SAVINGS * state.qty : 0;
+  const savings = activeVariant === "box" ? BOX_SAVINGS * state.qty : 0;
+  const BOX_PRICE = dynPrice.box;
 
   return (
     <div className="flex flex-col gap-6">
@@ -42,9 +53,12 @@ export function BuyPanel() {
 
       <div id="comprar" className="grid gap-3">
         <div className="eyebrow">Escolha sua opção</div>
-        {(["single", "box"] as const).map((id) => {
+        {(["single", "box"] as const).filter((id) => (id === "single" ? singleActive : boxActive)).map((id) => {
           const variant = variants[id];
-          const selected = state.variant === id;
+          const selected = activeVariant === id;
+          const price = dynPrice[id];
+          const name = dynName[id];
+          const badge = id === "box" ? boxBadge : undefined;
           return (
             <button
               key={id}
@@ -55,9 +69,9 @@ export function BuyPanel() {
                   : "border-border bg-card hover:border-primary/40"
               }`}
             >
-              {variant.badge && (
+              {badge && (
                 <span className="absolute -top-3 left-4 rounded-full gradient-brand px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-md shadow-primary/30">
-                  {variant.badge}
+                  {badge}
                 </span>
               )}
               <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-sand">
@@ -65,9 +79,9 @@ export function BuyPanel() {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline justify-between gap-2">
-                  <div className="font-semibold text-ink">{variant.name}</div>
+                  <div className="font-semibold text-ink">{name}</div>
                   <div className="text-lg font-bold text-ink whitespace-nowrap">
-                    {formatBRL(variant.price)}
+                    {formatBRL(price)}
                   </div>
                 </div>
                 <div className="mt-0.5 text-xs text-muted-foreground">
