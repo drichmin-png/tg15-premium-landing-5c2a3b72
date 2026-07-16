@@ -8,12 +8,12 @@ export function Hero() {
         <div className="absolute -top-40 left-1/2 h-[600px] w-[900px] -translate-x-1/2 rounded-full bg-primary/10 blur-3xl" />
         <div className="absolute top-40 right-0 h-72 w-72 rounded-full bg-primary/15 blur-3xl" />
       </div>
-      <div className="container-x grid gap-10 py-14 md:py-20 lg:grid-cols-[1.1fr_1fr] items-center">
+      <div className="container-x grid gap-10 py-10 md:py-16 lg:grid-cols-[1.1fr_1fr] items-center">
         <div>
           <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/[0.06] px-4 py-1.5 text-xs font-semibold text-primary-deep">
             <ShieldCheck className="h-3.5 w-3.5" /> Tecnologia Avançada · Resultados Reais
           </div>
-          <h1 className="heading-display mt-6 text-5xl md:text-7xl text-ink">
+          <h1 className="heading-display mt-6 text-4xl md:text-5xl lg:text-6xl text-ink">
             Transforme
             <br />
             <span className="text-gradient-brand">sua jornada</span>

@@ -22,7 +22,7 @@ function Index() {
         <Hero />
         <TrustBar />
 
-        <section id="produto" className="container-x mt-24">
+        <section id="produto" className="container-x mt-16">
           <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
             <ProductGallery />
             <BuyPanel />
