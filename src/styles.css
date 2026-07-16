@@ -75,7 +75,12 @@
 
 @layer base {
   * { border-color: var(--color-border); }
-  html { scroll-behavior: smooth; }
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    touch-action: manipulation;
+  }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
@@ -83,6 +88,7 @@
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
+  input, select, textarea { font-size: 16px; }
   ::selection { background: var(--color-primary); color: var(--color-primary-foreground); }
 }
 
