@@ -1,20 +1,29 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowDown,
   ArrowUp,
   Eye,
   EyeOff,
   LogOut,
+  Package,
+  RefreshCw,
   RotateCcw,
   Save,
   ShieldCheck,
 } from "lucide-react";
 import { admin, useAdmin, type BlockId } from "@/lib/admin-store";
+import {
+  listOrdersAdmin,
+  updateOrderStatusAdmin,
+  type AdminOrder,
+} from "@/lib/orders-admin.functions";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
+
 
 function AdminPage() {
   const state = useAdmin();
@@ -68,13 +77,14 @@ function LoginScreen() {
   );
 }
 
-type Tab = "produtos" | "blocos" | "hero" | "tracking" | "gateway" | "seguranca";
+type Tab = "pedidos" | "produtos" | "blocos" | "hero" | "tracking" | "gateway" | "seguranca";
 
 function Dashboard() {
-  const [tab, setTab] = useState<Tab>("produtos");
+  const [tab, setTab] = useState<Tab>("pedidos");
   const s = useAdmin();
 
   const tabs: { id: Tab; label: string }[] = [
+    { id: "pedidos", label: "Pedidos" },
     { id: "produtos", label: "Produtos e Preços" },
     { id: "hero", label: "Hero / Textos" },
     { id: "blocos", label: "Blocos da Página" },
@@ -82,6 +92,7 @@ function Dashboard() {
     { id: "gateway", label: "Gateway de Pagamento" },
     { id: "seguranca", label: "Segurança" },
   ];
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -133,6 +144,7 @@ function Dashboard() {
         </nav>
 
         <main className="min-w-0">
+          {tab === "pedidos" && <OrdersPanel />}
           {tab === "produtos" && <ProductsPanel s={s} />}
           {tab === "hero" && <HeroPanel s={s} />}
           {tab === "blocos" && <BlocksPanel s={s} />}
@@ -501,3 +513,311 @@ function SecurityPanel() {
     </div>
   );
 }
+
+/* ------------ ORDERS PANEL ------------ */
+
+function formatBRL(cents: number) {
+  return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+function formatDate(iso: string | null) {
+  if (!iso) return "—";
+  return new Date(iso).toLocaleString("pt-BR");
+}
+const PAYMENT_LABEL: Record<string, string> = {
+  pix: "Pix",
+  card: "Cartão",
+  boleto: "Boleto",
+};
+const STATUS_LABEL: Record<string, string> = {
+  pending: "Pendente",
+  paid: "Pago",
+  cancelled: "Cancelado",
+  refunded: "Estornado",
+};
+const STATUS_BADGE: Record<string, string> = {
+  pending: "bg-amber-500/10 text-amber-700 border-amber-500/30",
+  paid: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30",
+  cancelled: "bg-red-500/10 text-red-700 border-red-500/30",
+  refunded: "bg-slate-500/10 text-slate-700 border-slate-500/30",
+};
+
+function OrdersPanel() {
+  const listOrders = useServerFn(listOrdersAdmin);
+  const updateOrder = useServerFn(updateOrderStatusAdmin);
+  const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [err, setErr] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"all" | "pending" | "paid" | "cancelled">("all");
+  const password = admin.get().password;
+
+  async function reload() {
+    setLoading(true);
+    setErr(null);
+    try {
+      const rows = await listOrders({ data: { password } });
+      setOrders(rows);
+    } catch (e) {
+      setErr(e instanceof Error ? e.message : "Erro ao carregar pedidos");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    reload();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function setStatus(id: string, payment_status: string) {
+    try {
+      await updateOrder({ data: { password, orderId: id, payment_status } });
+      await reload();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Erro");
+    }
+  }
+  async function setDelivery(id: string, delivery_status_override: string | null) {
+    try {
+      await updateOrder({ data: { password, orderId: id, delivery_status_override } });
+      await reload();
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Erro");
+    }
+  }
+
+  const filtered = orders.filter((o) => filter === "all" || o.payment_status === filter);
+  const totalPaidCents = orders
+    .filter((o) => o.payment_status === "paid")
+    .reduce((s, o) => s + o.total_cents, 0);
+
+  return (
+    <div className="grid gap-6">
+      <Card
+        title="Pedidos"
+        description="Todos os pedidos recebidos, com dados do cliente, endereço de entrega e itens."
+      >
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex flex-wrap gap-1.5">
+            {(["all", "pending", "paid", "cancelled"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition ${
+                  filter === f
+                    ? "border-primary bg-primary text-white"
+                    : "border-border bg-card text-foreground/70 hover:border-primary/40"
+                }`}
+              >
+                {f === "all" ? "Todos" : STATUS_LABEL[f]}
+              </button>
+            ))}
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-xs text-muted-foreground">
+              <strong className="text-ink">{orders.length}</strong> pedidos ·{" "}
+              <strong className="text-primary">{formatBRL(totalPaidCents)}</strong> pagos
+            </div>
+            <button
+              onClick={reload}
+              disabled={loading}
+              className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:border-primary/40 disabled:opacity-50"
+            >
+              <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Atualizar
+            </button>
+          </div>
+        </div>
+
+        {err && (
+          <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/5 p-3 text-sm text-destructive">
+            {err}
+          </div>
+        )}
+
+        {loading && orders.length === 0 && (
+          <div className="mt-6 text-sm text-muted-foreground">Carregando pedidos…</div>
+        )}
+
+        {!loading && filtered.length === 0 && (
+          <div className="mt-6 grid place-items-center gap-2 rounded-lg border border-dashed border-border bg-background p-10 text-center">
+            <Package className="h-8 w-8 text-muted-foreground" />
+            <div className="text-sm font-semibold text-ink">Nenhum pedido ainda</div>
+            <div className="text-xs text-muted-foreground">
+              Assim que um cliente finalizar a compra, ele aparece aqui.
+            </div>
+          </div>
+        )}
+
+        <ul className="mt-4 grid gap-3">
+          {filtered.map((o) => {
+            const isOpen = expanded === o.id;
+            return (
+              <li key={o.id} className="rounded-xl border border-border bg-background">
+                <button
+                  onClick={() => setExpanded(isOpen ? null : o.id)}
+                  className="grid w-full grid-cols-[1fr_auto] gap-3 p-4 text-left"
+                >
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <span className="font-semibold text-ink">{o.customer_name}</span>
+                      <span
+                        className={`rounded-full border px-2 py-0.5 text-[10px] font-bold uppercase ${
+                          STATUS_BADGE[o.payment_status] ?? "bg-sand text-ink border-border"
+                        }`}
+                      >
+                        {STATUS_LABEL[o.payment_status] ?? o.payment_status}
+                      </span>
+                      <span className="rounded-full border border-border bg-card px-2 py-0.5 text-[10px] font-semibold text-foreground/70">
+                        {PAYMENT_LABEL[o.payment_method] ?? o.payment_method}
+                        {o.payment_method === "card" && o.card_installments > 1
+                          ? ` ${o.card_installments}x`
+                          : ""}
+                      </span>
+                    </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      {formatDate(o.created_at)} · {o.customer_email} · {o.customer_phone}
+                    </div>
+                    <div className="mt-0.5 text-xs text-muted-foreground truncate">
+                      {o.address_street}, {o.address_number}
+                      {o.address_complement ? ` — ${o.address_complement}` : ""} · {o.address_city}/
+                      {o.address_state}
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <div className="text-base font-bold text-ink">
+                      {formatBRL(o.total_cents)}
+                    </div>
+                    <div className="text-[10px] uppercase tracking-wider text-muted-foreground">
+                      #{o.public_token.slice(0, 8)}
+                    </div>
+                  </div>
+                </button>
+
+                {isOpen && (
+                  <div className="border-t border-border p-4 grid gap-4">
+                    <div className="grid gap-4 md:grid-cols-2">
+                      <div>
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Cliente
+                        </div>
+                        <div className="mt-1.5 text-sm text-ink space-y-0.5">
+                          <div><strong>Nome:</strong> {o.customer_name}</div>
+                          <div><strong>Email:</strong> {o.customer_email}</div>
+                          <div><strong>Telefone:</strong> {o.customer_phone}</div>
+                          <div><strong>CPF:</strong> {o.customer_cpf}</div>
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Endereço de entrega
+                        </div>
+                        <div className="mt-1.5 text-sm text-ink space-y-0.5">
+                          <div>{o.address_street}, {o.address_number}</div>
+                          {o.address_complement && <div>Compl.: {o.address_complement}</div>}
+                          <div>Bairro: {o.address_district}</div>
+                          <div>{o.address_city} / {o.address_state}</div>
+                          <div>CEP: {o.address_zip}</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                        Itens do pedido
+                      </div>
+                      <ul className="mt-1.5 divide-y divide-border rounded-lg border border-border bg-card">
+                        {o.items.map((it) => (
+                          <li key={it.id} className="flex items-center justify-between px-3 py-2 text-sm">
+                            <span>
+                              <strong>{it.quantity}×</strong> {it.variant_name}
+                            </span>
+                            <span className="text-muted-foreground">
+                              {formatBRL(it.unit_price_cents * it.quantity)}
+                            </span>
+                          </li>
+                        ))}
+                        <li className="flex items-center justify-between bg-sand/50 px-3 py-2 text-sm font-bold">
+                          <span>Total</span>
+                          <span className="text-primary">{formatBRL(o.total_cents)}</span>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <div className="grid gap-3 md:grid-cols-2">
+                      <div>
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Status de pagamento
+                        </div>
+                        <div className="mt-1.5 flex flex-wrap gap-1.5">
+                          {(["pending", "paid", "cancelled", "refunded"] as const).map((st) => (
+                            <button
+                              key={st}
+                              onClick={() => setStatus(o.id, st)}
+                              className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                                o.payment_status === st
+                                  ? STATUS_BADGE[st]
+                                  : "border-border bg-card text-foreground/70 hover:border-primary/40"
+                              }`}
+                            >
+                              {STATUS_LABEL[st]}
+                            </button>
+                          ))}
+                        </div>
+                        <div className="mt-2 text-[11px] text-muted-foreground">
+                          Pago em: {formatDate(o.paid_at)}
+                        </div>
+                      </div>
+                      <div>
+                        <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                          Status de entrega (manual)
+                        </div>
+                        <div className="mt-1.5 flex flex-wrap gap-1.5">
+                          {[
+                            { v: null, l: "Automático" },
+                            { v: "preparing", l: "Preparando" },
+                            { v: "shipped", l: "Enviado" },
+                            { v: "delivered", l: "Entregue" },
+                          ].map((opt) => (
+                            <button
+                              key={String(opt.v)}
+                              onClick={() => setDelivery(o.id, opt.v)}
+                              className={`rounded-full border px-3 py-1 text-xs font-semibold ${
+                                o.delivery_status_override === opt.v
+                                  ? "border-primary bg-primary text-white"
+                                  : "border-border bg-card text-foreground/70 hover:border-primary/40"
+                              }`}
+                            >
+                              {opt.l}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="text-[11px] text-muted-foreground">
+                      ID: {o.id} · Token público: {o.public_token}
+                      {o.invoice_url && (
+                        <>
+                          {" · "}
+                          <a
+                            href={o.invoice_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-primary underline"
+                          >
+                            Nota fiscal
+                          </a>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+        </ul>
+      </Card>
+    </div>
+  );
+}
+
