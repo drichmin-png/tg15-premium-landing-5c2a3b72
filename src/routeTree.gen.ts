@@ -13,6 +13,8 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiPublicWebhookGatewayRouteImport } from './routes/api/public/webhook.$gateway'
+import { Route as ApiPublicHooksTickOrdersRouteImport } from './routes/api/public/hooks/tick-orders'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -34,18 +36,33 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWebhookGatewayRoute = ApiPublicWebhookGatewayRouteImport.update({
+  id: '/api/public/webhook/$gateway',
+  path: '/api/public/webhook/$gateway',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPublicHooksTickOrdersRoute =
+  ApiPublicHooksTickOrdersRouteImport.update({
+    id: '/api/public/hooks/tick-orders',
+    path: '/api/public/hooks/tick-orders',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/public/hooks/tick-orders': typeof ApiPublicHooksTickOrdersRoute
+  '/api/public/webhook/$gateway': typeof ApiPublicWebhookGatewayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/public/hooks/tick-orders': typeof ApiPublicHooksTickOrdersRoute
+  '/api/public/webhook/$gateway': typeof ApiPublicWebhookGatewayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -53,13 +70,34 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/api/public/hooks/tick-orders': typeof ApiPublicHooksTickOrdersRoute
+  '/api/public/webhook/$gateway': typeof ApiPublicWebhookGatewayRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/admin' | '/checkout' | '/sitemap.xml'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/checkout'
+    | '/sitemap.xml'
+    | '/api/public/hooks/tick-orders'
+    | '/api/public/webhook/$gateway'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/admin' | '/checkout' | '/sitemap.xml'
-  id: '__root__' | '/' | '/admin' | '/checkout' | '/sitemap.xml'
+  to:
+    | '/'
+    | '/admin'
+    | '/checkout'
+    | '/sitemap.xml'
+    | '/api/public/hooks/tick-orders'
+    | '/api/public/webhook/$gateway'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/checkout'
+    | '/sitemap.xml'
+    | '/api/public/hooks/tick-orders'
+    | '/api/public/webhook/$gateway'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -67,6 +105,8 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   CheckoutRoute: typeof CheckoutRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  ApiPublicHooksTickOrdersRoute: typeof ApiPublicHooksTickOrdersRoute
+  ApiPublicWebhookGatewayRoute: typeof ApiPublicWebhookGatewayRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -99,6 +139,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/webhook/$gateway': {
+      id: '/api/public/webhook/$gateway'
+      path: '/api/public/webhook/$gateway'
+      fullPath: '/api/public/webhook/$gateway'
+      preLoaderRoute: typeof ApiPublicWebhookGatewayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/public/hooks/tick-orders': {
+      id: '/api/public/hooks/tick-orders'
+      path: '/api/public/hooks/tick-orders'
+      fullPath: '/api/public/hooks/tick-orders'
+      preLoaderRoute: typeof ApiPublicHooksTickOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -107,6 +161,8 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   CheckoutRoute: CheckoutRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  ApiPublicHooksTickOrdersRoute: ApiPublicHooksTickOrdersRoute,
+  ApiPublicWebhookGatewayRoute: ApiPublicWebhookGatewayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

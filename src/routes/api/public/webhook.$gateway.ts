@@ -61,7 +61,7 @@ export const Route = createFileRoute("/api/public/webhook/$gateway")({
           if (!orderById) throw new Error(`Pedido ${normalized.pedido_id} não encontrado`);
           pedidoUuid = orderById.id;
 
-          const patch: Record<string, unknown> = {
+          const patch: Record<string, string | boolean | null> = {
             gateway_utilizado: normalized.gateway_origem,
             gateway_charge_id: normalized.gateway_charge_id ?? null,
           };
