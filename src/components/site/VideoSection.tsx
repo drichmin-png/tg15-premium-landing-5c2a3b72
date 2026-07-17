@@ -179,7 +179,7 @@ export function VideoSection() {
           </p>
         </div>
 
-        <div className="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-2">
+        <div className="mt-8 grid gap-4 grid-cols-2 lg:gap-8 lg:grid-cols-4">
           {media.videos.antesDepois.map((src, i) => {
             const t = testimonials[i];
             return (
