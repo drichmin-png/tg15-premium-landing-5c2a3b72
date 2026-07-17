@@ -97,7 +97,7 @@ const celebrities: Celebrity[] = [
   {
     name: "Jojo Todynho",
     role: "Cantora e apresentadora brasileira",
-    image: jojo.url,
+    image: assetUrl(jojo.url),
     initials: "JT",
     story: [
       { label: "Como começou", text: "Após realizar cirurgia bariátrica, Jojo explicou que utilizou o Mounjaro apenas como complemento do processo de emagrecimento." },
@@ -118,7 +118,7 @@ const celebrities: Celebrity[] = [
   {
     name: "Gordão da XJ",
     role: "Sidney Bezerra — influenciador digital",
-    image: gordao.url,
+    image: assetUrl(gordao.url),
     initials: "GX",
     story: [
       { label: "Início da transformação", text: "Peso máximo divulgado: aproximadamente 345 kg. Decidiu mudar de vida após receber alertas médicos e passou a documentar toda a evolução nas redes sociais." },
@@ -129,7 +129,7 @@ const celebrities: Celebrity[] = [
   {
     name: "Nicolle Caroline",
     role: "Influenciadora e estudante de enfermagem",
-    image: nicolle.url,
+    image: assetUrl(nicolle.url),
     initials: "NC",
     story: [
       { label: "Como começou", text: "Ganhou notoriedade ao acompanhar a rotina saudável ao lado de Sidney Bezerra (Gordão da XJ), com academia diária, alimentação balanceada e mudança completa de hábitos." },
