@@ -1,32 +1,41 @@
 import { useEffect } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { useAdmin } from "@/lib/admin-store";
+import { initMetaPixel, pageView } from "@/lib/tracking/metaPixel";
+import { captureUtmFirstTouch } from "@/lib/tracking/utm";
 
 /**
- * Injects tracking scripts (Facebook Pixel, GA4, TikTok) based on admin settings.
- * Client-side only. Server-side CAPI requires backend (next step).
+ * Injects tracking scripts and handles SPA-safe PageView on route changes.
+ * - Meta Pixel: initialized via metaPixel.ts, PageView fires on every route change.
+ * - GA4 + TikTok Pixel: base script injection.
  */
 export function TrackingScripts() {
   const { tracking } = useAdmin();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+
+  // capture UTMs on first load (first-touch)
+  useEffect(() => {
+    captureUtmFirstTouch();
+  }, []);
+
+  // init Meta Pixel when id/active changes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!tracking.active) return;
+    if (tracking.facebookPixelId) initMetaPixel(tracking.facebookPixelId);
+  }, [tracking.active, tracking.facebookPixelId]);
+
+  // SPA-safe PageView on route change
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (!tracking.active) return;
+    if (!tracking.facebookPixelId) return;
+    pageView();
+  }, [pathname, tracking.active, tracking.facebookPixelId]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (!tracking.active) return;
-
-    // Facebook Pixel
-    if (tracking.facebookPixelId && !document.getElementById("fb-pixel")) {
-      const s = document.createElement("script");
-      s.id = "fb-pixel";
-      s.innerHTML = `
-        !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-        n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;
-        n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;
-        t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,
-        document,'script','https://connect.facebook.net/en_US/fbevents.js');
-        fbq('init', '${tracking.facebookPixelId}');
-        fbq('track', 'PageView');
-      `;
-      document.head.appendChild(s);
-    }
 
     // Google Analytics (GA4)
     if (tracking.googleAnalyticsId && !document.getElementById("ga4")) {
@@ -59,7 +68,7 @@ export function TrackingScripts() {
       `;
       document.head.appendChild(s);
     }
-  }, [tracking.active, tracking.facebookPixelId, tracking.googleAnalyticsId, tracking.tiktokPixelId]);
+  }, [tracking.active, tracking.googleAnalyticsId, tracking.tiktokPixelId]);
 
   return null;
 }
