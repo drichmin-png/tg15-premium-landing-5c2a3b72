@@ -204,10 +204,11 @@ function StepCustomer({ state, onNext }: { state: ReturnType<typeof useCart>; on
       <p className="mt-1.5 text-sm text-muted-foreground">Para emissão da nota fiscal e contato.</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <Field label="Nome completo" required value={state.customer.fullName} onChange={(e) => cart.patch("customer", { fullName: e.target.value })} />
-        <Field label="E-mail" required type="email" value={state.customer.email} onChange={(e) => cart.patch("customer", { email: e.target.value })} />
-        <Field label="Telefone / WhatsApp" required placeholder="(11) 90000-0000" value={state.customer.phone} onChange={(e) => cart.patch("customer", { phone: e.target.value })} />
-        <Field label="CPF" required placeholder="000.000.000-00" value={state.customer.cpf} onChange={(e) => cart.patch("customer", { cpf: e.target.value })} />
+        <Field label="Nome completo" required value={state.customer.fullName} onChange={(e) => { fireLead(); cart.patch("customer", { fullName: e.target.value }); }} />
+        <Field label="E-mail" required type="email" value={state.customer.email} onChange={(e) => { fireLead(); cart.patch("customer", { email: e.target.value }); }} />
+        <Field label="Telefone / WhatsApp" required placeholder="(11) 90000-0000" value={state.customer.phone} onChange={(e) => { fireLead(); cart.patch("customer", { phone: e.target.value }); }} />
+        <Field label="CPF" required placeholder="000.000.000-00" value={state.customer.cpf} onChange={(e) => { fireLead(); cart.patch("customer", { cpf: e.target.value }); }} />
+
       </div>
       <PrimaryButton type="submit">Continuar para endereço</PrimaryButton>
     </form>
@@ -273,14 +274,25 @@ function StepShipping({ state, onNext }: { state: ReturnType<typeof useCart>; on
   );
 }
 
-function StepPayment({ state, onNext }: { state: ReturnType<typeof useCart>; onNext: () => void }) {
+function StepPayment({ state, onNext, total }: { state: ReturnType<typeof useCart>; onNext: () => void; total: number }) {
   const methods = [
     { id: "pix" as const, label: "Pix", desc: "Aprovação imediata · 5% de desconto", icon: QrCode },
     { id: "card" as const, label: "Cartão de crédito", desc: "Em até 12x sem juros", icon: CreditCard },
     { id: "boleto" as const, label: "Boleto bancário", desc: "Compensação em até 2 dias úteis", icon: FileText },
   ];
   return (
-    <form onSubmit={(e) => { e.preventDefault(); if (state.payment) onNext(); }}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!state.payment) return;
+        trackAddPaymentInfo({
+          value: total,
+          content_ids: [state.variant],
+        });
+        onNext();
+      }}
+    >
+
       <h2 className="heading-display text-2xl md:text-3xl text-ink">Pagamento</h2>
       <p className="mt-1.5 text-sm text-muted-foreground">Ambiente 100% seguro e criptografado.</p>
       <div className="mt-6 grid gap-3">
@@ -322,7 +334,17 @@ function StepPayment({ state, onNext }: { state: ReturnType<typeof useCart>; onN
   );
 }
 
-function StepConfirm({ orderId }: { orderId: string }) {
+function StepConfirm({ orderId, total, state }: { orderId: string; total: number; state: ReturnType<typeof useCart> }) {
+  useEffect(() => {
+    trackPurchase({
+      value: total,
+      content_ids: [state.variant],
+      num_items: state.qty,
+      order_id: orderId,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="text-center py-6">
       <div className="mx-auto grid h-20 w-20 place-items-center rounded-full gradient-brand text-white shadow-2xl shadow-primary/40">
