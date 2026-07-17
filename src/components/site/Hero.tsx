@@ -1,9 +1,12 @@
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, MessageCircle, Users } from "lucide-react";
 import { media } from "@/lib/product";
 import { useAdmin } from "@/lib/admin-store";
 
 export function Hero() {
-  const { hero } = useAdmin();
+  const { hero, support } = useAdmin();
+  const phone = (support.whatsappPhone || "").replace(/\D/g, "");
+  const waLink = phone ? `https://wa.me/${phone}` : "";
+  const groupLink = support.whatsappGroupLink || "";
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 -z-10">
