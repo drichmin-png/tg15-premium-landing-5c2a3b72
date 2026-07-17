@@ -56,6 +56,21 @@ export type AdminState = {
     // secretKeyStored: only kept locally as marker; never used on client. Real secret must be moved to a server function later.
     secretKeyPlaceholder: string;
   };
+
+  // pix — configuração do QR Code na tela de confirmação
+  pix: {
+    mode: "key" | "gateway"; // "key" = gera QR local a partir da chave; "gateway" = usa o gateway configurado
+    key: string;
+    keyType: "cpf" | "cnpj" | "email" | "telefone" | "aleatoria";
+    merchantName: string;
+    merchantCity: string;
+  };
+
+  // suporte / whatsapp
+  support: {
+    whatsappGroupLink: string; // link do grupo (aparece após confirmação)
+    whatsappPhone: string;     // telefone de suporte (formato internacional, ex.: 5511900000000)
+  };
 };
 
 const DEFAULT_BLOCKS: Block[] = [
@@ -98,6 +113,17 @@ const DEFAULTS: AdminState = {
     active: false,
     secretKeyPlaceholder: "",
   },
+  pix: {
+    mode: "key",
+    key: "",
+    keyType: "cpf",
+    merchantName: "T.G.15",
+    merchantCity: "SAO PAULO",
+  },
+  support: {
+    whatsappGroupLink: "",
+    whatsappPhone: "",
+  },
 };
 
 const STORAGE_KEY = "tg15-admin-v1";
@@ -119,6 +145,8 @@ function load(): AdminState {
       },
       tracking: { ...DEFAULTS.tracking, ...(parsed.tracking ?? {}) },
       gateway: { ...DEFAULTS.gateway, ...(parsed.gateway ?? {}) },
+      pix: { ...DEFAULTS.pix, ...(parsed.pix ?? {}) },
+      support: { ...DEFAULTS.support, ...(parsed.support ?? {}) },
       blocks: mergeBlocks(parsed.blocks),
       authed: false, // never auto-authenticate
     };
