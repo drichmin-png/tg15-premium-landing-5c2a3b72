@@ -88,7 +88,13 @@ export const updateOrderStatusAdmin = createServerFn({ method: "POST" })
       throw new Error("Senha inválida");
     }
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const patch: Record<string, unknown> = {};
+    const patch: {
+      payment_status?: string;
+      paid_at?: string;
+      delivery_status_override?: string | null;
+      invoice_url?: string | null;
+      notes?: string;
+    } = {};
     if (data.payment_status !== undefined) {
       patch.payment_status = data.payment_status;
       if (data.payment_status === "paid") patch.paid_at = new Date().toISOString();
