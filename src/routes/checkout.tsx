@@ -102,8 +102,9 @@ function Checkout() {
             {step === 1 && <StepCustomer state={state} onNext={next} />}
             {step === 2 && <StepAddress state={state} onNext={next} />}
             {step === 3 && <StepShipping state={state} onNext={next} />}
-            {step === 4 && <StepPayment state={state} onNext={next} />}
-            {step === 5 && <StepConfirm orderId={orderId} />}
+            {step === 4 && <StepPayment state={state} onNext={next} total={total} />}
+            {step === 5 && <StepConfirm orderId={orderId} total={total} state={state} />}
+
           </div>
 
           {/* Order summary */}
@@ -190,8 +191,15 @@ function PrimaryButton({ children, ...rest }: React.ButtonHTMLAttributes<HTMLBut
 }
 
 function StepCustomer({ state, onNext }: { state: ReturnType<typeof useCart>; onNext: () => void }) {
+  const leadFired = useRef(false);
+  const fireLead = () => {
+    if (leadFired.current) return;
+    leadFired.current = true;
+    trackLead({ content_name: "checkout_customer_form" });
+  };
   return (
     <form onSubmit={(e) => { e.preventDefault(); onNext(); }}>
+
       <h2 className="heading-display text-2xl md:text-3xl text-ink">Seus dados</h2>
       <p className="mt-1.5 text-sm text-muted-foreground">Para emissão da nota fiscal e contato.</p>
 
