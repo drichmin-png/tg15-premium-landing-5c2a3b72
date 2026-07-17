@@ -15,21 +15,24 @@ type State = {
     street: string;
     number: string;
     complement: string;
+    reference: string;
     district: string;
     city: string;
     state: string;
   };
   shipping: "standard" | "express" | "";
   payment: "pix" | "card" | "boleto" | "";
+  cardInstallments: number;
 };
 
 const initial: State = {
   variant: "box",
   qty: 1,
   customer: { fullName: "", email: "", phone: "", cpf: "" },
-  address: { zip: "", street: "", number: "", complement: "", district: "", city: "", state: "" },
+  address: { zip: "", street: "", number: "", complement: "", reference: "", district: "", city: "", state: "" },
   shipping: "",
   payment: "",
+  cardInstallments: 1,
 };
 
 let state: State = initial;

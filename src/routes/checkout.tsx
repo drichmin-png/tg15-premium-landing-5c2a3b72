@@ -4,6 +4,9 @@ import { Check, ChevronLeft, CreditCard, Lock, QrCode, ShieldCheck, Truck, FileT
 import { cart, useCart } from "@/lib/cart-store";
 import { BOX_SAVINGS, formatBRL, variants } from "@/lib/product";
 import { trackLead, trackInitiateCheckout, trackAddPaymentInfo, trackPurchase } from "@/lib/tracking/metaPixel";
+import { cleanCPF, formatCPF, isValidCPF } from "@/lib/validation/cpf";
+import { cleanCEP, formatCEP, lookupCEP } from "@/lib/validation/cep";
+import { installmentOptions } from "@/lib/payments/installments";
 
 
 export const Route = createFileRoute("/checkout")({
@@ -192,13 +195,23 @@ function PrimaryButton({ children, ...rest }: React.ButtonHTMLAttributes<HTMLBut
 
 function StepCustomer({ state, onNext }: { state: ReturnType<typeof useCart>; onNext: () => void }) {
   const leadFired = useRef(false);
+  const [cpfError, setCpfError] = useState<string | null>(null);
   const fireLead = () => {
     if (leadFired.current) return;
     leadFired.current = true;
     trackLead({ content_name: "checkout_customer_form" });
   };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isValidCPF(state.customer.cpf)) {
+      setCpfError("CPF inválido. Verifique os números digitados.");
+      return;
+    }
+    setCpfError(null);
+    onNext();
+  };
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onNext(); }}>
+    <form onSubmit={handleSubmit}>
 
       <h2 className="heading-display text-2xl md:text-3xl text-ink">Seus dados</h2>
       <p className="mt-1.5 text-sm text-muted-foreground">Para emissão da nota fiscal e contato.</p>
@@ -207,7 +220,22 @@ function StepCustomer({ state, onNext }: { state: ReturnType<typeof useCart>; on
         <Field label="Nome completo" required value={state.customer.fullName} onChange={(e) => { fireLead(); cart.patch("customer", { fullName: e.target.value }); }} />
         <Field label="E-mail" required type="email" value={state.customer.email} onChange={(e) => { fireLead(); cart.patch("customer", { email: e.target.value }); }} />
         <Field label="Telefone / WhatsApp" required placeholder="(11) 90000-0000" value={state.customer.phone} onChange={(e) => { fireLead(); cart.patch("customer", { phone: e.target.value }); }} />
-        <Field label="CPF" required placeholder="000.000.000-00" value={state.customer.cpf} onChange={(e) => { fireLead(); cart.patch("customer", { cpf: e.target.value }); }} />
+        <div>
+          <Field
+            label="CPF"
+            required
+            placeholder="000.000.000-00"
+            inputMode="numeric"
+            value={formatCPF(state.customer.cpf)}
+            onChange={(e) => { fireLead(); setCpfError(null); cart.patch("customer", { cpf: cleanCPF(e.target.value) }); }}
+            onBlur={() => {
+              if (state.customer.cpf && !isValidCPF(state.customer.cpf)) {
+                setCpfError("CPF inválido.");
+              }
+            }}
+          />
+          {cpfError && <p className="mt-1.5 text-xs font-medium text-red-600">{cpfError}</p>}
+        </div>
 
       </div>
       <PrimaryButton type="submit">Continuar para endereço</PrimaryButton>
@@ -216,16 +244,50 @@ function StepCustomer({ state, onNext }: { state: ReturnType<typeof useCart>; on
 }
 
 function StepAddress({ state, onNext }: { state: ReturnType<typeof useCart>; onNext: () => void }) {
+  const [cepLoading, setCepLoading] = useState(false);
+  const [cepError, setCepError] = useState<string | null>(null);
+
+  const handleCepChange = async (raw: string) => {
+    const clean = cleanCEP(raw);
+    cart.patch("address", { zip: clean });
+    setCepError(null);
+    if (clean.length === 8) {
+      setCepLoading(true);
+      const res = await lookupCEP(clean);
+      setCepLoading(false);
+      if (!res) {
+        setCepError("CEP não encontrado. Verifique e tente novamente.");
+        return;
+      }
+      cart.patch("address", {
+        street: res.logradouro || "",
+        district: res.bairro || "",
+        city: res.localidade || "",
+        state: (res.uf || "").toUpperCase(),
+      });
+    }
+  };
+
   return (
     <form onSubmit={(e) => { e.preventDefault(); onNext(); }}>
       <h2 className="heading-display text-2xl md:text-3xl text-ink">Endereço de entrega</h2>
-      <p className="mt-1.5 text-sm text-muted-foreground">Enviamos com cadeia de frio para todo o Brasil.</p>
+      <p className="mt-1.5 text-sm text-muted-foreground">Digite o CEP e preenchemos cidade, estado, bairro e rua automaticamente.</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-6">
-        <div className="sm:col-span-2"><Field label="CEP" required placeholder="00000-000" value={state.address.zip} onChange={(e) => cart.patch("address", { zip: e.target.value })} /></div>
+        <div className="sm:col-span-2">
+          <Field
+            label={cepLoading ? "CEP (buscando...)" : "CEP"}
+            required
+            placeholder="00000-000"
+            inputMode="numeric"
+            value={formatCEP(state.address.zip)}
+            onChange={(e) => handleCepChange(e.target.value)}
+          />
+          {cepError && <p className="mt-1.5 text-xs font-medium text-red-600">{cepError}</p>}
+        </div>
         <div className="sm:col-span-4"><Field label="Rua" required value={state.address.street} onChange={(e) => cart.patch("address", { street: e.target.value })} /></div>
         <div className="sm:col-span-2"><Field label="Número" required value={state.address.number} onChange={(e) => cart.patch("address", { number: e.target.value })} /></div>
-        <div className="sm:col-span-4"><Field label="Complemento" value={state.address.complement} onChange={(e) => cart.patch("address", { complement: e.target.value })} /></div>
+        <div className="sm:col-span-4"><Field label="Ponto de referência (opcional)" value={state.address.reference} onChange={(e) => cart.patch("address", { reference: e.target.value })} /></div>
         <div className="sm:col-span-3"><Field label="Bairro" required value={state.address.district} onChange={(e) => cart.patch("address", { district: e.target.value })} /></div>
         <div className="sm:col-span-2"><Field label="Cidade" required value={state.address.city} onChange={(e) => cart.patch("address", { city: e.target.value })} /></div>
         <div className="sm:col-span-1"><Field label="UF" required maxLength={2} value={state.address.state} onChange={(e) => cart.patch("address", { state: e.target.value.toUpperCase() })} /></div>
@@ -237,8 +299,8 @@ function StepAddress({ state, onNext }: { state: ReturnType<typeof useCart>; onN
 
 function StepShipping({ state, onNext }: { state: ReturnType<typeof useCart>; onNext: () => void }) {
   const options = [
-    { id: "standard" as const, label: "Envio Refrigerado Padrão", eta: "5 a 7 dias úteis", price: 19.9 },
-    { id: "express" as const, label: "Envio Refrigerado Expresso", eta: "2 a 3 dias úteis", price: 39.9 },
+    { id: "standard" as const, label: "Envio Refrigerado Padrão", eta: "2 a 5 dias úteis", price: 19.9 },
+    { id: "express" as const, label: "Envio Refrigerado Expresso", eta: "1 a 2 dias úteis", price: 39.9 },
   ];
   return (
     <form onSubmit={(e) => { e.preventDefault(); if (state.shipping) onNext(); }}>
@@ -321,12 +383,25 @@ function StepPayment({ state, onNext, total }: { state: ReturnType<typeof useCar
       </div>
       {state.payment === "card" && (
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2"><Field label="Número do cartão" placeholder="0000 0000 0000 0000" required /></div>
+          <div className="sm:col-span-2"><Field label="Número do cartão" placeholder="0000 0000 0000 0000" inputMode="numeric" required /></div>
           <Field label="Nome impresso" required />
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Validade" placeholder="MM/AA" required />
-            <Field label="CVV" placeholder="000" required />
+            <Field label="Validade" placeholder="MM/AA" inputMode="numeric" required />
+            <Field label="CVV" placeholder="000" inputMode="numeric" required />
           </div>
+          <label className="sm:col-span-2 block">
+            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-foreground/70">Parcelamento</span>
+            <select
+              value={state.cardInstallments}
+              onChange={(e) => cart.set({ cardInstallments: parseInt(e.target.value, 10) })}
+              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-ink outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
+            >
+              {installmentOptions(total).map((opt) => (
+                <option key={opt.n} value={opt.n}>{opt.label}</option>
+              ))}
+            </select>
+            <span className="mt-1.5 block text-[11px] text-muted-foreground">Até 12x sem juros no cartão de crédito.</span>
+          </label>
         </div>
       )}
       <PrimaryButton type="submit" disabled={!state.payment}>Finalizar compra</PrimaryButton>

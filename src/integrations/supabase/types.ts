@@ -14,16 +14,209 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      admin_settings: {
+        Row: {
+          business_days: number[]
+          business_hour_end: number
+          business_hour_start: number
+          created_at: string
+          delivery_time_label: string
+          id: string
+          pix_key: string
+          pix_key_type: string
+          pix_merchant_city: string
+          pix_merchant_name: string
+          singleton: boolean
+          support_phone: string
+          updated_at: string
+          whatsapp_group_url: string
+        }
+        Insert: {
+          business_days?: number[]
+          business_hour_end?: number
+          business_hour_start?: number
+          created_at?: string
+          delivery_time_label?: string
+          id?: string
+          pix_key?: string
+          pix_key_type?: string
+          pix_merchant_city?: string
+          pix_merchant_name?: string
+          singleton?: boolean
+          support_phone?: string
+          updated_at?: string
+          whatsapp_group_url?: string
+        }
+        Update: {
+          business_days?: number[]
+          business_hour_end?: number
+          business_hour_start?: number
+          created_at?: string
+          delivery_time_label?: string
+          id?: string
+          pix_key?: string
+          pix_key_type?: string
+          pix_merchant_city?: string
+          pix_merchant_name?: string
+          singleton?: boolean
+          support_phone?: string
+          updated_at?: string
+          whatsapp_group_url?: string
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          quantity: number
+          unit_price_cents: number
+          variant_id: string
+          variant_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          quantity: number
+          unit_price_cents: number
+          variant_id: string
+          variant_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          quantity?: number
+          unit_price_cents?: number
+          variant_id?: string
+          variant_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          address_city: string
+          address_complement: string
+          address_district: string
+          address_number: string
+          address_state: string
+          address_street: string
+          address_zip: string
+          card_installments: number
+          created_at: string
+          customer_cpf: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          delivery_status_override: string | null
+          id: string
+          invoice_url: string | null
+          notes: string
+          paid_at: string | null
+          payment_method: string
+          payment_status: string
+          public_token: string
+          total_cents: number
+          updated_at: string
+        }
+        Insert: {
+          address_city: string
+          address_complement?: string
+          address_district?: string
+          address_number: string
+          address_state: string
+          address_street: string
+          address_zip: string
+          card_installments?: number
+          created_at?: string
+          customer_cpf: string
+          customer_email: string
+          customer_name: string
+          customer_phone: string
+          delivery_status_override?: string | null
+          id?: string
+          invoice_url?: string | null
+          notes?: string
+          paid_at?: string | null
+          payment_method: string
+          payment_status?: string
+          public_token?: string
+          total_cents: number
+          updated_at?: string
+        }
+        Update: {
+          address_city?: string
+          address_complement?: string
+          address_district?: string
+          address_number?: string
+          address_state?: string
+          address_street?: string
+          address_zip?: string
+          card_installments?: number
+          created_at?: string
+          customer_cpf?: string
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string
+          delivery_status_override?: string | null
+          id?: string
+          invoice_url?: string | null
+          notes?: string
+          paid_at?: string | null
+          payment_method?: string
+          payment_status?: string
+          public_token?: string
+          total_cents?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "admin" | "user"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +343,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["admin", "user"],
+    },
   },
 } as const
