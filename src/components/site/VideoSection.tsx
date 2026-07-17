@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Play } from "lucide-react";
 import { media } from "@/lib/product";
+import { assetUrl } from "@/lib/asset-url";
 import gordao from "@/assets/gordao-xj.jpg.asset.json";
 import jojo from "@/assets/jojo-todynho.jpg.asset.json";
 import nicolle from "@/assets/nicolle-caroline.png.asset.json";
