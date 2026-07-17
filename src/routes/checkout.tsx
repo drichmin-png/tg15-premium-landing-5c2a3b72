@@ -1,8 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, ChevronLeft, CreditCard, Lock, QrCode, ShieldCheck, Truck, FileText } from "lucide-react";
 import { cart, useCart } from "@/lib/cart-store";
 import { BOX_SAVINGS, formatBRL, variants } from "@/lib/product";
+import { trackLead, trackInitiateCheckout, trackAddPaymentInfo, trackPurchase } from "@/lib/tracking/metaPixel";
+
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -34,6 +36,17 @@ function Checkout() {
   const shippingCost = state.shipping === "express" ? 39.9 : state.shipping === "standard" ? 19.9 : 0;
   const total = subtotal + shippingCost;
   const savings = state.variant === "box" ? BOX_SAVINGS * state.qty : 0;
+
+  // InitiateCheckout — apenas ao acessar /checkout (uma vez por sessão de página)
+  useEffect(() => {
+    trackInitiateCheckout({
+      value: subtotal,
+      num_items: state.qty,
+      content_ids: [state.variant],
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const next = () => setStep((s) => Math.min(5, s + 1));
   const prev = () => setStep((s) => Math.max(1, s - 1));
@@ -89,8 +102,9 @@ function Checkout() {
             {step === 1 && <StepCustomer state={state} onNext={next} />}
             {step === 2 && <StepAddress state={state} onNext={next} />}
             {step === 3 && <StepShipping state={state} onNext={next} />}
-            {step === 4 && <StepPayment state={state} onNext={next} />}
-            {step === 5 && <StepConfirm orderId={orderId} />}
+            {step === 4 && <StepPayment state={state} onNext={next} total={total} />}
+            {step === 5 && <StepConfirm orderId={orderId} total={total} state={state} />}
+
           </div>
 
           {/* Order summary */}
@@ -177,16 +191,24 @@ function PrimaryButton({ children, ...rest }: React.ButtonHTMLAttributes<HTMLBut
 }
 
 function StepCustomer({ state, onNext }: { state: ReturnType<typeof useCart>; onNext: () => void }) {
+  const leadFired = useRef(false);
+  const fireLead = () => {
+    if (leadFired.current) return;
+    leadFired.current = true;
+    trackLead({ content_name: "checkout_customer_form" });
+  };
   return (
     <form onSubmit={(e) => { e.preventDefault(); onNext(); }}>
+
       <h2 className="heading-display text-2xl md:text-3xl text-ink">Seus dados</h2>
       <p className="mt-1.5 text-sm text-muted-foreground">Para emissão da nota fiscal e contato.</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <Field label="Nome completo" required value={state.customer.fullName} onChange={(e) => cart.patch("customer", { fullName: e.target.value })} />
-        <Field label="E-mail" required type="email" value={state.customer.email} onChange={(e) => cart.patch("customer", { email: e.target.value })} />
-        <Field label="Telefone / WhatsApp" required placeholder="(11) 90000-0000" value={state.customer.phone} onChange={(e) => cart.patch("customer", { phone: e.target.value })} />
-        <Field label="CPF" required placeholder="000.000.000-00" value={state.customer.cpf} onChange={(e) => cart.patch("customer", { cpf: e.target.value })} />
+        <Field label="Nome completo" required value={state.customer.fullName} onChange={(e) => { fireLead(); cart.patch("customer", { fullName: e.target.value }); }} />
+        <Field label="E-mail" required type="email" value={state.customer.email} onChange={(e) => { fireLead(); cart.patch("customer", { email: e.target.value }); }} />
+        <Field label="Telefone / WhatsApp" required placeholder="(11) 90000-0000" value={state.customer.phone} onChange={(e) => { fireLead(); cart.patch("customer", { phone: e.target.value }); }} />
+        <Field label="CPF" required placeholder="000.000.000-00" value={state.customer.cpf} onChange={(e) => { fireLead(); cart.patch("customer", { cpf: e.target.value }); }} />
+
       </div>
       <PrimaryButton type="submit">Continuar para endereço</PrimaryButton>
     </form>
@@ -252,14 +274,25 @@ function StepShipping({ state, onNext }: { state: ReturnType<typeof useCart>; on
   );
 }
 
-function StepPayment({ state, onNext }: { state: ReturnType<typeof useCart>; onNext: () => void }) {
+function StepPayment({ state, onNext, total }: { state: ReturnType<typeof useCart>; onNext: () => void; total: number }) {
   const methods = [
     { id: "pix" as const, label: "Pix", desc: "Aprovação imediata · 5% de desconto", icon: QrCode },
     { id: "card" as const, label: "Cartão de crédito", desc: "Em até 12x sem juros", icon: CreditCard },
     { id: "boleto" as const, label: "Boleto bancário", desc: "Compensação em até 2 dias úteis", icon: FileText },
   ];
   return (
-    <form onSubmit={(e) => { e.preventDefault(); if (state.payment) onNext(); }}>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!state.payment) return;
+        trackAddPaymentInfo({
+          value: total,
+          content_ids: [state.variant],
+        });
+        onNext();
+      }}
+    >
+
       <h2 className="heading-display text-2xl md:text-3xl text-ink">Pagamento</h2>
       <p className="mt-1.5 text-sm text-muted-foreground">Ambiente 100% seguro e criptografado.</p>
       <div className="mt-6 grid gap-3">
@@ -301,7 +334,17 @@ function StepPayment({ state, onNext }: { state: ReturnType<typeof useCart>; onN
   );
 }
 
-function StepConfirm({ orderId }: { orderId: string }) {
+function StepConfirm({ orderId, total, state }: { orderId: string; total: number; state: ReturnType<typeof useCart> }) {
+  useEffect(() => {
+    trackPurchase({
+      value: total,
+      content_ids: [state.variant],
+      num_items: state.qty,
+      order_id: orderId,
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="text-center py-6">
       <div className="mx-auto grid h-20 w-20 place-items-center rounded-full gradient-brand text-white shadow-2xl shadow-primary/40">

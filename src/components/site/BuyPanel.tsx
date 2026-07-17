@@ -3,6 +3,8 @@ import { Check, Minus, Plus, Shield, Truck, Award } from "lucide-react";
 import { cart, useCart } from "@/lib/cart-store";
 import { formatBRL, variants } from "@/lib/product";
 import { useAdmin } from "@/lib/admin-store";
+import { trackAddToCart } from "@/lib/tracking/metaPixel";
+
 
 export function BuyPanel() {
   const state = useCart();
@@ -166,12 +168,22 @@ export function BuyPanel() {
           </div>
         )}
         <button
-          onClick={() => nav({ to: "/checkout" })}
+          onClick={() => {
+            trackAddToCart({
+              value: total,
+              content_ids: [activeVariant],
+              content_name: dynName[activeVariant],
+              content_type: "product",
+              contents: [{ id: activeVariant, quantity: state.qty, item_price: unitPrice }],
+            });
+            nav({ to: "/checkout" });
+          }}
           className="btn-shine mt-4 flex w-full items-center justify-center gap-2 rounded-full gradient-brand px-6 py-4 text-base font-bold text-white shadow-xl shadow-primary/30 transition-transform hover:scale-[1.01] active:scale-[0.99]"
         >
           <span className="btn-shine-inner" />
           <span className="relative">Comprar Agora</span>
         </button>
+
         <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-muted-foreground justify-center">
           <span>Pix</span>·<span>Cartão até 12x</span>·<span>Boleto</span>·<span>Compra 100% segura</span>
         </div>
