@@ -195,13 +195,23 @@ function PrimaryButton({ children, ...rest }: React.ButtonHTMLAttributes<HTMLBut
 
 function StepCustomer({ state, onNext }: { state: ReturnType<typeof useCart>; onNext: () => void }) {
   const leadFired = useRef(false);
+  const [cpfError, setCpfError] = useState<string | null>(null);
   const fireLead = () => {
     if (leadFired.current) return;
     leadFired.current = true;
     trackLead({ content_name: "checkout_customer_form" });
   };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!isValidCPF(state.customer.cpf)) {
+      setCpfError("CPF inválido. Verifique os números digitados.");
+      return;
+    }
+    setCpfError(null);
+    onNext();
+  };
   return (
-    <form onSubmit={(e) => { e.preventDefault(); onNext(); }}>
+    <form onSubmit={handleSubmit}>
 
       <h2 className="heading-display text-2xl md:text-3xl text-ink">Seus dados</h2>
       <p className="mt-1.5 text-sm text-muted-foreground">Para emissão da nota fiscal e contato.</p>
@@ -210,7 +220,22 @@ function StepCustomer({ state, onNext }: { state: ReturnType<typeof useCart>; on
         <Field label="Nome completo" required value={state.customer.fullName} onChange={(e) => { fireLead(); cart.patch("customer", { fullName: e.target.value }); }} />
         <Field label="E-mail" required type="email" value={state.customer.email} onChange={(e) => { fireLead(); cart.patch("customer", { email: e.target.value }); }} />
         <Field label="Telefone / WhatsApp" required placeholder="(11) 90000-0000" value={state.customer.phone} onChange={(e) => { fireLead(); cart.patch("customer", { phone: e.target.value }); }} />
-        <Field label="CPF" required placeholder="000.000.000-00" value={state.customer.cpf} onChange={(e) => { fireLead(); cart.patch("customer", { cpf: e.target.value }); }} />
+        <div>
+          <Field
+            label="CPF"
+            required
+            placeholder="000.000.000-00"
+            inputMode="numeric"
+            value={formatCPF(state.customer.cpf)}
+            onChange={(e) => { fireLead(); setCpfError(null); cart.patch("customer", { cpf: cleanCPF(e.target.value) }); }}
+            onBlur={() => {
+              if (state.customer.cpf && !isValidCPF(state.customer.cpf)) {
+                setCpfError("CPF inválido.");
+              }
+            }}
+          />
+          {cpfError && <p className="mt-1.5 text-xs font-medium text-red-600">{cpfError}</p>}
+        </div>
 
       </div>
       <PrimaryButton type="submit">Continuar para endereço</PrimaryButton>
