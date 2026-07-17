@@ -144,6 +144,7 @@ function Dashboard() {
         </nav>
 
         <main className="min-w-0">
+          {tab === "pedidos" && <OrdersPanel />}
           {tab === "produtos" && <ProductsPanel s={s} />}
           {tab === "hero" && <HeroPanel s={s} />}
           {tab === "blocos" && <BlocksPanel s={s} />}
