@@ -77,7 +77,7 @@ function LoginScreen() {
   );
 }
 
-type Tab = "pedidos" | "produtos" | "blocos" | "hero" | "tracking" | "gateway" | "seguranca";
+type Tab = "pedidos" | "produtos" | "blocos" | "hero" | "tracking" | "gateway" | "pix" | "suporte" | "seguranca";
 
 function Dashboard() {
   const [tab, setTab] = useState<Tab>("pedidos");
@@ -89,7 +89,9 @@ function Dashboard() {
     { id: "hero", label: "Hero / Textos" },
     { id: "blocos", label: "Blocos da Página" },
     { id: "tracking", label: "Facebook Pixel & Tracking" },
+    { id: "pix", label: "Pagamento Pix" },
     { id: "gateway", label: "Gateway de Pagamento" },
+    { id: "suporte", label: "Suporte / WhatsApp" },
     { id: "seguranca", label: "Segurança" },
   ];
 
@@ -149,7 +151,9 @@ function Dashboard() {
           {tab === "hero" && <HeroPanel s={s} />}
           {tab === "blocos" && <BlocksPanel s={s} />}
           {tab === "tracking" && <TrackingPanel s={s} />}
+          {tab === "pix" && <PixPanel s={s} />}
           {tab === "gateway" && <GatewayPanel s={s} />}
+          {tab === "suporte" && <SupportPanel s={s} />}
           {tab === "seguranca" && <SecurityPanel />}
         </main>
       </div>
