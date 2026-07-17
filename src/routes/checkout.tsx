@@ -383,12 +383,25 @@ function StepPayment({ state, onNext, total }: { state: ReturnType<typeof useCar
       </div>
       {state.payment === "card" && (
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <div className="sm:col-span-2"><Field label="Número do cartão" placeholder="0000 0000 0000 0000" required /></div>
+          <div className="sm:col-span-2"><Field label="Número do cartão" placeholder="0000 0000 0000 0000" inputMode="numeric" required /></div>
           <Field label="Nome impresso" required />
           <div className="grid grid-cols-2 gap-4">
-            <Field label="Validade" placeholder="MM/AA" required />
-            <Field label="CVV" placeholder="000" required />
+            <Field label="Validade" placeholder="MM/AA" inputMode="numeric" required />
+            <Field label="CVV" placeholder="000" inputMode="numeric" required />
           </div>
+          <label className="sm:col-span-2 block">
+            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-foreground/70">Parcelamento</span>
+            <select
+              value={state.cardInstallments}
+              onChange={(e) => cart.set({ cardInstallments: parseInt(e.target.value, 10) })}
+              className="w-full rounded-xl border border-border bg-card px-4 py-3 text-sm text-ink outline-none transition focus:border-primary focus:ring-4 focus:ring-primary/15"
+            >
+              {installmentOptions(total).map((opt) => (
+                <option key={opt.n} value={opt.n}>{opt.label}</option>
+              ))}
+            </select>
+            <span className="mt-1.5 block text-[11px] text-muted-foreground">Até 12x sem juros no cartão de crédito.</span>
+          </label>
         </div>
       )}
       <PrimaryButton type="submit" disabled={!state.payment}>Finalizar compra</PrimaryButton>
