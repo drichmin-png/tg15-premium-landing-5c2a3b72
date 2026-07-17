@@ -9,17 +9,18 @@ import antes1 from "@/assets/antes-depois-1.mp4.asset.json";
 import antes2 from "@/assets/antes-depois-2.mp4.asset.json";
 import antes3 from "@/assets/antes-depois-3.mp4.asset.json";
 import duvidas from "@/assets/tirando-duvidas.mp4.asset.json";
+import { assetUrl } from "@/lib/asset-url";
 
 export const media = {
-  ampola: ampola.url,
+  ampola: assetUrl(ampola.url),
   caixa,
-  hero: hero.url,
-  tabela: tabela.url,
+  hero: assetUrl(hero.url),
+  tabela: assetUrl(tabela.url),
   videos: {
-    apresentacao: apresentacao.url,
-    comoUsar: comoUsar.url,
-    duvidas: duvidas.url,
-    antesDepois: [antes0.url, antes1.url, antes2.url, antes3.url],
+    apresentacao: assetUrl(apresentacao.url),
+    comoUsar: assetUrl(comoUsar.url),
+    duvidas: assetUrl(duvidas.url),
+    antesDepois: [antes0.url, antes1.url, antes2.url, antes3.url].map(assetUrl),
   },
 };
 
