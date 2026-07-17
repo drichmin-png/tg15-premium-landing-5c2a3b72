@@ -219,26 +219,26 @@ export function VideoSection() {
           </p>
         </div>
 
-        <div className="mt-8 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-4 grid-cols-2 lg:grid-cols-3 lg:gap-6">
           {celebrities.map((c) => (
             <article key={c.name} className="card-premium overflow-hidden flex flex-col">
               {c.image ? (
-                <div className="aspect-[4/3] w-full overflow-hidden bg-sand">
+                <div className="aspect-video w-full overflow-hidden bg-sand">
                   <img src={c.image} alt={c.name} className="h-full w-full object-cover" />
                 </div>
               ) : (
-                <div className="aspect-[4/3] w-full grid place-items-center gradient-brand">
-                  <span className="heading-display text-6xl text-white/90">{c.initials}</span>
+                <div className="aspect-video w-full grid place-items-center gradient-brand">
+                  <span className="heading-display text-4xl lg:text-6xl text-white/90">{c.initials}</span>
                 </div>
               )}
-              <div className="p-5 flex-1 flex flex-col">
-                <h3 className="heading-display text-xl text-ink">{c.name}</h3>
-                <div className="text-xs text-muted-foreground">{c.role}</div>
-                <div className="mt-4 space-y-3">
+              <div className="p-3 lg:p-5 flex-1 flex flex-col">
+                <h3 className="heading-display text-base lg:text-xl text-ink">{c.name}</h3>
+                <div className="text-[10px] lg:text-xs text-muted-foreground">{c.role}</div>
+                <div className="mt-2 lg:mt-4 space-y-2 lg:space-y-3">
                   {c.story.map((s) => (
                     <div key={s.label}>
                       <div className="text-[10px] uppercase tracking-wider font-bold text-primary-deep">{s.label}</div>
-                      <p className="mt-1 text-sm leading-relaxed text-foreground/80">{s.text}</p>
+                      <p className="mt-0.5 lg:mt-1 text-xs lg:text-sm leading-relaxed text-foreground/80">{s.text}</p>
                     </div>
                   ))}
                 </div>
