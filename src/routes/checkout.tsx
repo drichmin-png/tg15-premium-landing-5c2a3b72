@@ -244,16 +244,50 @@ function StepCustomer({ state, onNext }: { state: ReturnType<typeof useCart>; on
 }
 
 function StepAddress({ state, onNext }: { state: ReturnType<typeof useCart>; onNext: () => void }) {
+  const [cepLoading, setCepLoading] = useState(false);
+  const [cepError, setCepError] = useState<string | null>(null);
+
+  const handleCepChange = async (raw: string) => {
+    const clean = cleanCEP(raw);
+    cart.patch("address", { zip: clean });
+    setCepError(null);
+    if (clean.length === 8) {
+      setCepLoading(true);
+      const res = await lookupCEP(clean);
+      setCepLoading(false);
+      if (!res) {
+        setCepError("CEP não encontrado. Verifique e tente novamente.");
+        return;
+      }
+      cart.patch("address", {
+        street: res.logradouro || "",
+        district: res.bairro || "",
+        city: res.localidade || "",
+        state: (res.uf || "").toUpperCase(),
+      });
+    }
+  };
+
   return (
     <form onSubmit={(e) => { e.preventDefault(); onNext(); }}>
       <h2 className="heading-display text-2xl md:text-3xl text-ink">Endereço de entrega</h2>
-      <p className="mt-1.5 text-sm text-muted-foreground">Enviamos com cadeia de frio para todo o Brasil.</p>
+      <p className="mt-1.5 text-sm text-muted-foreground">Digite o CEP e preenchemos cidade, estado, bairro e rua automaticamente.</p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-6">
-        <div className="sm:col-span-2"><Field label="CEP" required placeholder="00000-000" value={state.address.zip} onChange={(e) => cart.patch("address", { zip: e.target.value })} /></div>
+        <div className="sm:col-span-2">
+          <Field
+            label={cepLoading ? "CEP (buscando...)" : "CEP"}
+            required
+            placeholder="00000-000"
+            inputMode="numeric"
+            value={formatCEP(state.address.zip)}
+            onChange={(e) => handleCepChange(e.target.value)}
+          />
+          {cepError && <p className="mt-1.5 text-xs font-medium text-red-600">{cepError}</p>}
+        </div>
         <div className="sm:col-span-4"><Field label="Rua" required value={state.address.street} onChange={(e) => cart.patch("address", { street: e.target.value })} /></div>
         <div className="sm:col-span-2"><Field label="Número" required value={state.address.number} onChange={(e) => cart.patch("address", { number: e.target.value })} /></div>
-        <div className="sm:col-span-4"><Field label="Complemento" value={state.address.complement} onChange={(e) => cart.patch("address", { complement: e.target.value })} /></div>
+        <div className="sm:col-span-4"><Field label="Ponto de referência (opcional)" value={state.address.reference} onChange={(e) => cart.patch("address", { reference: e.target.value })} /></div>
         <div className="sm:col-span-3"><Field label="Bairro" required value={state.address.district} onChange={(e) => cart.patch("address", { district: e.target.value })} /></div>
         <div className="sm:col-span-2"><Field label="Cidade" required value={state.address.city} onChange={(e) => cart.patch("address", { city: e.target.value })} /></div>
         <div className="sm:col-span-1"><Field label="UF" required maxLength={2} value={state.address.state} onChange={(e) => cart.patch("address", { state: e.target.value.toUpperCase() })} /></div>
@@ -265,8 +299,8 @@ function StepAddress({ state, onNext }: { state: ReturnType<typeof useCart>; onN
 
 function StepShipping({ state, onNext }: { state: ReturnType<typeof useCart>; onNext: () => void }) {
   const options = [
-    { id: "standard" as const, label: "Envio Refrigerado Padrão", eta: "5 a 7 dias úteis", price: 19.9 },
-    { id: "express" as const, label: "Envio Refrigerado Expresso", eta: "2 a 3 dias úteis", price: 39.9 },
+    { id: "standard" as const, label: "Envio Refrigerado Padrão", eta: "2 a 5 dias úteis", price: 19.9 },
+    { id: "express" as const, label: "Envio Refrigerado Expresso", eta: "1 a 2 dias úteis", price: 39.9 },
   ];
   return (
     <form onSubmit={(e) => { e.preventDefault(); if (state.shipping) onNext(); }}>
