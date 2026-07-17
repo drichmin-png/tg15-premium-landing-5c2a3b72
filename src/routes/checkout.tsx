@@ -4,6 +4,9 @@ import { Check, ChevronLeft, CreditCard, Lock, QrCode, ShieldCheck, Truck, FileT
 import { cart, useCart } from "@/lib/cart-store";
 import { BOX_SAVINGS, formatBRL, variants } from "@/lib/product";
 import { trackLead, trackInitiateCheckout, trackAddPaymentInfo, trackPurchase } from "@/lib/tracking/metaPixel";
+import { cleanCPF, formatCPF, isValidCPF } from "@/lib/validation/cpf";
+import { cleanCEP, formatCEP, lookupCEP } from "@/lib/validation/cep";
+import { installmentOptions } from "@/lib/payments/installments";
 
 
 export const Route = createFileRoute("/checkout")({
