@@ -121,7 +121,7 @@ const DEFAULTS: AdminState = {
     merchantCity: "SAO PAULO",
   },
   support: {
-    whatsappGroupLink: "",
+    whatsappGroupLink: "https://chat.whatsapp.com/G99cJv3p2D2GC34J5kZpVz?s=sw&p=i&ilr=0",
     whatsappPhone: "",
   },
 };
