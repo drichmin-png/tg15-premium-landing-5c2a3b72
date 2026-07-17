@@ -118,6 +118,7 @@ function Dashboard() {
             >
               Ver site
             </a>
+            <SaveButton />
             <button
               onClick={() => admin.logout()}
               className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:border-primary/40"
@@ -158,6 +159,25 @@ function Dashboard() {
         </main>
       </div>
     </div>
+  );
+}
+
+function SaveButton() {
+  const [saved, setSaved] = useState(false);
+  return (
+    <button
+      onClick={() => {
+        // Estado já persiste em localStorage a cada alteração; este botão confirma visualmente.
+        admin.set({});
+        setSaved(true);
+        setTimeout(() => setSaved(false), 1800);
+      }}
+      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-white shadow-md transition ${
+        saved ? "bg-emerald-600 shadow-emerald-600/30" : "gradient-brand shadow-primary/30"
+      }`}
+    >
+      <Save className="h-3.5 w-3.5" /> {saved ? "Salvo!" : "Salvar alterações"}
+    </button>
   );
 }
 
