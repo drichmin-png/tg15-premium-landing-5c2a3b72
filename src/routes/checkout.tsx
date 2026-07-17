@@ -1,8 +1,10 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Check, ChevronLeft, CreditCard, Lock, QrCode, ShieldCheck, Truck, FileText } from "lucide-react";
 import { cart, useCart } from "@/lib/cart-store";
 import { BOX_SAVINGS, formatBRL, variants } from "@/lib/product";
+import { trackLead, trackInitiateCheckout, trackAddPaymentInfo, trackPurchase } from "@/lib/tracking/metaPixel";
+
 
 export const Route = createFileRoute("/checkout")({
   head: () => ({
@@ -34,6 +36,17 @@ function Checkout() {
   const shippingCost = state.shipping === "express" ? 39.9 : state.shipping === "standard" ? 19.9 : 0;
   const total = subtotal + shippingCost;
   const savings = state.variant === "box" ? BOX_SAVINGS * state.qty : 0;
+
+  // InitiateCheckout — apenas ao acessar /checkout (uma vez por sessão de página)
+  useEffect(() => {
+    trackInitiateCheckout({
+      value: subtotal,
+      num_items: state.qty,
+      content_ids: [state.variant],
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
 
   const next = () => setStep((s) => Math.min(5, s + 1));
   const prev = () => setStep((s) => Math.max(1, s - 1));
