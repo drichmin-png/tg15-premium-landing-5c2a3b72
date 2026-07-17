@@ -77,13 +77,14 @@ function LoginScreen() {
   );
 }
 
-type Tab = "produtos" | "blocos" | "hero" | "tracking" | "gateway" | "seguranca";
+type Tab = "pedidos" | "produtos" | "blocos" | "hero" | "tracking" | "gateway" | "seguranca";
 
 function Dashboard() {
-  const [tab, setTab] = useState<Tab>("produtos");
+  const [tab, setTab] = useState<Tab>("pedidos");
   const s = useAdmin();
 
   const tabs: { id: Tab; label: string }[] = [
+    { id: "pedidos", label: "Pedidos" },
     { id: "produtos", label: "Produtos e Preços" },
     { id: "hero", label: "Hero / Textos" },
     { id: "blocos", label: "Blocos da Página" },
@@ -91,6 +92,7 @@ function Dashboard() {
     { id: "gateway", label: "Gateway de Pagamento" },
     { id: "seguranca", label: "Segurança" },
   ];
+
 
   return (
     <div className="min-h-screen bg-background">
