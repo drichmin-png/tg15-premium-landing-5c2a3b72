@@ -412,6 +412,7 @@ function StepPayment({ state, onNext, total }: { state: ReturnType<typeof useCar
 }
 
 function StepConfirm({ orderId, total, state }: { orderId: string; total: number; state: ReturnType<typeof useCart> }) {
+  const admin = useAdmin();
   useEffect(() => {
     trackPurchase({
       value: total,
@@ -431,13 +432,106 @@ function StepConfirm({ orderId, total, state }: { orderId: string; total: number
       <p className="mt-2 text-muted-foreground">
         Seu pedido <span className="font-semibold text-ink">#{orderId}</span> foi recebido com sucesso.
       </p>
-      <p className="mt-1 text-sm text-muted-foreground">
+
+      {state.payment === "pix" && <PixBlock total={total} orderId={orderId} admin={admin} />}
+
+      <p className="mt-6 text-sm text-muted-foreground">
         Você receberá o comprovante e o rastreio por e-mail e WhatsApp.
       </p>
+
       <div className="mt-8 flex flex-wrap justify-center gap-3">
+        {admin.support.whatsappGroupLink && (
+          <a
+            href={admin.support.whatsappGroupLink}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#25D366]/30 hover:brightness-110"
+          >
+            <MessageCircle className="h-4 w-4" /> Entrar no grupo de clientes
+          </a>
+        )}
         <Link to="/" className="rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-ink hover:border-primary/40">
           Voltar ao site
         </Link>
+      </div>
+    </div>
+  );
+}
+
+function PixBlock({ total, orderId, admin }: { total: number; orderId: string; admin: ReturnType<typeof useAdmin> }) {
+  const [copied, setCopied] = useState(false);
+  const { pix, gateway } = admin;
+
+  if (pix.mode === "gateway") {
+    return (
+      <div className="mt-8 mx-auto max-w-md rounded-2xl border border-border bg-card p-6 text-left">
+        <div className="flex items-center gap-2 text-sm font-bold text-ink">
+          <QrCode className="h-4 w-4 text-primary" /> Pagamento via gateway
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {gateway.active && gateway.name
+            ? <>O QR Code Pix será gerado pelo gateway <strong>{gateway.name}</strong>. Aguarde a confirmação por e-mail e WhatsApp.</>
+            : "Nenhum gateway ativo configurado. Configure no painel administrativo."}
+        </p>
+      </div>
+    );
+  }
+
+  if (!pix.key) {
+    return (
+      <div className="mt-8 mx-auto max-w-md rounded-2xl border border-amber-500/30 bg-amber-500/5 p-6 text-left text-sm text-amber-900">
+        Chave Pix não configurada no painel. Configure em <strong>Admin → Pagamento Pix</strong>.
+      </div>
+    );
+  }
+
+  const payload = buildPixPayload({
+    key: pix.key,
+    amount: total,
+    merchantName: pix.merchantName || "T.G.15",
+    merchantCity: pix.merchantCity || "SAO PAULO",
+    txid: orderId.replace(/[^A-Za-z0-9]/g, "").slice(0, 25) || "TG15",
+  });
+  const qr = pixQrImageUrl(payload, 260);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(payload);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* ignore */
+    }
+  };
+
+  return (
+    <div className="mt-8 mx-auto max-w-md rounded-2xl border border-border bg-card p-6">
+      <div className="flex items-center justify-center gap-2 text-sm font-bold text-ink">
+        <QrCode className="h-4 w-4 text-primary" /> Pague com Pix
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Abra o app do seu banco, escaneie o QR Code ou use "Pix copia e cola".
+      </p>
+      <div className="mt-4 grid place-items-center">
+        <div className="rounded-xl border border-border bg-white p-3">
+          <img src={qr} alt="QR Code Pix" width={220} height={220} />
+        </div>
+      </div>
+      <div className="mt-4 text-center text-2xl font-black text-ink">{formatBRL(total)}</div>
+      <div className="mt-4">
+        <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Pix copia e cola</div>
+        <textarea
+          readOnly
+          value={payload}
+          rows={3}
+          className="mt-1 w-full resize-none rounded-lg border border-border bg-background px-3 py-2 text-[11px] font-mono text-foreground/80"
+        />
+        <button
+          onClick={copy}
+          className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full gradient-brand px-4 py-3 text-sm font-bold text-white shadow-md shadow-primary/30"
+        >
+          <Copy className="h-4 w-4" /> {copied ? "Copiado!" : "Copiar código Pix"}
+        </button>
       </div>
     </div>
   );
