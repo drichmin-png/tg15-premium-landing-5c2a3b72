@@ -825,3 +825,115 @@ function OrdersPanel() {
   );
 }
 
+/* ------------ PIX PANEL ------------ */
+
+function PixPanel({ s }: { s: ReturnType<typeof useAdmin> }) {
+  return (
+    <div className="grid gap-6">
+      <Card
+        title="Modo de geração do QR Code Pix"
+        description="Escolha se o QR Code é gerado automaticamente a partir de uma chave Pix, ou delegado ao gateway configurado."
+      >
+        <div className="grid gap-3 md:grid-cols-2">
+          {(
+            [
+              { id: "key", title: "Chave Pix (automático)", desc: "Gera o QR Code na hora usando a chave abaixo. Ideal para receber direto na sua conta." },
+              { id: "gateway", title: "Gateway", desc: "O QR Code será gerado pelo gateway de pagamento (aba Gateway)." },
+            ] as const
+          ).map((opt) => {
+            const selected = s.pix.mode === opt.id;
+            return (
+              <button
+                key={opt.id}
+                type="button"
+                onClick={() => admin.update("pix", { mode: opt.id })}
+                className={`text-left rounded-2xl border-2 p-4 transition ${
+                  selected ? "border-primary bg-primary/[0.04]" : "border-border hover:border-primary/40"
+                }`}
+              >
+                <div className="font-semibold text-ink">{opt.title}</div>
+                <div className="mt-1 text-xs text-muted-foreground">{opt.desc}</div>
+              </button>
+            );
+          })}
+        </div>
+      </Card>
+
+      {s.pix.mode === "key" && (
+        <Card
+          title="Dados da chave Pix"
+          description="Usados para gerar o QR Code e o código copia-e-cola na confirmação do pedido."
+        >
+          <div className="grid gap-4 md:grid-cols-2">
+            <label className="block">
+              <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Tipo de chave</span>
+              <select
+                value={s.pix.keyType}
+                onChange={(e) => admin.update("pix", { keyType: e.target.value as typeof s.pix.keyType })}
+                className="mt-1 w-full rounded-lg border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-primary"
+              >
+                <option value="cpf">CPF</option>
+                <option value="cnpj">CNPJ</option>
+                <option value="email">E-mail</option>
+                <option value="telefone">Telefone</option>
+                <option value="aleatoria">Aleatória (EVP)</option>
+              </select>
+            </label>
+            <Field
+              label="Chave Pix"
+              value={s.pix.key}
+              onChange={(v) => admin.update("pix", { key: v })}
+              placeholder="ex.: 000.000.000-00 ou email@dominio.com"
+            />
+            <Field
+              label="Nome do recebedor"
+              value={s.pix.merchantName}
+              onChange={(v) => admin.update("pix", { merchantName: v })}
+              placeholder="Máx. 25 caracteres"
+            />
+            <Field
+              label="Cidade do recebedor"
+              value={s.pix.merchantCity}
+              onChange={(v) => admin.update("pix", { merchantCity: v })}
+              placeholder="Máx. 15 caracteres, sem acento"
+            />
+          </div>
+          <div className="mt-4 rounded-lg bg-primary/5 p-3 text-xs text-primary-deep">
+            O QR Code é gerado no padrão Pix do Banco Central (BR Code EMV). Funciona em qualquer app bancário.
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+}
+
+/* ------------ SUPPORT PANEL ------------ */
+
+function SupportPanel({ s }: { s: ReturnType<typeof useAdmin> }) {
+  return (
+    <Card
+      title="Suporte e grupo de clientes"
+      description="O botão 'Entrar no grupo' aparece na tela de confirmação após o pedido."
+    >
+      <div className="grid gap-4">
+        <Field
+          label="Link do grupo WhatsApp"
+          value={s.support.whatsappGroupLink}
+          onChange={(v) => admin.update("support", { whatsappGroupLink: v })}
+          placeholder="https://chat.whatsapp.com/..."
+        />
+        <Field
+          label="Telefone de suporte (WhatsApp)"
+          value={s.support.whatsappPhone}
+          onChange={(v) => admin.update("support", { whatsappPhone: v })}
+          placeholder="5511900000000 (DDI + DDD, só números)"
+        />
+        <div className="rounded-lg bg-primary/5 p-3 text-xs text-primary-deep">
+          Deixe o link do grupo em branco para ocultar o botão da tela de confirmação.
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+
