@@ -21,6 +21,8 @@ export type Database = {
           business_hour_start: number
           created_at: string
           delivery_time_label: string
+          facebook_capi_token: string
+          facebook_pixel_id: string
           id: string
           pix_key: string
           pix_key_type: string
@@ -29,6 +31,7 @@ export type Database = {
           singleton: boolean
           support_phone: string
           updated_at: string
+          utmify_api_key: string
           whatsapp_group_url: string
         }
         Insert: {
@@ -37,6 +40,8 @@ export type Database = {
           business_hour_start?: number
           created_at?: string
           delivery_time_label?: string
+          facebook_capi_token?: string
+          facebook_pixel_id?: string
           id?: string
           pix_key?: string
           pix_key_type?: string
@@ -45,6 +50,7 @@ export type Database = {
           singleton?: boolean
           support_phone?: string
           updated_at?: string
+          utmify_api_key?: string
           whatsapp_group_url?: string
         }
         Update: {
@@ -53,6 +59,8 @@ export type Database = {
           business_hour_start?: number
           created_at?: string
           delivery_time_label?: string
+          facebook_capi_token?: string
+          facebook_pixel_id?: string
           id?: string
           pix_key?: string
           pix_key_type?: string
@@ -61,7 +69,56 @@ export type Database = {
           singleton?: boolean
           support_phone?: string
           updated_at?: string
+          utmify_api_key?: string
           whatsapp_group_url?: string
+        }
+        Relationships: []
+      }
+      gateways: {
+        Row: {
+          ativo: boolean
+          chave_pix: string
+          chave_publica: string
+          chave_secreta: string
+          created_at: string
+          id: string
+          nome: string
+          padrao: boolean
+          prioridade: number
+          tipo: Database["public"]["Enums"]["gateway_tipo"]
+          tipo_chave_pix: string
+          updated_at: string
+          webhook_secret: string
+        }
+        Insert: {
+          ativo?: boolean
+          chave_pix?: string
+          chave_publica?: string
+          chave_secreta?: string
+          created_at?: string
+          id?: string
+          nome: string
+          padrao?: boolean
+          prioridade?: number
+          tipo: Database["public"]["Enums"]["gateway_tipo"]
+          tipo_chave_pix?: string
+          updated_at?: string
+          webhook_secret?: string
+        }
+        Update: {
+          ativo?: boolean
+          chave_pix?: string
+          chave_publica?: string
+          chave_secreta?: string
+          created_at?: string
+          id?: string
+          nome?: string
+          padrao?: boolean
+          prioridade?: number
+          tipo?: Database["public"]["Enums"]["gateway_tipo"]
+          tipo_chave_pix?: string
+          updated_at?: string
+          webhook_secret?: string
         }
         Relationships: []
       }
@@ -113,12 +170,15 @@ export type Database = {
           address_street: string
           address_zip: string
           card_installments: number
+          chargeback_flag: boolean
           created_at: string
           customer_cpf: string
           customer_email: string
           customer_name: string
           customer_phone: string
           delivery_status_override: string | null
+          gateway_charge_id: string | null
+          gateway_utilizado: string | null
           id: string
           invoice_url: string | null
           notes: string
@@ -126,8 +186,15 @@ export type Database = {
           payment_method: string
           payment_status: string
           public_token: string
+          rastreio_atualizado_em: string | null
+          status_rastreio: string
           total_cents: number
           updated_at: string
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
         }
         Insert: {
           address_city: string
@@ -138,12 +205,15 @@ export type Database = {
           address_street: string
           address_zip: string
           card_installments?: number
+          chargeback_flag?: boolean
           created_at?: string
           customer_cpf: string
           customer_email: string
           customer_name: string
           customer_phone: string
           delivery_status_override?: string | null
+          gateway_charge_id?: string | null
+          gateway_utilizado?: string | null
           id?: string
           invoice_url?: string | null
           notes?: string
@@ -151,8 +221,15 @@ export type Database = {
           payment_method: string
           payment_status?: string
           public_token?: string
+          rastreio_atualizado_em?: string | null
+          status_rastreio?: string
           total_cents: number
           updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Update: {
           address_city?: string
@@ -163,12 +240,15 @@ export type Database = {
           address_street?: string
           address_zip?: string
           card_installments?: number
+          chargeback_flag?: boolean
           created_at?: string
           customer_cpf?: string
           customer_email?: string
           customer_name?: string
           customer_phone?: string
           delivery_status_override?: string | null
+          gateway_charge_id?: string | null
+          gateway_utilizado?: string | null
           id?: string
           invoice_url?: string | null
           notes?: string
@@ -176,8 +256,15 @@ export type Database = {
           payment_method?: string
           payment_status?: string
           public_token?: string
+          rastreio_atualizado_em?: string | null
+          status_rastreio?: string
           total_cents?: number
           updated_at?: string
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Relationships: []
       }
@@ -202,6 +289,47 @@ export type Database = {
         }
         Relationships: []
       }
+      webhook_logs: {
+        Row: {
+          assinatura_valida: boolean
+          created_at: string
+          erro: string | null
+          gateway_tipo: string
+          id: string
+          payload: Json
+          pedido_id: string | null
+          sucesso: boolean
+        }
+        Insert: {
+          assinatura_valida?: boolean
+          created_at?: string
+          erro?: string | null
+          gateway_tipo: string
+          id?: string
+          payload?: Json
+          pedido_id?: string | null
+          sucesso?: boolean
+        }
+        Update: {
+          assinatura_valida?: boolean
+          created_at?: string
+          erro?: string | null
+          gateway_tipo?: string
+          id?: string
+          payload?: Json
+          pedido_id?: string | null
+          sucesso?: boolean
+        }
+        Relationships: [
+          {
+            foreignKeyName: "webhook_logs_pedido_id_fkey"
+            columns: ["pedido_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -217,6 +345,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      gateway_tipo: "ironpay" | "pagarme" | "mercadopago" | "outro"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -345,6 +474,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      gateway_tipo: ["ironpay", "pagarme", "mercadopago", "outro"],
     },
   },
 } as const

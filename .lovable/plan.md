@@ -1,45 +1,62 @@
+## Sistema de Pagamentos Multi-Gateway — Plano de Implementação
 
-# Plano de implementação — 10 itens
+Escopo grande. Proponho executar em **4 fases** para você validar cada parte antes de seguir. Nada quebra o que já existe (checkout local em `cart-store`, admin em `localStorage`, tabelas `orders`/`order_items`/`admin_settings` já criadas).
 
-## Observação importante sobre a Vercel
-O stack do projeto (TanStack Start + nitro) é otimizado para **Cloudflare Workers**, que é onde o Lovable publica automaticamente em `tg15-premium-landing.lovable.app`. Deploy manual na Vercel exige adaptação do runtime e **quebra as server functions** (checkout, admin, pedidos, Pix). **Recomendação:** publicar apenas pelo botão Publish do Lovable — o site já fica com URL pública, SSL, custom domain se quiser, e o backend funciona nativamente. Vou implementar assumindo publicação via Lovable; se você insistir na Vercel, faremos ajustes adicionais depois.
+### Fase 1 — Backend: schema e webhook (essencial)
 
-## Fase 1 — Fundação (este turno)
-**Backend / schema**
-- Tabelas: `admin_settings` (singleton para prazo, WhatsApp, telefone suporte, link do grupo, horário comercial), `orders` (pedido + endereço + status pgto + status entrega + timestamps), `order_items`, `user_roles` (admin), `has_role()` security definer.
-- RLS: admin lê tudo; cliente lê o próprio pedido por token público.
-- Bucket público `product-media` para futuros uploads de mídia via admin.
+Migration única criando/ajustando:
 
-**Item 4 — Prazo "2 a 5 dias úteis"**
-- Trocar em FAQ, DosageTable/hero e checkout.
+- **`gateways`**: `id`, `nome`, `tipo` (enum `ironpay|pagarme|mercadopago|outro`), `chave_publica`, `chave_secreta`, `tipo_chave_pix`, `chave_pix`, `ativo`, `padrao`, `prioridade`, timestamps. RLS: só admin lê/escreve (via `has_role`).
+- **`webhook_logs`**: `id`, `gateway_tipo`, `pedido_id` (nullable), `payload` (jsonb), `assinatura_valida` (bool), `sucesso` (bool), `erro`, `created_at`. RLS: só admin lê.
+- **`orders` (ALTER)**: `gateway_utilizado`, `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term`, `status_rastreio` (`preparando|a_caminho|entregue`), `rastreio_atualizado_em`, `chargeback_flag`.
+- **`admin_settings` (ALTER)**: `facebook_pixel_id`, `facebook_capi_token`, `utmify_api_key` (todos server-only leitura). Cliente continua lendo só o `pixel_id` publicável.
 
-**Item 2 — Validação de CPF**
-- Utilitário `validateCPF()` com dígito verificador + bloqueio de sequências (111.111.111-11 etc.). Aplicado no formulário do checkout com máscara e erro inline.
+Rota pública única: `POST /api/public/webhook/$gateway` em `src/routes/api/public/webhook.$gateway.ts`:
 
-**Item 3 — Auto-preenchimento por CEP**
-- Chamada ao ViaCEP (`https://viacep.com.br/ws/{cep}/json/`) ao completar 8 dígitos. Preenche automaticamente cidade, estado, bairro e rua; usuário só preenche número e ponto de referência.
+- Lê `gateway_tipo` do path, busca credenciais, valida assinatura via adapter, grava `webhook_logs`, chama adapter → payload normalizado → atualiza `orders`. Sempre responde `200`.
+- Adapter IronPay em `src/lib/gateways/adapters/ironpay.ts` com mapeamento de status conforme especificado.
+- Interface `GatewayAdapter` (`verifySignature`, `parseWebhook`, `createPixCharge`, `createCardCharge`) para plugar novos gateways.
 
-**Item 5 — Parcelamento em 12x sem juros**
-- Ao selecionar cartão, mostrar select de parcelas 1x–12x com o valor calculado sem juros.
+Regra de horário comercial (usa `admin_settings.business_days/hours` já existentes): scheduler simples via `pg_cron` chamando `/api/public/cron/tick-orders` a cada 15 min, que promove `preparando → a_caminho` entre 4h–6h **dentro do expediente**.
 
-## Fase 2 — Checkout completo + rastreio (próximo turno)
-**Item 6 — Fluxo Pix**
-- Como você escolheu "outro provedor", vou implementar o layout completo (loading → QR Code → botão copiar) com **QR Code gerado localmente** a partir de uma string Pix EMV (payload copia-e-cola) usando o CPF/chave que você configurar no admin. Fica 100% funcional para pagamento real via qualquer app de banco, sem depender de API externa. Se depois quiser conciliação automática, integramos um PSP.
+Eventos de conversão em `src/lib/tracking/server-events.ts`:
+- Facebook CAPI (`Purchase`) com hash SHA-256 de email/telefone.
+- UTMify (POST com UTMs salvas no pedido).
+Disparados quando webhook marca pedido como `pago`.
 
-**Item 7 e 8 — Botão WhatsApp e Suporte**
-- Aparecem na tela de confirmação e num FAB (botão flutuante) fixo. Editáveis no admin (`admin_settings`).
+### Fase 2 — Checkout real com criação de cobrança
 
-**Item 9 — Painel de rastreio pós-pagamento**
-- Rota `/pedido/$token` acessível ao cliente. Status calculado a partir de `paid_at` + regras de horário comercial (configurável no admin: início/fim/dias da semana). "Preparando pedido" nas primeiras 4h comerciais; "Pedido a caminho / Entregue" após 4h e até 6h comerciais.
+- Server fn `createCharge` seleciona gateway `padrao=true, ativo=true`, tenta criar cobrança via adapter (Pix ou cartão com parcelas). Em erro, tenta próximo por `prioridade`. Grava `gateway_utilizado` no pedido.
+- Migrar checkout atual (hoje só localStorage) para inserir `orders` + `order_items` reais no banco no passo final, com UTMs vindas de `useUtmParams`.
+- Tela de confirmação Pix: loading → QR Code retornado pelo gateway → botão copiar (fallback para QR gerado local com chave, já implementado).
+- Cartão: mantém parcelamento 1x–12x já existente; envia dados ao gateway.
 
-## Fase 3 — Painel admin e detalhes finais
-**Item 10 — Gestão de pedidos**
-- Autenticação real (email/senha) no `/admin` substituindo a senha `admin123` do localStorage.
-- Aba Pedidos: lista individualizada, filtro por status, view detalhada com dados do cliente, endereço, itens, status de pagamento editável, botão "gerar nota fiscal" (PDF simples via server function) e status de entrega editável (com override manual das regras de horário).
-- Campos editáveis: link do grupo WhatsApp, telefone de suporte, prazo de entrega, horário comercial, chave Pix.
+### Fase 3 — Painel Admin
 
-**Item 1 — Imagens em produção**
-- Diagnóstico: as imagens hoje usam **assets do CDN Lovable** (`/__l5e/assets-v1/...`) e um único PNG local (`caixa-4-ampolas.png`). No ambiente Lovable publicado tudo funciona. Se você está tentando Vercel, o problema é que a Vercel não serve o CDN `/__l5e/...`. Corrigir migrando 100% dos assets para o CDN (o `caixa-4-ampolas.png` também) — funciona em qualquer host. Se você optar por continuar só no Lovable, esse item é 0 trabalho.
+Novas abas em `/admin`:
+- **Gateways**: lista, adicionar/editar/excluir, marcar padrão, definir prioridade, botão "Copiar URL de postback" (`https://<domain>/api/public/webhook/<tipo>`), botão "Testar credenciais", toggle ativo/inativo.
+- **Logs de Webhook**: lista filtrada por gateway com payload/erro, badge de sucesso.
+- **Pedidos**: já existe; adicionar coluna `gateway_utilizado`, alerta visual para `chargeback_flag`, status de rastreio editável, campo NF-e (já existe `invoice_url`).
+- **Integrações**: campos para Pixel ID, CAPI token, UTMify key, link do grupo WhatsApp, suporte.
 
-## Aviso de custo
-Isso é grande. Vou executar Fase 1 já neste turno e parar para você testar. Se aprovar, respondo "seguir" e faço Fase 2, depois Fase 3. Se quiser mudar prioridades, me diz agora.
+Autenticação do painel: manter a senha atual (`ADMIN_PANEL_PASSWORD`) — todas as server fns novas validam essa senha antes de tocar em `gateways`/`webhook_logs`.
+
+### Fase 4 — Polimento
+
+- Alertas no admin para chargeback/pedido inexistente no webhook.
+- Copiar-e-cola Pix com feedback visual.
+- Documentação inline dos endpoints.
+
+### Detalhes técnicos
+
+- Adapters ficam em `src/lib/gateways/adapters/*.ts` implementando a mesma interface — para adicionar Pagar.me/MercadoPago basta criar novo arquivo e registrar no `getAdapter(tipo)`.
+- Segredos dos gateways ficam **no banco**, criptografados na leitura pública (server-only via `supabaseAdmin` dentro do handler). Nunca vão pro cliente.
+- Facebook CAPI Access Token e UTMify Key: como são **um por projeto**, ficam em `admin_settings` (server-only) — não precisa criar secret separado no ambiente.
+- Webhook responde sempre 200 mesmo em erro, mas grava `sucesso=false` + `erro` em `webhook_logs`.
+- `pg_cron` + `pg_net` chamando rota interna resolve a regra de horário comercial sem worker externo.
+
+### Perguntas antes de começar
+
+1. **Confirma que a Fase 1 (migration grande + webhook + adapter IronPay + CAPI/UTMify no servidor) é o próximo passo agora**, e faço Fase 2/3/4 depois em mensagens separadas?
+2. **IronPay**: você tem a documentação da API deles (URL de criação de cobrança Pix/cartão, formato da assinatura do webhook)? Sem isso, o adapter fica com placeholders e o webhook não valida assinatura real — só o mapeamento de status funciona. Se você colar o link da doc ou os endpoints, eu já implemento o `verifySignature` + `createPixCharge` corretos.
+3. **Migração dos dados atuais**: hoje o admin salva tudo em `localStorage`. Ok migrar as configurações (pixel, textos, whatsapp, pix) para `admin_settings` no banco nessa fase, ou prefere manter em localStorage por mais um tempo?
