@@ -3,6 +3,8 @@ import { Check, Minus, Plus, Shield, Truck, Award } from "lucide-react";
 import { cart, useCart } from "@/lib/cart-store";
 import { formatBRL, variants } from "@/lib/product";
 import { useAdmin } from "@/lib/admin-store";
+import { trackAddToCart } from "@/lib/tracking/metaPixel";
+
 
 export function BuyPanel() {
   const state = useCart();
