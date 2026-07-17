@@ -1,9 +1,12 @@
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, MessageCircle, Users } from "lucide-react";
 import { media } from "@/lib/product";
 import { useAdmin } from "@/lib/admin-store";
 
 export function Hero() {
-  const { hero } = useAdmin();
+  const { hero, support } = useAdmin();
+  const phone = (support.whatsappPhone || "").replace(/\D/g, "");
+  const waLink = phone ? `https://wa.me/${phone}` : "";
+  const groupLink = support.whatsappGroupLink || "";
   return (
     <section className="relative overflow-hidden">
       <div className="absolute inset-0 -z-10">
@@ -42,7 +45,33 @@ export function Hero() {
               Conhecer benefícios
             </a>
           </div>
+
+          {(waLink || groupLink) && (
+            <div className="mt-4 flex flex-wrap gap-3">
+              {waLink && (
+                <a
+                  href={waLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-[#25D366]/30 hover:brightness-110"
+                >
+                  <MessageCircle className="h-4 w-4" /> Atendimento via WhatsApp
+                </a>
+              )}
+              {groupLink && (
+                <a
+                  href={groupLink}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-5 py-3 text-sm font-bold text-[#128C7E] hover:bg-[#25D366]/15"
+                >
+                  <Users className="h-4 w-4" /> Grupo de promoções
+                </a>
+              )}
+            </div>
+          )}
         </div>
+
 
         <div className="relative">
           <div className="absolute inset-0 -z-10 rounded-[2rem] bg-gradient-to-tr from-primary/20 to-transparent blur-2xl" />
