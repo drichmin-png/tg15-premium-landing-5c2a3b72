@@ -145,6 +145,8 @@ function load(): AdminState {
       },
       tracking: { ...DEFAULTS.tracking, ...(parsed.tracking ?? {}) },
       gateway: { ...DEFAULTS.gateway, ...(parsed.gateway ?? {}) },
+      pix: { ...DEFAULTS.pix, ...(parsed.pix ?? {}) },
+      support: { ...DEFAULTS.support, ...(parsed.support ?? {}) },
       blocks: mergeBlocks(parsed.blocks),
       authed: false, // never auto-authenticate
     };
