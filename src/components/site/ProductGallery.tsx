@@ -1,17 +1,13 @@
 import { useState } from "react";
-import { Play, ZoomIn } from "lucide-react";
+import { ZoomIn } from "lucide-react";
 import { media } from "@/lib/product";
 
-type Slide =
-  | { kind: "image"; src: string; alt: string }
-  | { kind: "video"; src: string; poster?: string; label: string };
+type Slide = { kind: "image"; src: string; alt: string };
 
 const slides: Slide[] = [
   { kind: "image", src: media.caixa, alt: "Caixa T.G.15 com 4 ampolas" },
   { kind: "image", src: media.ampola, alt: "Ampola T.G.15 Tirzepatida 15mg/0,5mL" },
   { kind: "image", src: media.hero, alt: "Detalhes do produto T.G.15" },
-  { kind: "video", src: media.videos.apresentacao, label: "Apresentação do produto" },
-  { kind: "video", src: media.videos.comoUsar, label: "Como usar" },
 ];
 
 export function ProductGallery() {
@@ -32,57 +28,38 @@ export function ProductGallery() {
             }`}
             aria-label={`Ver mídia ${i + 1}`}
           >
-            {s.kind === "image" ? (
-              <img src={s.src} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <div className="relative h-full w-full bg-ink">
-                <video src={s.src} className="h-full w-full object-cover opacity-70" muted preload="metadata" />
-                <Play className="absolute inset-0 m-auto h-6 w-6 text-white" fill="currentColor" />
-              </div>
-            )}
+            <img src={s.src} alt="" className="h-full w-full object-contain bg-white p-1" />
           </button>
         ))}
       </div>
 
-      <div className="relative flex-1 aspect-square overflow-hidden rounded-3xl bg-gradient-to-br from-sand to-white card-premium">
-        {current.kind === "image" ? (
-          <>
-            <button
-              type="button"
-              onClick={() => setZoom((z) => !z)}
-              onMouseMove={(e) => {
-                if (!zoom) return;
-                const r = e.currentTarget.getBoundingClientRect();
-                const x = ((e.clientX - r.left) / r.width) * 100;
-                const y = ((e.clientY - r.top) / r.height) * 100;
-                setOrigin(`${x}% ${y}%`);
-              }}
-              className="group absolute inset-0"
-              aria-label="Ampliar imagem"
-            >
-              <img
-                src={current.src}
-                alt={current.alt}
-                className="h-full w-full object-contain p-8 transition-transform duration-500"
-                style={{
-                  transform: zoom ? "scale(2)" : "scale(1)",
-                  transformOrigin: origin,
-                }}
-              />
-              <span className="absolute bottom-4 right-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-3 py-1.5 text-xs font-medium text-ink shadow">
-                <ZoomIn className="h-3.5 w-3.5" /> {zoom ? "Reduzir" : "Zoom"}
-              </span>
-            </button>
-          </>
-        ) : (
-          <video
-            key={current.src}
+      <div className="relative w-full flex-1 aspect-square overflow-hidden rounded-3xl bg-gradient-to-br from-sand to-white card-premium">
+        <button
+          type="button"
+          onClick={() => setZoom((z) => !z)}
+          onMouseMove={(e) => {
+            if (!zoom) return;
+            const r = e.currentTarget.getBoundingClientRect();
+            const x = ((e.clientX - r.left) / r.width) * 100;
+            const y = ((e.clientY - r.top) / r.height) * 100;
+            setOrigin(`${x}% ${y}%`);
+          }}
+          className="group absolute inset-0"
+          aria-label="Ampliar imagem"
+        >
+          <img
             src={current.src}
-            controls
-            playsInline
-            className="h-full w-full object-cover bg-ink"
+            alt={current.alt}
+            className="h-full w-full object-contain p-3 sm:p-6 transition-transform duration-500"
+            style={{
+              transform: zoom ? "scale(2)" : "scale(1)",
+              transformOrigin: origin,
+            }}
           />
-        )}
+          <span className="absolute bottom-4 right-4 inline-flex items-center gap-1.5 rounded-full bg-white/90 backdrop-blur px-3 py-1.5 text-xs font-medium text-ink shadow">
+            <ZoomIn className="h-3.5 w-3.5" /> {zoom ? "Reduzir" : "Zoom"}
+          </span>
+        </button>
       </div>
     </div>
   );
