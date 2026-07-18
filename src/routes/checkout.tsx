@@ -158,13 +158,12 @@ function Checkout() {
           </aside>
 
           {/* Form */}
-          <div className="card-premium p-6 md:p-8 lg:order-1">
+          <div className={step === 5 ? "card-premium p-6 md:p-8 lg:order-1" : "lg:order-1 py-2"}>
             {step === 1 && <StepCustomer state={state} onNext={next} />}
             {step === 2 && <StepAddress state={state} onNext={next} />}
             {step === 3 && <StepShipping state={state} onNext={next} />}
             {step === 4 && <StepPayment state={state} onNext={next} total={total} />}
             {step === 5 && <StepConfirm orderId={orderId} total={total} state={state} />}
-
           </div>
         </div>
       </div>
