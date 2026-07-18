@@ -333,6 +333,16 @@ export const admin = {
     notify();
     return true;
   },
+  changePasswordRemote: async (next: string) => {
+    if (!authPassword) throw new Error("Faça login novamente para alterar a senha");
+    const { changeAdminPassword } = await import("@/lib/site-config.functions");
+    await changeAdminPassword({ data: { currentPassword: authPassword, nextPassword: next } });
+    authPassword = next;
+    state = { ...state, password: next };
+    persist(state);
+    notify();
+    return true;
+  },
   reset: () => {
     state = { ...DEFAULTS };
     persist(state);
