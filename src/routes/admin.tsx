@@ -100,7 +100,7 @@ function LoginScreen() {
   );
 }
 
-type Tab = "pedidos" | "produtos" | "blocos" | "hero" | "tracking" | "gateway" | "pix" | "suporte" | "seguranca";
+type Tab = "pedidos" | "relatorio" | "produtos" | "blocos" | "hero" | "tracking" | "gateway" | "pix" | "suporte" | "seguranca";
 
 function Dashboard() {
   const [tab, setTab] = useState<Tab>("pedidos");
@@ -108,6 +108,7 @@ function Dashboard() {
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "pedidos", label: "Pedidos" },
+    { id: "relatorio", label: "Relatório & IA" },
     { id: "produtos", label: "Produtos e Preços" },
     { id: "hero", label: "Hero / Textos" },
     { id: "blocos", label: "Blocos da Página" },
