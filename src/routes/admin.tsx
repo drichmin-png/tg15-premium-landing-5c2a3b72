@@ -4,6 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowDown,
   ArrowUp,
+  Check,
+  Copy,
+  ExternalLink,
   Eye,
   EyeOff,
   LogOut,
@@ -11,8 +14,10 @@ import {
   RefreshCw,
   RotateCcw,
   Save,
+  Share2,
   ShieldCheck,
 } from "lucide-react";
+
 import { admin, useAdmin, type BlockId } from "@/lib/admin-store";
 import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
 import {
@@ -157,7 +162,8 @@ function Dashboard() {
           ))}
         </nav>
 
-        <main className="min-w-0">
+        <main className="min-w-0 space-y-6">
+          <ShareSiteLink />
           {tab === "pedidos" && <OrdersPanel />}
           {tab === "produtos" && <ProductsPanel s={s} />}
           {tab === "hero" && <HeroPanel s={s} />}
@@ -168,12 +174,82 @@ function Dashboard() {
           {tab === "suporte" && <SupportPanel s={s} />}
           {tab === "seguranca" && <SecurityPanel />}
         </main>
+
       </div>
     </div>
   );
 }
 
+function ShareSiteLink() {
+  const [url, setUrl] = useState("");
+  const [copied, setCopied] = useState(false);
+  useEffect(() => {
+    if (typeof window !== "undefined") setUrl(window.location.origin);
+  }, []);
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(url);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+    } catch {
+      /* ignore */
+    }
+  };
+  const waMsg = encodeURIComponent(
+    `Confira o T.G.15 — Tirzepatida 15mg/0,5mL 💉\nCompre pelo link oficial: ${url}`
+  );
+  return (
+    <section className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-orange-50 p-5 shadow-sm">
+      <div className="flex items-start gap-3">
+        <div className="rounded-full bg-primary/10 p-2 text-primary">
+          <Share2 className="h-4 w-4" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <h2 className="text-sm font-bold text-ink">Link oficial do site</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Compartilhe este link com clientes — sempre reflete as últimas alterações salvas no painel.
+          </p>
+          <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+            <input
+              readOnly
+              value={url}
+              onFocus={(e) => e.currentTarget.select()}
+              className="min-w-0 flex-1 rounded-lg border border-border bg-white px-3 py-2 font-mono text-xs text-ink"
+            />
+            <div className="flex gap-2">
+              <button
+                onClick={copy}
+                className="inline-flex items-center gap-1.5 rounded-lg bg-ink px-3 py-2 text-xs font-bold text-white transition hover:opacity-90"
+              >
+                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                {copied ? "Copiado!" : "Copiar"}
+              </button>
+              <a
+                href={`https://wa.me/?text=${waMsg}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3 py-2 text-xs font-bold text-white transition hover:bg-emerald-700"
+              >
+                <Share2 className="h-3.5 w-3.5" /> WhatsApp
+              </a>
+              <a
+                href={url || "#"}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-2 text-xs font-bold text-ink transition hover:bg-sand"
+              >
+                <ExternalLink className="h-3.5 w-3.5" /> Abrir
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function SaveButton() {
+
   const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
   const [error, setError] = useState<string>("");
   return (
