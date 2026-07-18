@@ -8,27 +8,26 @@ import nicolle from "@/assets/nicolle-caroline.png.asset.json";
 
 type VideoCardProps = {
   src: string;
+  poster: string;
   label: string;
   orientation?: "portrait" | "landscape";
   fit?: "cover" | "contain";
 };
 
-function VideoCard({ src, label, orientation = "landscape", fit = "cover" }: VideoCardProps) {
+function VideoCard({ src, poster, label, orientation = "landscape", fit = "cover" }: VideoCardProps) {
   const [playing, setPlaying] = useState(false);
   const aspect = orientation === "portrait" ? "aspect-[9/16]" : "aspect-video";
   const objectFit = fit === "contain" ? "object-contain" : "object-cover";
   return (
     <div className={`card-premium relative overflow-hidden bg-ink ${aspect}`}>
       {playing ? (
-        <video src={src} controls autoPlay playsInline className={`h-full w-full ${objectFit}`} />
+        <video src={src} poster={poster} controls autoPlay playsInline className={`h-full w-full ${objectFit}`} />
       ) : (
         <button onClick={() => setPlaying(true)} className="group relative h-full w-full">
-          <video
-            src={src}
-            muted
-            playsInline
-            preload="metadata"
-            className={`h-full w-full ${objectFit} opacity-85 transition-opacity group-hover:opacity-100`}
+          <img
+            src={poster}
+            alt={label}
+            className={`h-full w-full ${objectFit} opacity-90 transition-opacity group-hover:opacity-100`}
           />
           <div className="absolute inset-0 grid place-items-center bg-gradient-to-t from-ink/60 via-ink/5 to-transparent">
             <span className="grid h-14 w-14 place-items-center rounded-full gradient-brand text-white shadow-2xl shadow-primary/40 transition-transform group-hover:scale-110">
