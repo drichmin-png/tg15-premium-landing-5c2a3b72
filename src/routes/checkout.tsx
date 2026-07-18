@@ -9,6 +9,7 @@ import { cleanCEP, formatCEP, lookupCEP } from "@/lib/validation/cep";
 import { installmentOptions } from "@/lib/payments/installments";
 import { useAdmin } from "@/lib/admin-store";
 import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
+import { saveLocalOrder } from "@/lib/local-db";
 
 
 export const Route = createFileRoute("/checkout")({
@@ -423,6 +424,7 @@ function StepPayment({ state, onNext, total }: { state: ReturnType<typeof useCar
 
 function StepConfirm({ orderId, total, state }: { orderId: string; total: number; state: ReturnType<typeof useCart> }) {
   const admin = useAdmin();
+  const savedOrder = useRef(false);
   useEffect(() => {
     trackPurchase({
       value: total,
@@ -430,6 +432,43 @@ function StepConfirm({ orderId, total, state }: { orderId: string; total: number
       num_items: state.qty,
       order_id: orderId,
     });
+    if (!savedOrder.current) {
+      savedOrder.current = true;
+      const unitPrice = state.variant === "box" ? admin.products.box.price : admin.products.single.price;
+      saveLocalOrder({
+        id: orderId,
+        public_token: orderId,
+        created_at: new Date().toISOString(),
+        paid_at: null,
+        payment_method: state.payment || "pix",
+        payment_status: "pending",
+        card_installments: state.cardInstallments,
+        total_cents: Math.round(total * 100),
+        customer_name: state.customer.fullName,
+        customer_email: state.customer.email,
+        customer_phone: state.customer.phone,
+        customer_cpf: state.customer.cpf,
+        address_zip: state.address.zip,
+        address_street: state.address.street,
+        address_number: state.address.number,
+        address_complement: state.address.complement,
+        address_district: state.address.district,
+        address_city: state.address.city,
+        address_state: state.address.state,
+        delivery_status_override: null,
+        invoice_url: null,
+        notes: state.address.reference,
+        items: [
+          {
+            id: `${orderId}-1`,
+            variant_id: state.variant,
+            variant_name: state.variant === "box" ? admin.products.box.name : admin.products.single.name,
+            quantity: state.qty,
+            unit_price_cents: Math.round(unitPrice * 100),
+          },
+        ],
+      });
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
