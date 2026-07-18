@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronLeft, CreditCard, Lock, QrCode, ShieldCheck, Truck, FileText, MessageCircle } from "lucide-react";
+import { Check, ChevronLeft, Copy, CreditCard, Lock, QrCode, ShieldCheck, Truck, FileText, MessageCircle } from "lucide-react";
 import { cart, useCart } from "@/lib/cart-store";
 import { BOX_SAVINGS, formatBRL, variants } from "@/lib/product";
 import { trackLead, trackInitiateCheckout, trackAddPaymentInfo, trackPurchase } from "@/lib/tracking/metaPixel";
@@ -8,6 +8,7 @@ import { cleanCPF, formatCPF, isValidCPF } from "@/lib/validation/cpf";
 import { cleanCEP, formatCEP, lookupCEP } from "@/lib/validation/cep";
 import { installmentOptions } from "@/lib/payments/installments";
 import { useAdmin } from "@/lib/admin-store";
+import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
 
 
 export const Route = createFileRoute("/checkout")({
