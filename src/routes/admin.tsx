@@ -1142,3 +1142,237 @@ function SupportPanel({ s }: { s: ReturnType<typeof useAdmin> }) {
 }
 
 
+
+// ============================================================
+// Relatório comportamental + IA
+// ============================================================
+function AnalyticsPanel() {
+  const fetchReport = useServerFn(getAnalyticsReport);
+  const fetchSuggestions = useServerFn(getAnalyticsSuggestions);
+  const [report, setReport] = useState<AnalyticsReport | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [days, setDays] = useState(14);
+  const [error, setError] = useState<string | null>(null);
+  const [insights, setInsights] = useState<Array<{ titulo: string; evidencia: string; acao: string }> | null>(null);
+  const [aiLoading, setAiLoading] = useState(false);
+
+  const password =
+    typeof window !== "undefined" ? window.sessionStorage.getItem("admin_password") ?? "" : "";
+
+  const load = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const r = await fetchReport({ data: { password, days } });
+      setReport(r);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Falha ao carregar");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    void load();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [days]);
+
+  const askAI = async () => {
+    if (!report) return;
+    setAiLoading(true);
+    setInsights(null);
+    try {
+      const r = await fetchSuggestions({ data: { password, report } });
+      setInsights(r.insights);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Falha na IA");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-5">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <BarChart3 className="h-5 w-5 text-primary" />
+          <h2 className="text-lg font-bold text-ink">Relatório de comportamento</h2>
+        </div>
+        <div className="flex items-center gap-2">
+          <select
+            value={days}
+            onChange={(e) => setDays(Number(e.target.value))}
+            className="rounded-lg border border-border bg-white px-2 py-1.5 text-xs font-semibold"
+          >
+            <option value={1}>Últimas 24h</option>
+            <option value={7}>7 dias</option>
+            <option value={14}>14 dias</option>
+            <option value={30}>30 dias</option>
+            <option value={90}>90 dias</option>
+          </select>
+          <button
+            onClick={load}
+            disabled={loading}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-white px-3 py-1.5 text-xs font-bold hover:border-primary/40 disabled:opacity-60"
+          >
+            <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} /> Atualizar
+          </button>
+        </div>
+      </div>
+
+      {error && <div className="rounded-lg bg-destructive/10 p-3 text-xs text-destructive">{error}</div>}
+
+      {report && (
+        <>
+          <div className="grid grid-cols-2 gap-3 md:grid-cols-5">
+            <KpiCard label="Sessões" value={report.totals.sessions} />
+            <KpiCard label="Pageviews" value={report.totals.pageViews} />
+            <KpiCard label="Iniciaram checkout" value={report.totals.checkoutStarted} />
+            <KpiCard label="Chegaram no Pix" value={report.totals.checkoutCompleted} />
+            <KpiCard label="Copiaram Pix" value={report.totals.pixCopied} highlight />
+          </div>
+
+          <Card title="Funil de conversão">
+            <div className="space-y-2">
+              {report.funnel.map((f) => (
+                <div key={f.step} className="flex items-center gap-3">
+                  <div className="w-40 shrink-0 text-xs font-semibold text-ink">{f.step}</div>
+                  <div className="relative h-6 flex-1 overflow-hidden rounded-full bg-sand">
+                    <div
+                      className="h-full gradient-brand"
+                      style={{ width: `${Math.max(2, f.pctFromStart)}%` }}
+                    />
+                    <div className="absolute inset-0 flex items-center justify-between px-3 text-[11px] font-bold text-ink">
+                      <span>{f.sessions} sessões</span>
+                      <span>{f.pctFromStart}%</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Card title="Cliques mais frequentes">
+              {report.topClicks.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Sem cliques registrados no período.</p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {report.topClicks.map((c) => (
+                    <li key={c.target} className="flex items-center justify-between gap-2 text-xs">
+                      <span className="truncate font-medium text-ink">{c.target}</span>
+                      <span className="rounded bg-sand px-2 py-0.5 font-bold text-primary">{c.clicks}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+
+            <Card title="Tempo médio por seção">
+              {report.timeOnSections.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Sem dados de tempo por seção.</p>
+              ) : (
+                <ul className="space-y-1.5">
+                  {report.timeOnSections.map((t) => (
+                    <li key={t.section} className="flex items-center justify-between gap-2 text-xs">
+                      <span className="font-medium text-ink">{t.section}</span>
+                      <span className="text-muted-foreground">
+                        {(t.avgMs / 1000).toFixed(1)}s · {t.sessions} sess.
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </Card>
+          </div>
+
+          <Card title="Onde os visitantes abandonam (páginas de saída)">
+            {report.dropoffPaths.length === 0 ? (
+              <p className="text-xs text-muted-foreground">Sem dados suficientes.</p>
+            ) : (
+              <ul className="space-y-1.5">
+                {report.dropoffPaths.map((d) => (
+                  <li key={d.path} className="flex items-center justify-between gap-2 text-xs">
+                    <span className="font-mono text-ink">{d.path}</span>
+                    <span className="text-muted-foreground">
+                      {d.exits} saídas · média {(d.avgMs / 1000).toFixed(1)}s
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </Card>
+
+          <Card title="Perfil de quem copiou o código Pix (converteu)">
+            <div className="grid gap-3 md:grid-cols-3">
+              <KpiCard label="Sessões que copiaram" value={report.copiers.sessions} />
+              <KpiCard label="Seções vistas (média)" value={report.copiers.avgSectionsViewed} />
+              <KpiCard
+                label="Tempo até copiar"
+                value={report.copiers.avgTimeToCopyMs ? `${Math.round(report.copiers.avgTimeToCopyMs / 1000)}s` : "—"}
+              />
+            </div>
+            {report.copiers.topSections.length > 0 && (
+              <div className="mt-3">
+                <div className="mb-1.5 text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
+                  Seções mais visitadas por eles
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {report.copiers.topSections.map((s) => (
+                    <span key={s.section} className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-semibold text-primary-deep">
+                      {s.section} · {s.sessions}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </Card>
+
+          <Card title="Sugestões da IA">
+            <div className="mb-3 flex items-center justify-between gap-2">
+              <p className="text-xs text-muted-foreground">
+                Gera recomendações de melhoria baseadas no comportamento dos visitantes — priorizando o que
+                converte (quem copia o Pix).
+              </p>
+              <button
+                onClick={askAI}
+                disabled={aiLoading}
+                className="inline-flex items-center gap-1.5 rounded-lg gradient-brand px-3 py-1.5 text-xs font-bold text-white shadow-md shadow-primary/20 disabled:opacity-60"
+              >
+                <Sparkles className="h-3.5 w-3.5" /> {aiLoading ? "Analisando..." : "Analisar com IA"}
+              </button>
+            </div>
+            {insights && insights.length > 0 && (
+              <div className="space-y-2">
+                {insights.map((it, i) => (
+                  <div key={i} className="rounded-lg border border-primary/20 bg-primary/5 p-3">
+                    <div className="text-sm font-bold text-ink">{it.titulo}</div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      <span className="font-semibold text-ink">Evidência: </span>
+                      {it.evidencia}
+                    </div>
+                    <div className="mt-1 text-xs">
+                      <span className="font-semibold text-primary-deep">Ação: </span>
+                      {it.acao}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </Card>
+        </>
+      )}
+    </div>
+  );
+}
+
+function KpiCard({ label, value, highlight }: { label: string; value: string | number; highlight?: boolean }) {
+  return (
+    <div className={`rounded-xl border p-3 ${highlight ? "border-primary/40 bg-primary/5" : "border-border bg-white"}`}>
+      <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">{label}</div>
+      <div className={`mt-1 text-2xl font-black ${highlight ? "text-primary" : "text-ink"}`} style={{ fontFamily: "Montserrat, sans-serif" }}>
+        {value}
+      </div>
+    </div>
+  );
+}
