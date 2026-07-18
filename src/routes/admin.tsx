@@ -14,6 +14,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { admin, useAdmin, type BlockId } from "@/lib/admin-store";
+import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
 import {
   listOrdersAdmin,
   updateOrderStatusAdmin,
