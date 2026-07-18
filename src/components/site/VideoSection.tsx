@@ -179,11 +179,11 @@ export function VideoSection() {
         </div>
 
         <div className="mt-8 grid gap-4 grid-cols-2 lg:gap-8 lg:grid-cols-4">
-          {media.videos.antesDepois.map((src, i) => {
+          {media.videos.antesDepois.map((video, i) => {
             const t = testimonials[i];
             return (
-              <article key={src} className="card-premium overflow-hidden flex flex-col">
-                <VideoCard src={src} label={`Relato ${i + 1}`} orientation="portrait" fit="cover" />
+              <article key={video.src} className="card-premium overflow-hidden flex flex-col">
+                <VideoCard src={video.src} poster={video.poster} label={`Relato ${i + 1}`} orientation="portrait" fit="cover" />
                 <div className="p-5">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="heading-display text-xl text-ink">{t.name}</h3>
