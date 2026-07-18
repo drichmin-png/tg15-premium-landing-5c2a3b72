@@ -184,6 +184,9 @@ function persist(s: AdminState) {
 
 let state: AdminState = DEFAULTS;
 let hydrated = false;
+let remoteHydrated = false;
+let remoteHydrating: Promise<void> | null = null;
+let authPassword: string | null = null; // guardado em memória após login (não persiste)
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((l) => l());
 
@@ -192,6 +195,65 @@ function ensureHydrated() {
     state = load();
     hydrated = true;
   }
+}
+
+// Campos que nunca vão para o servidor compartilhado
+const REMOTE_EXCLUDE: (keyof AdminState)[] = ["authed", "password"];
+
+function toRemotePayload(s: AdminState): Record<string, unknown> {
+  const clone: Record<string, unknown> = { ...s };
+  for (const k of REMOTE_EXCLUDE) delete clone[k as string];
+  // apagar quaisquer chaves sensíveis dentro do gateway
+  const gw = clone.gateway as AdminState["gateway"] | undefined;
+  if (gw) clone.gateway = { ...gw, secretKeyPlaceholder: "" };
+  return clone;
+}
+
+function mergeRemote(remote: Partial<AdminState>): AdminState {
+  const merged: AdminState = {
+    ...DEFAULTS,
+    ...state,
+    ...remote,
+    hero: { ...DEFAULTS.hero, ...state.hero, ...(remote.hero ?? {}) },
+    products: {
+      single: { ...DEFAULTS.products.single, ...state.products.single, ...(remote.products?.single ?? {}) },
+      box: { ...DEFAULTS.products.box, ...state.products.box, ...(remote.products?.box ?? {}) },
+    },
+    tracking: { ...DEFAULTS.tracking, ...state.tracking, ...(remote.tracking ?? {}) },
+    gateway: { ...DEFAULTS.gateway, ...state.gateway, ...(remote.gateway ?? {}) },
+    pix: { ...DEFAULTS.pix, ...state.pix, ...(remote.pix ?? {}) },
+    support: { ...DEFAULTS.support, ...state.support, ...(remote.support ?? {}) },
+    blocks: mergeBlocks(remote.blocks ?? state.blocks),
+    // preservar sempre localmente:
+    authed: state.authed,
+    password: state.password,
+  };
+  return merged;
+}
+
+async function hydrateRemote() {
+  if (typeof window === "undefined") return;
+  if (remoteHydrated) return;
+  if (remoteHydrating) return remoteHydrating;
+  remoteHydrating = (async () => {
+    try {
+      const { getSiteConfig } = await import("@/lib/site-config.functions");
+      const res = await getSiteConfig();
+      const parsed = JSON.parse(res.data) as Partial<AdminState>;
+      if (parsed && typeof parsed === "object" && Object.keys(parsed).length > 0) {
+        ensureHydrated();
+        state = mergeRemote(parsed);
+        persist(state);
+        notify();
+      }
+      remoteHydrated = true;
+    } catch (err) {
+      console.warn("[admin] falha ao carregar configuração remota", err);
+    } finally {
+      remoteHydrating = null;
+    }
+  })();
+  return remoteHydrating;
 }
 
 export const admin = {
@@ -242,13 +304,25 @@ export const admin = {
   login: (password: string) => {
     ensureHydrated();
     if (password === state.password) {
+      authPassword = password;
       state = { ...state, authed: true };
       notify();
       return true;
     }
     return false;
   },
+  loginRemote: async (password: string) => {
+    ensureHydrated();
+    const { verifyAdminPassword } = await import("@/lib/site-config.functions");
+    await verifyAdminPassword({ data: { password } });
+    authPassword = password;
+    state = { ...state, authed: true, password };
+    persist(state);
+    notify();
+    return true;
+  },
   logout: () => {
+    authPassword = null;
     state = { ...state, authed: false };
     notify();
   },
@@ -263,6 +337,17 @@ export const admin = {
     state = { ...DEFAULTS };
     persist(state);
     notify();
+  },
+  hydrateRemote,
+  saveRemote: async () => {
+    if (!authPassword) {
+      throw new Error("Faça login novamente para salvar no servidor");
+    }
+    const { saveSiteConfig } = await import("@/lib/site-config.functions");
+    const payload = toRemotePayload(state);
+    await saveSiteConfig({
+      data: { password: authPassword, data: JSON.stringify(payload) },
+    });
   },
   subscribe: (l: () => void) => {
     listeners.add(l);
