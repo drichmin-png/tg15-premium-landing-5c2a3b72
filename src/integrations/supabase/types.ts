@@ -420,6 +420,11 @@ export type Database = {
         }
         Returns: boolean
       }
+      set_admin_password: {
+        Args: { current_pwd: string; new_pwd: string }
+        Returns: boolean
+      }
+      verify_admin_password: { Args: { pwd: string }; Returns: boolean }
     }
     Enums: {
       app_role: "admin" | "user"
