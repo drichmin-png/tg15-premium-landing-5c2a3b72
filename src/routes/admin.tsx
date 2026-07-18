@@ -921,8 +921,72 @@ function PixPanel({ s }: { s: ReturnType<typeof useAdmin> }) {
           <div className="mt-4 rounded-lg bg-primary/5 p-3 text-xs text-primary-deep">
             O QR Code é gerado no padrão Pix do Banco Central (BR Code EMV). Funciona em qualquer app bancário.
           </div>
+          <PixPreview s={s} />
         </Card>
       )}
+    </div>
+  );
+}
+
+function PixPreview({ s }: { s: ReturnType<typeof useAdmin> }) {
+  const key = s.pix.key.trim();
+  if (!key) {
+    return (
+      <div className="mt-4 rounded-lg border border-dashed border-border p-4 text-xs text-muted-foreground">
+        Preencha a chave Pix acima para visualizar o QR Code de teste.
+      </div>
+    );
+  }
+  let payload = "";
+  let error: string | null = null;
+  try {
+    payload = buildPixPayload({
+      key,
+      amount: 1.0,
+      merchantName: s.pix.merchantName || "RECEBEDOR",
+      merchantCity: s.pix.merchantCity || "SAO PAULO",
+      txid: "TESTE",
+    });
+  } catch (e) {
+    error = e instanceof Error ? e.message : "Erro ao gerar payload";
+  }
+  if (error) {
+    return (
+      <div className="mt-4 rounded-lg border border-destructive/40 bg-destructive/5 p-4 text-xs text-destructive">
+        {error}
+      </div>
+    );
+  }
+  return (
+    <div className="mt-6 grid gap-4 md:grid-cols-[220px_1fr] items-start rounded-xl border border-border p-4 bg-muted/20">
+      <img
+        src={pixQrImageUrl(payload, 220)}
+        alt="QR Code Pix (preview R$ 1,00)"
+        className="w-[220px] h-[220px] rounded-lg bg-white p-2"
+      />
+      <div className="min-w-0">
+        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+          Preview de teste (R$ 1,00)
+        </div>
+        <div className="mt-2 text-xs text-muted-foreground">
+          Este é apenas um teste visual. Na tela do cliente, o valor será o total do pedido.
+        </div>
+        <div className="mt-3">
+          <div className="text-xs font-semibold text-ink mb-1">Código copia-e-cola</div>
+          <textarea
+            readOnly
+            value={payload}
+            className="w-full h-24 text-[11px] font-mono rounded-lg border border-border bg-background p-2 outline-none"
+          />
+          <button
+            type="button"
+            onClick={() => navigator.clipboard.writeText(payload)}
+            className="mt-2 rounded-lg border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"
+          >
+            Copiar código
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
