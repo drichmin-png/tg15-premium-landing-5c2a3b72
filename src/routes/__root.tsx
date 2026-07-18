@@ -132,6 +132,8 @@ function RootComponent() {
   useEffect(() => {
     // Inicia rastreamento comportamental
     import("@/lib/analytics/tracker").then(({ trackPageView }) => trackPageView());
+    // Sincroniza configuração salva no painel admin em todos os aparelhos
+    import("@/lib/admin-store").then(({ admin }) => admin.hydrateRemote());
   }, []);
 
   return (
