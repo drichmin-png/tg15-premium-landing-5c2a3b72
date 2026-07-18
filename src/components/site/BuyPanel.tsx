@@ -157,16 +157,29 @@ export function BuyPanel() {
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-card p-5">
-        <div className="flex items-baseline justify-between">
-          <div className="text-sm text-muted-foreground">Total</div>
-          <div className="heading-display text-3xl text-ink">{formatBRL(total)}</div>
-        </div>
-        {savings > 0 && (
-          <div className="mt-1 text-right text-xs font-medium text-primary-deep">
-            Economia total {formatBRL(savings)}
+      <div className="card-premium overflow-hidden p-0">
+        <div className="relative bg-gradient-to-br from-primary/[0.06] to-transparent p-5">
+          <div className="flex items-end justify-between gap-4">
+            <div>
+              <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                Total do pedido
+              </div>
+              <div className="font-price mt-1 text-[2.6rem] leading-none text-ink">
+                {formatBRL(total)}
+              </div>
+            </div>
+            {savings > 0 && (
+              <div className="flex flex-col items-end">
+                <span className="rounded-full bg-gradient-to-r from-emerald-500 to-emerald-600 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-sm">
+                  Economia {formatBRL(savings)}
+                </span>
+                <span className="mt-1 text-[10px] text-muted-foreground">
+                  {state.qty > 1 ? `${state.qty} caixas` : "1 caixa"}
+                </span>
+              </div>
+            )}
           </div>
-        )}
+        </div>
         <button
           onClick={() => {
             trackAddToCart({
