@@ -1,11 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 
-function requirePassword(password: string) {
-  const expected = process.env.ADMIN_PANEL_PASSWORD;
-  if (!expected) throw new Error("Senha administrativa não configurada no servidor");
-  if (password !== expected) throw new Error("Senha incorreta");
-}
-
 export interface AnalyticsReport {
   windowDays: number;
   totals: {
@@ -31,7 +25,8 @@ export interface AnalyticsReport {
 export const getAnalyticsReport = createServerFn({ method: "POST" })
   .inputValidator((input: { password: string; days?: number }) => input)
   .handler(async ({ data }): Promise<AnalyticsReport> => {
-    requirePassword(data.password);
+    const { verifyAdminPasswordValue } = await import("@/lib/admin-auth.server");
+    await verifyAdminPasswordValue(data.password);
     const days = Math.min(Math.max(data.days ?? 14, 1), 90);
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString();
 
@@ -193,7 +188,8 @@ export const getAnalyticsReport = createServerFn({ method: "POST" })
 export const getAnalyticsSuggestions = createServerFn({ method: "POST" })
   .inputValidator((input: { password: string; report: AnalyticsReport }) => input)
   .handler(async ({ data }) => {
-    requirePassword(data.password);
+    const { verifyAdminPasswordValue } = await import("@/lib/admin-auth.server");
+    await verifyAdminPasswordValue(data.password);
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("LOVABLE_API_KEY não configurada");
 

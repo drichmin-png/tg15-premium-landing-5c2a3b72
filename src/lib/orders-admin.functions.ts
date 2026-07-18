@@ -35,10 +35,8 @@ export type AdminOrder = {
 export const listOrdersAdmin = createServerFn({ method: "POST" })
   .inputValidator((input: { password: string }) => input)
   .handler(async ({ data }) => {
-    const expected = process.env.ADMIN_PANEL_PASSWORD;
-    if (!expected || data.password !== expected) {
-      throw new Error("Senha inválida");
-    }
+    const { verifyAdminPasswordValue } = await import("@/lib/admin-auth.server");
+    await verifyAdminPasswordValue(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: orders, error } = await supabaseAdmin
       .from("orders")
@@ -83,10 +81,8 @@ export const updateOrderStatusAdmin = createServerFn({ method: "POST" })
     }) => input,
   )
   .handler(async ({ data }) => {
-    const expected = process.env.ADMIN_PANEL_PASSWORD;
-    if (!expected || data.password !== expected) {
-      throw new Error("Senha inválida");
-    }
+    const { verifyAdminPasswordValue } = await import("@/lib/admin-auth.server");
+    await verifyAdminPasswordValue(data.password);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const patch: {
       payment_status?: string;

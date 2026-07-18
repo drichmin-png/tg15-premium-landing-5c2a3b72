@@ -603,10 +603,11 @@ function SecurityPanel() {
   const [pwd, setPwd] = useState("");
   const [pwd2, setPwd2] = useState("");
   const [msg, setMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [saving, setSaving] = useState(false);
 
   return (
     <div className="grid gap-6">
-      <Card title="Alterar senha" description="A senha protege o acesso ao painel neste dispositivo.">
+      <Card title="Alterar senha" description="A senha protege o acesso ao painel em todos os dispositivos.">
         <div className="grid gap-4 max-w-md">
           <Field label="Nova senha (mín. 4 caracteres)" type="password" value={pwd} onChange={setPwd} />
           <Field label="Confirmar" type="password" value={pwd2} onChange={setPwd2} />
@@ -616,17 +617,27 @@ function SecurityPanel() {
             </div>
           )}
           <button
-            onClick={() => {
+            disabled={saving}
+            onClick={async () => {
               if (pwd !== pwd2) return setMsg({ type: "err", text: "As senhas não coincidem." });
-              const ok = admin.changePassword(pwd);
-              if (!ok) return setMsg({ type: "err", text: "Senha muito curta." });
-              setMsg({ type: "ok", text: "Senha atualizada com sucesso." });
-              setPwd("");
-              setPwd2("");
+              if (!pwd || pwd.length < 4) return setMsg({ type: "err", text: "Senha muito curta." });
+              setSaving(true);
+              setMsg(null);
+              try {
+                await admin.changePasswordRemote(pwd);
+                setMsg({ type: "ok", text: "Senha atualizada com sucesso em produção." });
+                setPwd("");
+                setPwd2("");
+              } catch (err) {
+                const text = err instanceof Error ? err.message : "Não foi possível alterar a senha.";
+                setMsg({ type: "err", text });
+              } finally {
+                setSaving(false);
+              }
             }}
-            className="inline-flex w-fit items-center gap-2 rounded-full gradient-brand px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-primary/30"
+            className="inline-flex w-fit items-center gap-2 rounded-full gradient-brand px-5 py-2.5 text-sm font-bold text-white shadow-md shadow-primary/30 disabled:opacity-70"
           >
-            <Save className="h-4 w-4" /> Salvar nova senha
+            <Save className="h-4 w-4" /> {saving ? "Salvando..." : "Salvar nova senha"}
           </button>
         </div>
       </Card>

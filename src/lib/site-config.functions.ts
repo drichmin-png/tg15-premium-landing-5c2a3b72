@@ -39,19 +39,25 @@ export const getSiteConfig = createServerFn({ method: "GET" }).handler(async () 
 export const verifyAdminPassword = createServerFn({ method: "POST" })
   .inputValidator((input: { password: string }) => input)
   .handler(async ({ data }) => {
-    const expected = process.env.ADMIN_PANEL_PASSWORD;
-    if (!expected) throw new Error("Senha administrativa não configurada no servidor");
-    if (data.password !== expected) throw new Error("Senha incorreta");
+    const { verifyAdminPasswordValue } = await import("@/lib/admin-auth.server");
+    await verifyAdminPasswordValue(data.password);
+    return { ok: true };
+  });
+
+export const changeAdminPassword = createServerFn({ method: "POST" })
+  .inputValidator((input: { currentPassword: string; nextPassword: string }) => input)
+  .handler(async ({ data }) => {
+    const { setAdminPasswordValue, verifyAdminPasswordValue } = await import("@/lib/admin-auth.server");
+    await verifyAdminPasswordValue(data.currentPassword);
+    await setAdminPasswordValue(data.nextPassword);
     return { ok: true };
   });
 
 export const saveSiteConfig = createServerFn({ method: "POST" })
   .inputValidator((input: { password: string; data: string }) => input)
   .handler(async ({ data }) => {
-    const expected = process.env.ADMIN_PANEL_PASSWORD;
-    if (!expected || data.password !== expected) {
-      throw new Error("Senha incorreta");
-    }
+    const { verifyAdminPasswordValue } = await import("@/lib/admin-auth.server");
+    await verifyAdminPasswordValue(data.password);
     let parsed: unknown;
     try {
       parsed = JSON.parse(data.data);
