@@ -35,13 +35,22 @@ function AdminPage() {
 function LoginScreen() {
   const [pwd, setPwd] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   return (
     <div className="min-h-screen grid place-items-center bg-background px-4">
       <form
-        onSubmit={(e) => {
+        onSubmit={async (e) => {
           e.preventDefault();
-          const ok = admin.login(pwd);
-          if (!ok) setError("Senha incorreta");
+          setError("");
+          setLoading(true);
+          try {
+            await admin.loginRemote(pwd);
+          } catch (err) {
+            const msg = err instanceof Error ? err.message : "Senha incorreta";
+            setError(msg);
+          } finally {
+            setLoading(false);
+          }
         }}
         className="w-full max-w-sm rounded-2xl border border-border bg-card p-8 shadow-xl"
       >
@@ -66,12 +75,13 @@ function LoginScreen() {
         {error && <div className="mt-2 text-xs text-destructive">{error}</div>}
         <button
           type="submit"
-          className="mt-5 w-full rounded-full gradient-brand py-2.5 text-sm font-bold text-white shadow-md shadow-primary/30"
+          disabled={loading}
+          className="mt-5 w-full rounded-full gradient-brand py-2.5 text-sm font-bold text-white shadow-md shadow-primary/30 disabled:opacity-70"
         >
-          Entrar
+          {loading ? "Entrando..." : "Entrar"}
         </button>
         <p className="mt-4 text-[11px] text-muted-foreground">
-          Senha inicial: <code className="rounded bg-sand px-1">admin123</code> — altere após o primeiro acesso.
+          A senha é validada no servidor e sincroniza suas alterações em todos os dispositivos.
         </p>
       </form>
     </div>
@@ -164,21 +174,46 @@ function Dashboard() {
 }
 
 function SaveButton() {
-  const [saved, setSaved] = useState(false);
+  const [status, setStatus] = useState<"idle" | "saving" | "saved" | "error">("idle");
+  const [error, setError] = useState<string>("");
   return (
-    <button
-      onClick={() => {
-        // Estado já persiste em localStorage a cada alteração; este botão confirma visualmente.
-        admin.set({});
-        setSaved(true);
-        setTimeout(() => setSaved(false), 1800);
-      }}
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-white shadow-md transition ${
-        saved ? "bg-emerald-600 shadow-emerald-600/30" : "gradient-brand shadow-primary/30"
-      }`}
-    >
-      <Save className="h-3.5 w-3.5" /> {saved ? "Salvo!" : "Salvar alterações"}
-    </button>
+    <div className="flex flex-col items-end gap-1">
+      <button
+        onClick={async () => {
+          setError("");
+          setStatus("saving");
+          try {
+            await admin.saveRemote();
+            setStatus("saved");
+            setTimeout(() => setStatus("idle"), 2000);
+          } catch (err) {
+            setStatus("error");
+            setError(err instanceof Error ? err.message : "Erro ao salvar");
+            setTimeout(() => setStatus("idle"), 4000);
+          }
+        }}
+        disabled={status === "saving"}
+        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-white shadow-md transition disabled:opacity-70 ${
+          status === "saved"
+            ? "bg-emerald-600 shadow-emerald-600/30"
+            : status === "error"
+              ? "bg-destructive shadow-destructive/30"
+              : "gradient-brand shadow-primary/30"
+        }`}
+      >
+        <Save className="h-3.5 w-3.5" />
+        {status === "saving"
+          ? "Salvando..."
+          : status === "saved"
+            ? "Salvo em todos os dispositivos"
+            : status === "error"
+              ? "Erro — tentar novamente"
+              : "Salvar alterações"}
+      </button>
+      {status === "error" && error && (
+        <span className="text-[10px] text-destructive max-w-[220px] text-right">{error}</span>
+      )}
+    </div>
   );
 }
 
