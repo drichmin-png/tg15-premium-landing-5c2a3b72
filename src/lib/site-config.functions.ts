@@ -46,13 +46,19 @@ export const verifyAdminPassword = createServerFn({ method: "POST" })
   });
 
 export const saveSiteConfig = createServerFn({ method: "POST" })
-  .inputValidator((input: { password: string; data: Record<string, unknown> }) => input)
+  .inputValidator((input: { password: string; data: string }) => input)
   .handler(async ({ data }) => {
     const expected = process.env.ADMIN_PANEL_PASSWORD;
     if (!expected || data.password !== expected) {
       throw new Error("Senha incorreta");
     }
-    const clean = stripSensitive(data.data);
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(data.data);
+    } catch {
+      throw new Error("Payload inválido");
+    }
+    const clean = stripSensitive(parsed);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { error } = await supabaseAdmin
       .from("site_config")
