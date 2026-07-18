@@ -60,7 +60,18 @@ interface TrackParams {
   meta?: Record<string, unknown>;
 }
 
-const queue: Array<Record<string, unknown>> = [];
+interface EventRow {
+  session_id: string;
+  event_type: EventType;
+  target: string | null;
+  path: string;
+  meta: Record<string, unknown>;
+  ms_on_section: number | null;
+  user_agent: string;
+  referrer: string | null;
+}
+
+const queue: EventRow[] = [];
 let flushTimer: ReturnType<typeof setTimeout> | null = null;
 
 function scheduleFlush() {
