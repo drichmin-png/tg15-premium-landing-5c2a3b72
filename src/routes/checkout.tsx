@@ -569,7 +569,9 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
         >
           <MessageCircle className="h-5 w-5" /> {showPix ? "Enviar comprovante no WhatsApp" : "Concluir compra no WhatsApp"}
         </a>
-      )}
+      </div>
+
+
 
       {/* Detalhes do pedido — dados do cliente, entrega, prazo e termos */}
       <div className="mt-8 mx-auto max-w-2xl text-left">
