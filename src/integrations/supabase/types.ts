@@ -74,6 +74,45 @@ export type Database = {
         }
         Relationships: []
       }
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          meta: Json
+          ms_on_section: number | null
+          path: string | null
+          referrer: string | null
+          session_id: string
+          target: string | null
+          user_agent: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          meta?: Json
+          ms_on_section?: number | null
+          path?: string | null
+          referrer?: string | null
+          session_id: string
+          target?: string | null
+          user_agent?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          meta?: Json
+          ms_on_section?: number | null
+          path?: string | null
+          referrer?: string | null
+          session_id?: string
+          target?: string | null
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       gateways: {
         Row: {
           ativo: boolean
