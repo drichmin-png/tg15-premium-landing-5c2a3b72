@@ -105,18 +105,8 @@ function Checkout() {
         </div>
 
         <div className="grid gap-8 lg:grid-cols-[1.4fr_1fr]">
-          {/* Form */}
-          <div className="card-premium p-6 md:p-8">
-            {step === 1 && <StepCustomer state={state} onNext={next} />}
-            {step === 2 && <StepAddress state={state} onNext={next} />}
-            {step === 3 && <StepShipping state={state} onNext={next} />}
-            {step === 4 && <StepPayment state={state} onNext={next} total={total} />}
-            {step === 5 && <StepConfirm orderId={orderId} total={total} state={state} />}
-
-          </div>
-
-          {/* Order summary */}
-          <aside className="lg:sticky lg:top-24 h-fit">
+          {/* Order summary — first in DOM so it sits at the top on mobile */}
+          <aside className="order-first lg:order-2 lg:sticky lg:top-24 h-fit">
             <div className="card-premium overflow-hidden">
               <div className="gradient-brand px-6 py-4 text-white">
                 <div className="eyebrow text-white/80">Resumo do Pedido</div>
@@ -147,7 +137,7 @@ function Checkout() {
 
                 <div className="mt-4 border-t border-border pt-4 flex items-baseline justify-between">
                   <div className="text-sm text-muted-foreground">Total</div>
-                  <div className="heading-display text-2xl text-ink">{formatBRL(total)}</div>
+                  <div className="font-price text-2xl text-ink">{formatBRL(total)}</div>
                 </div>
 
                 <div className="mt-6 grid gap-2 text-[11px] text-muted-foreground">
@@ -158,6 +148,16 @@ function Checkout() {
               </div>
             </div>
           </aside>
+
+          {/* Form */}
+          <div className="card-premium p-6 md:p-8 lg:order-1">
+            {step === 1 && <StepCustomer state={state} onNext={next} />}
+            {step === 2 && <StepAddress state={state} onNext={next} />}
+            {step === 3 && <StepShipping state={state} onNext={next} />}
+            {step === 4 && <StepPayment state={state} onNext={next} total={total} />}
+            {step === 5 && <StepConfirm orderId={orderId} total={total} state={state} />}
+
+          </div>
         </div>
       </div>
     </div>
