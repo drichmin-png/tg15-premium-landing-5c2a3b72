@@ -31,15 +31,18 @@ const steps = [
 function Checkout() {
   const state = useCart();
   const nav = useNavigate();
+  const { products } = useAdmin();
   const [step, setStep] = useState(1);
   const [orderId, setOrderId] = useState("TG-XXXXXX");
   useEffect(() => { setOrderId("TG-" + Math.random().toString(36).slice(2, 8).toUpperCase()); }, []);
 
   const v = variants[state.variant];
-  const subtotal = v.price * state.qty;
+  const unitPrice = state.variant === "box" ? products.box.price : products.single.price;
+  const subtotal = unitPrice * state.qty;
   const shippingCost = state.shipping === "express" ? 39.9 : state.shipping === "standard" ? 19.9 : 0;
   const total = subtotal + shippingCost;
-  const savings = state.variant === "box" ? BOX_SAVINGS * state.qty : 0;
+  const boxSavingsUnit = Math.max(0, products.single.price * 4 - products.box.price);
+  const savings = state.variant === "box" ? boxSavingsUnit * state.qty : 0;
 
   // InitiateCheckout — apenas ao acessar /checkout (uma vez por sessão de página)
   useEffect(() => {
