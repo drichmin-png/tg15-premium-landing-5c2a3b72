@@ -31,7 +31,7 @@ export const getSiteConfig = createServerFn({ method: "GET" }).handler(async () 
     .maybeSingle();
   if (error) throw new Error(error.message);
   return {
-    data: (data?.data ?? {}) as Record<string, unknown>,
+    data: JSON.stringify(data?.data ?? {}),
     updated_at: data?.updated_at ?? null,
   };
 });
