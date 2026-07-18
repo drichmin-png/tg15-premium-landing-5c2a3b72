@@ -34,7 +34,8 @@
   --color-ink: var(--ink);
   --color-sand: var(--sand);
   --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Playfair Display", "Inter", serif;
+  --font-display: "Poppins", ui-sans-serif, system-ui, sans-serif;
+  --font-price: "Montserrat", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
@@ -104,6 +105,13 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   line-height: 1.02;
+}
+
+@utility font-price {
+  font-family: var(--font-price);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  font-variant-numeric: tabular-nums;
 }
 
 @utility eyebrow {
