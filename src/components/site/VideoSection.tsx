@@ -178,26 +178,26 @@ export function VideoSection() {
           </p>
         </div>
 
-        <div className="mt-8 grid gap-4 grid-cols-2 lg:gap-8 lg:grid-cols-4">
+        <div className="mt-8 grid gap-3 grid-cols-2 lg:gap-6 lg:grid-cols-4">
           {media.videos.antesDepois.map((video, i) => {
             const t = testimonials[i];
             return (
               <article key={video.src} className="card-premium overflow-hidden flex flex-col">
                 <VideoCard src={video.src} poster={video.poster} label={`Relato ${i + 1}`} orientation="portrait" fit="cover" />
-                <div className="p-5">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="heading-display text-xl text-ink">{t.name}</h3>
-                    <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+                <div className="p-3 lg:p-4">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h3 className="heading-display text-sm lg:text-lg text-ink">{t.name}</h3>
+                    <span className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground bg-muted rounded-full px-1.5 py-0.5">
                       Caso fictício
                     </span>
                   </div>
-                  <div className="mt-3 flex items-center gap-2 text-xs">
-                    <span className="rounded-full bg-sand px-2.5 py-1 font-semibold text-ink">{t.from}</span>
+                  <div className="mt-2 flex items-center gap-1.5 text-[10px] lg:text-xs">
+                    <span className="rounded-full bg-sand px-2 py-0.5 font-semibold text-ink">{t.from}</span>
                     <span className="text-muted-foreground">→</span>
-                    <span className="rounded-full gradient-brand px-2.5 py-1 font-semibold text-white">{t.to}</span>
+                    <span className="rounded-full gradient-brand px-2 py-0.5 font-semibold text-white">{t.to}</span>
                     <span className="text-muted-foreground">· {t.weeks}</span>
                   </div>
-                  <p className="mt-3 text-sm leading-relaxed text-foreground/80">{t.text}</p>
+                  <p className="mt-2 text-[11px] lg:text-xs leading-snug text-foreground/80 line-clamp-4">{t.text}</p>
                 </div>
               </article>
             );
