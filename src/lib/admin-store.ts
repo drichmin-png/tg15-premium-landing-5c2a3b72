@@ -375,7 +375,7 @@ export const admin = {
       const { supabase } = await import("@/integrations/supabase/client");
       const { error } = await supabase.rpc("save_site_config", {
         pwd: authPassword,
-        payload,
+        payload: payload as never,
       });
       if (error) throw error;
     } catch (e) {
