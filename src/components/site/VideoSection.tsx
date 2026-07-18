@@ -46,28 +46,28 @@ function VideoCard({ src, poster, label, orientation = "landscape", fit = "cover
 const testimonials = [
   {
     name: "Maria Santos",
-    text: "Iniciou o acompanhamento com 110 kg e, após 9 semanas, atingiu 87 kg. Durante o período, utilizou tirzepatida 2,5 mg uma vez por semana, seguindo um plano alimentar orientado e mantendo uma rotina regular de atividades físicas. A evolução foi acompanhada semanalmente, com redução média de peso ao longo do tratamento. Os resultados variam de pessoa para pessoa e este é apenas um exemplo ilustrativo.",
+    text: "Iniciou com 110 kg e atingiu 87 kg em 9 semanas. Usou tirzepatida 2,5 mg semanalmente, dieta orientada e atividade física. Resultado fictício e ilustrativo.",
     from: "110 kg",
     to: "87 kg",
     weeks: "9 semanas",
   },
   {
     name: "Juliana Oliveira",
-    text: "Começou o tratamento com 96 kg e, após 12 semanas, alcançou 81 kg. O protocolo incluiu aplicações semanais conforme orientação médica, alimentação balanceada, hidratação adequada e caminhadas frequentes. Ao longo do acompanhamento, também relatou maior controle do apetite e facilidade para seguir a dieta. Este é um caso fictício criado apenas para fins de demonstração.",
+    text: "Começou com 96 kg e chegou a 81 kg em 12 semanas. Protocolo semanal + alimentação balanceada, hidratação e caminhadas. Caso fictício para demonstração.",
     from: "96 kg",
     to: "81 kg",
     weeks: "12 semanas",
   },
   {
     name: "Patrícia Lima",
-    text: "Iniciou o programa pesando 102 kg e chegou a 84 kg em 14 semanas. Além do tratamento prescrito, manteve acompanhamento nutricional e incorporou exercícios leves à rotina. A paciente relatou melhora na saciedade e maior facilidade para manter hábitos saudáveis. Exemplo fictício; não representa um resultado garantido.",
+    text: "De 102 kg para 84 kg em 14 semanas. Acompanhamento nutricional, exercícios leves e melhora da saciedade. Exemplo fictício; não garante resultado.",
     from: "102 kg",
     to: "84 kg",
     weeks: "14 semanas",
   },
   {
     name: "Fernanda Costa",
-    text: "Começou o tratamento com 89 kg e, após 10 semanas, passou a pesar 76 kg. Durante esse período, seguiu as orientações médicas, realizou aplicações semanais, adotou uma alimentação equilibrada e praticou atividades físicas de forma regular. A evolução ocorreu gradualmente ao longo do acompanhamento. Caso fictício criado apenas para ilustrar a apresentação de resultados.",
+    text: "De 89 kg para 76 kg em 10 semanas. Aplicações semanais, alimentação equilibrada e exercícios regulares. Caso fictício ilustrativo.",
     from: "89 kg",
     to: "76 kg",
     weeks: "10 semanas",
@@ -178,26 +178,26 @@ export function VideoSection() {
           </p>
         </div>
 
-        <div className="mt-8 grid gap-4 grid-cols-2 lg:gap-8 lg:grid-cols-4">
+        <div className="mt-8 grid gap-3 grid-cols-2 lg:gap-6 lg:grid-cols-4">
           {media.videos.antesDepois.map((video, i) => {
             const t = testimonials[i];
             return (
               <article key={video.src} className="card-premium overflow-hidden flex flex-col">
                 <VideoCard src={video.src} poster={video.poster} label={`Relato ${i + 1}`} orientation="portrait" fit="cover" />
-                <div className="p-5">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="heading-display text-xl text-ink">{t.name}</h3>
-                    <span className="text-[10px] uppercase tracking-wider font-semibold text-muted-foreground bg-muted rounded-full px-2 py-0.5">
+                <div className="p-3 lg:p-4">
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <h3 className="heading-display text-sm lg:text-lg text-ink">{t.name}</h3>
+                    <span className="text-[9px] uppercase tracking-wider font-semibold text-muted-foreground bg-muted rounded-full px-1.5 py-0.5">
                       Caso fictício
                     </span>
                   </div>
-                  <div className="mt-3 flex items-center gap-2 text-xs">
-                    <span className="rounded-full bg-sand px-2.5 py-1 font-semibold text-ink">{t.from}</span>
+                  <div className="mt-2 flex items-center gap-1.5 text-[10px] lg:text-xs">
+                    <span className="rounded-full bg-sand px-2 py-0.5 font-semibold text-ink">{t.from}</span>
                     <span className="text-muted-foreground">→</span>
-                    <span className="rounded-full gradient-brand px-2.5 py-1 font-semibold text-white">{t.to}</span>
+                    <span className="rounded-full gradient-brand px-2 py-0.5 font-semibold text-white">{t.to}</span>
                     <span className="text-muted-foreground">· {t.weeks}</span>
                   </div>
-                  <p className="mt-3 text-sm leading-relaxed text-foreground/80">{t.text}</p>
+                  <p className="mt-2 text-[11px] lg:text-xs leading-snug text-foreground/80 line-clamp-4">{t.text}</p>
                 </div>
               </article>
             );

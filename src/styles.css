@@ -168,3 +168,17 @@
   background: linear-gradient(90deg, transparent, rgba(255,255,255,0.35), transparent);
   animation: shine 3.5s ease-in-out infinite;
 }
+
+@utility line-clamp-3 {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@utility line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
