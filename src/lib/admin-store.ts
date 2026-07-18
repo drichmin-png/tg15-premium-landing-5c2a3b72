@@ -339,6 +339,7 @@ export const admin = {
     notify();
   },
   hydrateRemote,
+  getAuthPassword: () => authPassword,
   saveRemote: async () => {
     if (!authPassword) {
       throw new Error("Faça login novamente para salvar no servidor");

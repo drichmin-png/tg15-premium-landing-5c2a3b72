@@ -56,6 +56,13 @@ function Checkout() {
   }, []);
 
 
+  const stepNames = ["identificacao", "endereco", "frete", "pagamento", "confirmacao"] as const;
+  useEffect(() => {
+    import("@/lib/analytics/tracker").then(({ track }) =>
+      track("checkout_step", { target: stepNames[step - 1], meta: { step } })
+    );
+  }, [step]);
+
   const next = () => setStep((s) => Math.min(5, s + 1));
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
@@ -489,6 +496,9 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
       await navigator.clipboard.writeText(pixPayload);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      import("@/lib/analytics/tracker").then(({ track }) =>
+        track("pix_copied", { target: "pix_copy_button", meta: { orderId, total } })
+      );
     } catch {}
   };
 
