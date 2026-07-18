@@ -257,7 +257,7 @@ export function VideoSection() {
       <section className="container-x mt-20">
         <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr] items-center">
           <div className="order-2 lg:order-1">
-            <VideoCard src={media.videos.duvidas} label="Tirando dúvidas" orientation="landscape" fit="contain" />
+            <VideoCard src={media.videos.duvidas.src} poster={media.videos.duvidas.poster} label="Tirando dúvidas" orientation="landscape" fit="contain" />
           </div>
           <div className="order-1 lg:order-2">
             <div className="eyebrow">Explicações</div>
