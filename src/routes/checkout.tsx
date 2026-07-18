@@ -492,6 +492,26 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
     } catch {}
   };
 
+  const maskCPF = (cpf: string) => {
+    const c = (cpf || "").replace(/\D/g, "").padEnd(11, "•");
+    return `${c.slice(0, 3)}.•••.•••-${c.slice(9, 11)}`;
+  };
+  const maskEmail = (email: string) => {
+    if (!email || !email.includes("@")) return email || "—";
+    const [user, domain] = email.split("@");
+    const visible = user.slice(0, 2);
+    return `${visible}${"•".repeat(Math.max(1, user.length - 2))}@${domain}`;
+  };
+  const maskPhone = (phone: string) => {
+    const p = (phone || "").replace(/\D/g, "");
+    if (p.length < 4) return phone || "—";
+    return `(${p.slice(0, 2)}) •••••-${p.slice(-4)}`;
+  };
+  const etaText =
+    state.shipping === "express" ? "1 a 2 dias úteis após a confirmação do pagamento"
+      : state.shipping === "standard" ? "2 a 5 dias úteis após a confirmação do pagamento"
+      : "A combinar após a confirmação do pagamento";
+
   return (
     <div className="text-center py-6">
       <div className="mx-auto grid h-20 w-20 place-items-center rounded-full gradient-brand text-white shadow-2xl shadow-primary/40">
