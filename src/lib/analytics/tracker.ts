@@ -169,10 +169,7 @@ if (typeof window !== "undefined") {
     if (currentPath && pageStart > 0) {
       track("exit", { target: currentPath, msOnSection: Date.now() - pageStart });
     }
-    // Best-effort synchronous flush via sendBeacon
-    if (queue.length > 0 && navigator.sendBeacon) {
-      // Skipped: supabase-js doesn't expose beacon; events remain in memory queue.
-    }
+    // Best-effort flush; sendBeacon is not compatible with supabase-js payload shape.
     void flush();
   });
   document.addEventListener("visibilitychange", () => {
