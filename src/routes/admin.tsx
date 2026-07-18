@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowDown,
   ArrowUp,
@@ -23,15 +22,13 @@ import {
 import { admin, useAdmin, type BlockId } from "@/lib/admin-store";
 import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
 import {
-  listOrdersAdmin,
-  updateOrderStatusAdmin,
   type AdminOrder,
-} from "@/lib/orders-admin.functions";
-import {
-  getAnalyticsReport,
-  getAnalyticsSuggestions,
+  listLocalOrders,
+  updateLocalOrder,
+  getLocalAnalyticsReport,
+  getLocalAnalyticsSuggestions,
   type AnalyticsReport,
-} from "@/lib/analytics/report.functions";
+} from "@/lib/local-db";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -92,9 +89,9 @@ function LoginScreen() {
         >
           {loading ? "Entrando..." : "Entrar"}
         </button>
-        <p className="mt-4 text-[11px] text-muted-foreground">
-          A senha é validada no servidor e sincroniza suas alterações em todos os dispositivos.
-        </p>
+          <p className="mt-4 text-[11px] text-muted-foreground">
+            Acesso local, sem depender de configuração de servidor.
+          </p>
       </form>
     </div>
   );
@@ -290,7 +287,7 @@ function SaveButton() {
         {status === "saving"
           ? "Salvando..."
           : status === "saved"
-            ? "Salvo em todos os dispositivos"
+            ? "Salvo neste aparelho"
             : status === "error"
               ? "Erro — tentar novamente"
               : "Salvar alterações"}
