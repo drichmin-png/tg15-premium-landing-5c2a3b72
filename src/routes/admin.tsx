@@ -4,6 +4,9 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowDown,
   ArrowUp,
+  Check,
+  Copy,
+  ExternalLink,
   Eye,
   EyeOff,
   LogOut,
@@ -11,8 +14,10 @@ import {
   RefreshCw,
   RotateCcw,
   Save,
+  Share2,
   ShieldCheck,
 } from "lucide-react";
+
 import { admin, useAdmin, type BlockId } from "@/lib/admin-store";
 import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
 import {
