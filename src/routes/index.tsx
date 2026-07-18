@@ -12,13 +12,37 @@ import { VideoSection } from "@/components/site/VideoSection";
 import { FAQ } from "@/components/site/FAQ";
 import { useAdmin, type BlockId } from "@/lib/admin-store";
 import { TrackingScripts } from "@/components/site/TrackingScripts";
+import { observeSection, track } from "@/lib/analytics/tracker";
 
 export const Route = createFileRoute("/")({
   component: Index,
 });
 
+function TrackedBlock({ name, children }: { name: string; children: React.ReactNode }) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => observeSection(ref.current, name), [name]);
+  return <div ref={ref} data-section={name}>{children}</div>;
+}
+
 function Index() {
   const s = useAdmin();
+
+  // Global click delegation — capture clicks on links, buttons and CTAs
+  React.useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const el = (e.target as HTMLElement | null)?.closest("a,button,[data-track]") as HTMLElement | null;
+      if (!el) return;
+      const label =
+        el.getAttribute("data-track") ||
+        el.getAttribute("aria-label") ||
+        (el as HTMLAnchorElement).textContent?.trim().slice(0, 60) ||
+        el.tagName.toLowerCase();
+      const href = (el as HTMLAnchorElement).href;
+      track("click", { target: label, meta: href ? { href } : {} });
+    };
+    document.addEventListener("click", onClick, { capture: true });
+    return () => document.removeEventListener("click", onClick, { capture: true });
+  }, []);
 
   const renderers: Record<BlockId, () => React.ReactElement> = {
     hero: () => <Hero />,
@@ -45,7 +69,7 @@ function Index() {
         {s.blocks
           .filter((b) => b.visible)
           .map((b) => (
-            <div key={b.id}>{renderers[b.id]()}</div>
+            <TrackedBlock key={b.id} name={b.id}>{renderers[b.id]()}</TrackedBlock>
           ))}
       </main>
       <Footer />
