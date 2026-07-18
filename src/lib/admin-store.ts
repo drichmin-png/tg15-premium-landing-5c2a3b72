@@ -195,8 +195,53 @@ function ensureHydrated() {
   }
 }
 
+const REMOTE_KEYS: (keyof AdminState)[] = [
+  "hero",
+  "products",
+  "blocks",
+  "tracking",
+  "gateway",
+  "pix",
+  "support",
+];
+
+function applyRemoteData(remote: Record<string, unknown> | null | undefined) {
+  if (!remote || typeof remote !== "object") return;
+  const patch: Partial<AdminState> = {};
+  for (const k of REMOTE_KEYS) {
+    const v = (remote as Record<string, unknown>)[k as string];
+    if (v === undefined || v === null) continue;
+    if (k === "blocks") {
+      patch.blocks = mergeBlocks(v as Block[]);
+    } else {
+      const cur = state[k];
+      if (cur && typeof cur === "object" && !Array.isArray(cur) && typeof v === "object" && !Array.isArray(v)) {
+        (patch as Record<string, unknown>)[k as string] = { ...(cur as object), ...(v as object) };
+      } else {
+        (patch as Record<string, unknown>)[k as string] = v;
+      }
+    }
+  }
+  state = { ...state, ...patch };
+  persist(state);
+  notify();
+}
+
 async function hydrateRemote() {
   ensureHydrated();
+  if (typeof window === "undefined") return;
+  try {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data, error } = await supabase
+      .from("site_config")
+      .select("data")
+      .eq("singleton", true)
+      .maybeSingle();
+    if (error) throw error;
+    applyRemoteData((data?.data ?? null) as Record<string, unknown> | null);
+  } catch (e) {
+    console.warn("[admin] hydrateRemote falhou", e);
+  }
 }
 
 export const admin = {
@@ -257,12 +302,29 @@ export const admin = {
   },
   loginRemote: async (password: string) => {
     ensureHydrated();
-    if (password !== state.password && password !== DEFAULTS.password) throw new Error("Senha incorreta");
-    authPassword = password;
-    state = { ...state, authed: true, password };
-    persist(state);
-    notify();
-    return true;
+    const pwd = password.trim();
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { data, error } = await supabase.rpc("verify_admin_password", { pwd });
+      if (!error && data === true) {
+        authPassword = pwd;
+        state = { ...state, authed: true, password: pwd };
+        persist(state);
+        notify();
+        return true;
+      }
+      if (error) console.warn("[admin] verify_admin_password erro", error);
+    } catch (e) {
+      console.warn("[admin] loginRemote falhou, fallback local", e);
+    }
+    if (pwd === state.password || pwd === DEFAULTS.password) {
+      authPassword = pwd;
+      state = { ...state, authed: true, password: pwd };
+      persist(state);
+      notify();
+      return true;
+    }
+    throw new Error("Senha incorreta");
   },
   logout: () => {
     authPassword = null;
@@ -279,8 +341,19 @@ export const admin = {
   changePasswordRemote: async (next: string) => {
     if (!authPassword) throw new Error("Faça login novamente para alterar a senha");
     if (!next || next.length < 4) throw new Error("Senha muito curta");
-    authPassword = next;
-    state = { ...state, password: next };
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { error } = await supabase.rpc("set_admin_password", {
+        current_pwd: authPassword,
+        new_pwd: next.trim(),
+      });
+      if (error) throw error;
+    } catch (e) {
+      console.warn("[admin] set_admin_password falhou", e);
+      throw e instanceof Error ? e : new Error("Falha ao alterar senha");
+    }
+    authPassword = next.trim();
+    state = { ...state, password: next.trim() };
     persist(state);
     notify();
     return true;
@@ -293,11 +366,22 @@ export const admin = {
   hydrateRemote,
   getAuthPassword: () => authPassword,
   saveRemote: async () => {
-    if (!authPassword) {
-      throw new Error("Faça login novamente para salvar");
-    }
+    if (!authPassword) throw new Error("Faça login novamente para salvar");
     ensureHydrated();
     persist(state);
+    const payload: Record<string, unknown> = {};
+    for (const k of REMOTE_KEYS) payload[k as string] = state[k];
+    try {
+      const { supabase } = await import("@/integrations/supabase/client");
+      const { error } = await supabase.rpc("save_site_config", {
+        pwd: authPassword,
+        payload: payload as never,
+      });
+      if (error) throw error;
+    } catch (e) {
+      console.error("[admin] saveRemote falhou", e);
+      throw e instanceof Error ? e : new Error("Falha ao salvar no servidor");
+    }
     notify();
   },
   subscribe: (l: () => void) => {
