@@ -420,6 +420,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      save_site_config: { Args: { payload: Json; pwd: string }; Returns: Json }
       set_admin_password: {
         Args: { current_pwd: string; new_pwd: string }
         Returns: boolean
