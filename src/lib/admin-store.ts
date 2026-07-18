@@ -313,8 +313,10 @@ export const admin = {
   },
   loginRemote: async (password: string) => {
     ensureHydrated();
-    const { verifyAdminPassword } = await import("@/lib/site-config.functions");
-    await verifyAdminPassword({ data: { password } });
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data, error } = await supabase.rpc("verify_admin_password", { pwd: password });
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error("Senha incorreta");
     authPassword = password;
     state = { ...state, authed: true, password };
     persist(state);
@@ -335,8 +337,13 @@ export const admin = {
   },
   changePasswordRemote: async (next: string) => {
     if (!authPassword) throw new Error("Faça login novamente para alterar a senha");
-    const { changeAdminPassword } = await import("@/lib/site-config.functions");
-    await changeAdminPassword({ data: { currentPassword: authPassword, nextPassword: next } });
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data, error } = await supabase.rpc("set_admin_password", {
+      current_pwd: authPassword,
+      new_pwd: next,
+    });
+    if (error) throw new Error(error.message);
+    if (!data) throw new Error("Não foi possível atualizar a senha");
     authPassword = next;
     state = { ...state, password: next };
     persist(state);
