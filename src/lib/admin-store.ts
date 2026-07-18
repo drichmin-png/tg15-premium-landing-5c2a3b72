@@ -195,8 +195,53 @@ function ensureHydrated() {
   }
 }
 
+const REMOTE_KEYS: (keyof AdminState)[] = [
+  "hero",
+  "products",
+  "blocks",
+  "tracking",
+  "gateway",
+  "pix",
+  "support",
+];
+
+function applyRemoteData(remote: Record<string, unknown> | null | undefined) {
+  if (!remote || typeof remote !== "object") return;
+  const patch: Partial<AdminState> = {};
+  for (const k of REMOTE_KEYS) {
+    const v = (remote as Record<string, unknown>)[k as string];
+    if (v === undefined || v === null) continue;
+    if (k === "blocks") {
+      patch.blocks = mergeBlocks(v as Block[]);
+    } else {
+      const cur = state[k];
+      if (cur && typeof cur === "object" && !Array.isArray(cur) && typeof v === "object" && !Array.isArray(v)) {
+        (patch as Record<string, unknown>)[k as string] = { ...(cur as object), ...(v as object) };
+      } else {
+        (patch as Record<string, unknown>)[k as string] = v;
+      }
+    }
+  }
+  state = { ...state, ...patch };
+  persist(state);
+  notify();
+}
+
 async function hydrateRemote() {
   ensureHydrated();
+  if (typeof window === "undefined") return;
+  try {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { data, error } = await supabase
+      .from("site_config")
+      .select("data")
+      .eq("singleton", true)
+      .maybeSingle();
+    if (error) throw error;
+    applyRemoteData((data?.data ?? null) as Record<string, unknown> | null);
+  } catch (e) {
+    console.warn("[admin] hydrateRemote falhou", e);
+  }
 }
 
 export const admin = {
