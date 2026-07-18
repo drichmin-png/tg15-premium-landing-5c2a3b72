@@ -162,7 +162,8 @@ function Dashboard() {
           ))}
         </nav>
 
-        <main className="min-w-0">
+        <main className="min-w-0 space-y-6">
+          <ShareSiteLink />
           {tab === "pedidos" && <OrdersPanel />}
           {tab === "produtos" && <ProductsPanel s={s} />}
           {tab === "hero" && <HeroPanel s={s} />}
@@ -173,6 +174,7 @@ function Dashboard() {
           {tab === "suporte" && <SupportPanel s={s} />}
           {tab === "seguranca" && <SecurityPanel />}
         </main>
+
       </div>
     </div>
   );
