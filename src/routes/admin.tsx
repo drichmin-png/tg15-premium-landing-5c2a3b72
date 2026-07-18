@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowDown,
   ArrowUp,
@@ -23,15 +22,13 @@ import {
 import { admin, useAdmin, type BlockId } from "@/lib/admin-store";
 import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
 import {
-  listOrdersAdmin,
-  updateOrderStatusAdmin,
   type AdminOrder,
-} from "@/lib/orders-admin.functions";
-import {
-  getAnalyticsReport,
-  getAnalyticsSuggestions,
+  listLocalOrders,
+  updateLocalOrder,
+  getLocalAnalyticsReport,
+  getLocalAnalyticsSuggestions,
   type AnalyticsReport,
-} from "@/lib/analytics/report.functions";
+} from "@/lib/local-db";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
@@ -92,9 +89,9 @@ function LoginScreen() {
         >
           {loading ? "Entrando..." : "Entrar"}
         </button>
-        <p className="mt-4 text-[11px] text-muted-foreground">
-          A senha é validada no servidor e sincroniza suas alterações em todos os dispositivos.
-        </p>
+          <p className="mt-4 text-[11px] text-muted-foreground">
+            Acesso local, sem depender de configuração de servidor.
+          </p>
       </form>
     </div>
   );
@@ -290,7 +287,7 @@ function SaveButton() {
         {status === "saving"
           ? "Salvando..."
           : status === "saved"
-            ? "Salvo em todos os dispositivos"
+            ? "Salvo neste aparelho"
             : status === "error"
               ? "Erro — tentar novamente"
               : "Salvar alterações"}
@@ -698,20 +695,17 @@ const STATUS_BADGE: Record<string, string> = {
 };
 
 function OrdersPanel() {
-  const listOrders = useServerFn(listOrdersAdmin);
-  const updateOrder = useServerFn(updateOrderStatusAdmin);
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "paid" | "cancelled">("all");
-  const password = admin.get().password;
 
   async function reload() {
     setLoading(true);
     setErr(null);
     try {
-      const rows = await listOrders({ data: { password } });
+      const rows = listLocalOrders();
       setOrders(rows);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Erro ao carregar pedidos");
@@ -727,7 +721,7 @@ function OrdersPanel() {
 
   async function setStatus(id: string, payment_status: string) {
     try {
-      await updateOrder({ data: { password, orderId: id, payment_status } });
+      updateLocalOrder(id, { payment_status });
       await reload();
     } catch (e) {
       alert(e instanceof Error ? e.message : "Erro");
@@ -735,7 +729,7 @@ function OrdersPanel() {
   }
   async function setDelivery(id: string, delivery_status_override: string | null) {
     try {
-      await updateOrder({ data: { password, orderId: id, delivery_status_override } });
+      updateLocalOrder(id, { delivery_status_override });
       await reload();
     } catch (e) {
       alert(e instanceof Error ? e.message : "Erro");
@@ -1158,8 +1152,6 @@ function SupportPanel({ s }: { s: ReturnType<typeof useAdmin> }) {
 // Relatório comportamental + IA
 // ============================================================
 function AnalyticsPanel() {
-  const fetchReport = useServerFn(getAnalyticsReport);
-  const fetchSuggestions = useServerFn(getAnalyticsSuggestions);
   const [report, setReport] = useState<AnalyticsReport | null>(null);
   const [loading, setLoading] = useState(false);
   const [days, setDays] = useState(14);
@@ -1167,13 +1159,11 @@ function AnalyticsPanel() {
   const [insights, setInsights] = useState<Array<{ titulo: string; evidencia: string; acao: string }> | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
 
-  const password = admin.getAuthPassword() ?? "";
-
   const load = async () => {
     setLoading(true);
     setError(null);
     try {
-      const r = await fetchReport({ data: { password, days } });
+      const r = getLocalAnalyticsReport(days);
       setReport(r);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha ao carregar");
@@ -1192,8 +1182,7 @@ function AnalyticsPanel() {
     setAiLoading(true);
     setInsights(null);
     try {
-      const r = await fetchSuggestions({ data: { password, report } });
-      setInsights(r.insights);
+      setInsights(getLocalAnalyticsSuggestions(report));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha na IA");
     } finally {

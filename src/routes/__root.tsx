@@ -130,8 +130,6 @@ function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   useEffect(() => {
-    // Sincroniza a configuração do painel admin em todos os dispositivos
-    import("@/lib/admin-store").then(({ admin }) => admin.hydrateRemote?.());
     // Inicia rastreamento comportamental
     import("@/lib/analytics/tracker").then(({ trackPageView }) => trackPageView());
   }, []);
