@@ -84,7 +84,8 @@ async function flush() {
   if (queue.length === 0) return;
   const rows = queue.splice(0, queue.length);
   try {
-    await supabase.from("analytics_events").insert(rows);
+    // Cast: Supabase types treat jsonb as Json (array/scalar/object) — our meta is object-only.
+    await supabase.from("analytics_events").insert(rows as unknown as never);
   } catch {
     /* swallow — analytics must never break the app */
   }
