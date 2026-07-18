@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronLeft, CreditCard, Lock, QrCode, ShieldCheck, Truck, FileText, MessageCircle } from "lucide-react";
+import { Check, ChevronLeft, Copy, CreditCard, Lock, QrCode, ShieldCheck, Truck, FileText, MessageCircle } from "lucide-react";
 import { cart, useCart } from "@/lib/cart-store";
 import { BOX_SAVINGS, formatBRL, variants } from "@/lib/product";
 import { trackLead, trackInitiateCheckout, trackAddPaymentInfo, trackPurchase } from "@/lib/tracking/metaPixel";
@@ -8,6 +8,7 @@ import { cleanCPF, formatCPF, isValidCPF } from "@/lib/validation/cpf";
 import { cleanCEP, formatCEP, lookupCEP } from "@/lib/validation/cep";
 import { installmentOptions } from "@/lib/payments/installments";
 import { useAdmin } from "@/lib/admin-store";
+import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
 
 
 export const Route = createFileRoute("/checkout")({
@@ -464,12 +465,32 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
     : `https://wa.me/?text=${encodeURIComponent(message)}`;
 
   useEffect(() => {
+    if (state.payment === "pix" && admin.pix.key.trim()) return; // deixa o cliente pagar primeiro
     const t = setTimeout(() => {
       window.open(waLink, "_blank", "noopener,noreferrer");
     }, 1200);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const showPix = state.payment === "pix" && admin.pix.key.trim().length > 0;
+  const pixPayload = showPix
+    ? buildPixPayload({
+        key: admin.pix.key,
+        amount: total,
+        merchantName: admin.pix.merchantName || "T.G.15",
+        merchantCity: admin.pix.merchantCity || "SAO PAULO",
+        txid: orderId.replace(/[^A-Za-z0-9]/g, "").slice(0, 25),
+      })
+    : "";
+  const [copied, setCopied] = useState(false);
+  const copyPix = async () => {
+    try {
+      await navigator.clipboard.writeText(pixPayload);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  };
 
   return (
     <div className="text-center py-6">
@@ -480,22 +501,54 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
       <p className="mt-2 text-muted-foreground">
         Seu pedido <span className="font-semibold text-ink">#{orderId}</span> foi registrado com sucesso.
       </p>
-      <p className="mt-4 text-sm text-muted-foreground max-w-md mx-auto">
-        Para concluir a compra e receber as instruções de pagamento, finalize o atendimento pelo WhatsApp com nossa equipe.
+
+      {showPix && (
+        <div className="mt-6 mx-auto max-w-md rounded-2xl border border-border bg-card p-5 text-left">
+          <div className="flex items-center gap-2 text-sm font-bold text-ink">
+            <QrCode className="h-4 w-4 text-primary" /> Pague com Pix — {formatBRL(total)}
+          </div>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Escaneie o QR Code no app do seu banco ou use o código copia-e-cola abaixo.
+          </p>
+          <div className="mt-4 grid place-items-center">
+            <img
+              src={pixQrImageUrl(pixPayload, 240)}
+              alt="QR Code Pix"
+              className="h-60 w-60 rounded-xl border border-border bg-white p-2"
+            />
+          </div>
+          <div className="mt-4">
+            <div className="rounded-lg border border-border bg-sand/50 p-3 text-[11px] font-mono break-all text-ink/80 max-h-24 overflow-auto">
+              {pixPayload}
+            </div>
+            <button
+              onClick={copyPix}
+              className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-4 py-2.5 text-sm font-bold text-white hover:opacity-90"
+            >
+              <Copy className="h-4 w-4" /> {copied ? "Copiado!" : "Copiar código Pix"}
+            </button>
+          </div>
+          <p className="mt-3 text-[11px] text-muted-foreground text-center">
+            Valor total do pedido: <span className="font-bold text-ink">{formatBRL(total)}</span>
+          </p>
+        </div>
+      )}
+
+      <p className="mt-6 text-sm text-muted-foreground max-w-md mx-auto">
+        {showPix
+          ? "Após o pagamento, envie o comprovante pelo WhatsApp para liberarmos o envio."
+          : "Para concluir a compra e receber as instruções de pagamento, finalize o atendimento pelo WhatsApp com nossa equipe."}
       </p>
 
-      <div className="mt-8 flex flex-col items-center gap-3">
+      <div className="mt-6 flex flex-col items-center gap-3">
         <a
           href={waLink}
           target="_blank"
           rel="noreferrer"
           className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-8 py-4 text-base font-bold text-white shadow-xl shadow-[#25D366]/40 hover:brightness-110"
         >
-          <MessageCircle className="h-5 w-5" /> Concluir compra no WhatsApp
+          <MessageCircle className="h-5 w-5" /> {showPix ? "Enviar comprovante no WhatsApp" : "Concluir compra no WhatsApp"}
         </a>
-        <p className="text-[11px] text-muted-foreground">
-          Abrindo automaticamente… caso não abra, clique no botão acima.
-        </p>
       </div>
 
       <div className="mt-8 flex flex-wrap justify-center gap-3">
