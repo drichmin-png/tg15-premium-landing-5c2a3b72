@@ -1156,8 +1156,7 @@ function AnalyticsPanel() {
   const [insights, setInsights] = useState<Array<{ titulo: string; evidencia: string; acao: string }> | null>(null);
   const [aiLoading, setAiLoading] = useState(false);
 
-  const password =
-    typeof window !== "undefined" ? window.sessionStorage.getItem("admin_password") ?? "" : "";
+  const password = admin.getAuthPassword() ?? "";
 
   const load = async () => {
     setLoading(true);
