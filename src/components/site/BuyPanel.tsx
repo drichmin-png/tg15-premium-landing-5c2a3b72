@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Check, Minus, Plus, Shield, Truck, Award } from "lucide-react";
+import { Check, Minus, Plus, Shield, Truck, Award, MessageCircle, Users } from "lucide-react";
 import { cart, useCart } from "@/lib/cart-store";
 import { formatBRL, variants } from "@/lib/product";
 import { useAdmin } from "@/lib/admin-store";
@@ -9,7 +9,10 @@ import { trackAddToCart } from "@/lib/tracking/metaPixel";
 export function BuyPanel() {
   const state = useCart();
   const nav = useNavigate();
-  const { products } = useAdmin();
+  const { products, support } = useAdmin();
+  const phone = (support.whatsappPhone || "").replace(/\D/g, "");
+  const waLink = phone ? `https://wa.me/${phone}` : "";
+  const groupLink = support.whatsappGroupLink || "";
   const singleActive = products.single.active;
   const boxActive = products.box.active;
   const dynPrice = { single: products.single.price, box: products.box.price };
@@ -200,6 +203,31 @@ export function BuyPanel() {
         <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-muted-foreground justify-center">
           <span>Pix</span>·<span>Cartão até 12x</span>·<span>Boleto</span>·<span>Compra 100% segura</span>
         </div>
+
+        {(waLink || groupLink) && (
+          <div className="mt-5 flex flex-wrap gap-3 justify-center">
+            {waLink && (
+              <a
+                href={waLink}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-[#25D366]/30 hover:brightness-110"
+              >
+                <MessageCircle className="h-4 w-4" /> Atendimento via WhatsApp
+              </a>
+            )}
+            {groupLink && (
+              <a
+                href={groupLink}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-5 py-3 text-sm font-bold text-[#128C7E] hover:bg-[#25D366]/15"
+              >
+                <Users className="h-4 w-4" /> Grupo de promoções
+              </a>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );
