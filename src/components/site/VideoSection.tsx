@@ -8,27 +8,26 @@ import nicolle from "@/assets/nicolle-caroline.png.asset.json";
 
 type VideoCardProps = {
   src: string;
+  poster: string;
   label: string;
   orientation?: "portrait" | "landscape";
   fit?: "cover" | "contain";
 };
 
-function VideoCard({ src, label, orientation = "landscape", fit = "cover" }: VideoCardProps) {
+function VideoCard({ src, poster, label, orientation = "landscape", fit = "cover" }: VideoCardProps) {
   const [playing, setPlaying] = useState(false);
   const aspect = orientation === "portrait" ? "aspect-[9/16]" : "aspect-video";
   const objectFit = fit === "contain" ? "object-contain" : "object-cover";
   return (
     <div className={`card-premium relative overflow-hidden bg-ink ${aspect}`}>
       {playing ? (
-        <video src={src} controls autoPlay playsInline className={`h-full w-full ${objectFit}`} />
+        <video src={src} poster={poster} controls autoPlay playsInline className={`h-full w-full ${objectFit}`} />
       ) : (
         <button onClick={() => setPlaying(true)} className="group relative h-full w-full">
-          <video
-            src={src}
-            muted
-            playsInline
-            preload="metadata"
-            className={`h-full w-full ${objectFit} opacity-85 transition-opacity group-hover:opacity-100`}
+          <img
+            src={poster}
+            alt={label}
+            className={`h-full w-full ${objectFit} opacity-90 transition-opacity group-hover:opacity-100`}
           />
           <div className="absolute inset-0 grid place-items-center bg-gradient-to-t from-ink/60 via-ink/5 to-transparent">
             <span className="grid h-14 w-14 place-items-center rounded-full gradient-brand text-white shadow-2xl shadow-primary/40 transition-transform group-hover:scale-110">
@@ -155,12 +154,12 @@ export function VideoSection() {
         </div>
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <div>
-            <VideoCard src={media.videos.apresentacao} label="Apresentação do produto" orientation="landscape" fit="contain" />
+            <VideoCard src={media.videos.apresentacao.src} poster={media.videos.apresentacao.poster} label="Apresentação do produto" orientation="landscape" fit="contain" />
             <div className="mt-3 text-sm font-semibold text-ink">Apresentação do produto</div>
             <p className="text-sm text-muted-foreground">Conheça em detalhes a embalagem, o kit e as características do T.G.15.</p>
           </div>
           <div>
-            <VideoCard src={media.videos.comoUsar} label="Como usar" orientation="landscape" fit="contain" />
+            <VideoCard src={media.videos.comoUsar.src} poster={media.videos.comoUsar.poster} label="Como usar" orientation="landscape" fit="contain" />
             <div className="mt-3 text-sm font-semibold text-ink">Como usar</div>
             <p className="text-sm text-muted-foreground">Aplicação subcutânea uma vez por semana, com armazenamento entre 2°C e 8°C.</p>
           </div>
@@ -180,11 +179,11 @@ export function VideoSection() {
         </div>
 
         <div className="mt-8 grid gap-4 grid-cols-2 lg:gap-8 lg:grid-cols-4">
-          {media.videos.antesDepois.map((src, i) => {
+          {media.videos.antesDepois.map((video, i) => {
             const t = testimonials[i];
             return (
-              <article key={src} className="card-premium overflow-hidden flex flex-col">
-                <VideoCard src={src} label={`Relato ${i + 1}`} orientation="portrait" fit="cover" />
+              <article key={video.src} className="card-premium overflow-hidden flex flex-col">
+                <VideoCard src={video.src} poster={video.poster} label={`Relato ${i + 1}`} orientation="portrait" fit="cover" />
                 <div className="p-5">
                   <div className="flex items-center gap-2 flex-wrap">
                     <h3 className="heading-display text-xl text-ink">{t.name}</h3>
@@ -258,7 +257,7 @@ export function VideoSection() {
       <section className="container-x mt-20">
         <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr] items-center">
           <div className="order-2 lg:order-1">
-            <VideoCard src={media.videos.duvidas} label="Tirando dúvidas" orientation="landscape" fit="contain" />
+            <VideoCard src={media.videos.duvidas.src} poster={media.videos.duvidas.poster} label="Tirando dúvidas" orientation="landscape" fit="contain" />
           </div>
           <div className="order-1 lg:order-2">
             <div className="eyebrow">Explicações</div>

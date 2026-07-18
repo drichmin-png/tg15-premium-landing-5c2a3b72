@@ -17,10 +17,15 @@ export const media = {
   hero: assetUrl(hero.url),
   tabela: assetUrl(tabela.url),
   videos: {
-    apresentacao: assetUrl(apresentacao.url),
-    comoUsar: assetUrl(comoUsar.url),
-    duvidas: assetUrl(duvidas.url),
-    antesDepois: [antes0.url, antes1.url, antes2.url, antes3.url].map(assetUrl),
+    apresentacao: { src: assetUrl(apresentacao.url), poster: "/poster-apresentacao.jpg" },
+    comoUsar: { src: assetUrl(comoUsar.url), poster: "/poster-como-usar.jpg" },
+    duvidas: { src: assetUrl(duvidas.url), poster: "/poster-duvidas.jpg" },
+    antesDepois: [
+      { src: assetUrl(antes0.url), poster: "/poster-antes-depois-0.jpg" },
+      { src: assetUrl(antes1.url), poster: "/poster-antes-depois-1.jpg" },
+      { src: assetUrl(antes2.url), poster: "/poster-antes-depois-2.jpg" },
+      { src: assetUrl(antes3.url), poster: "/poster-antes-depois-3.jpg" },
+    ],
   },
 };
 
