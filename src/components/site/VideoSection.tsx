@@ -154,12 +154,12 @@ export function VideoSection() {
         </div>
         <div className="mt-8 grid gap-6 lg:grid-cols-2">
           <div>
-            <VideoCard src={media.videos.apresentacao} label="Apresentação do produto" orientation="landscape" fit="contain" />
+            <VideoCard src={media.videos.apresentacao.src} poster={media.videos.apresentacao.poster} label="Apresentação do produto" orientation="landscape" fit="contain" />
             <div className="mt-3 text-sm font-semibold text-ink">Apresentação do produto</div>
             <p className="text-sm text-muted-foreground">Conheça em detalhes a embalagem, o kit e as características do T.G.15.</p>
           </div>
           <div>
-            <VideoCard src={media.videos.comoUsar} label="Como usar" orientation="landscape" fit="contain" />
+            <VideoCard src={media.videos.comoUsar.src} poster={media.videos.comoUsar.poster} label="Como usar" orientation="landscape" fit="contain" />
             <div className="mt-3 text-sm font-semibold text-ink">Como usar</div>
             <p className="text-sm text-muted-foreground">Aplicação subcutânea uma vez por semana, com armazenamento entre 2°C e 8°C.</p>
           </div>
