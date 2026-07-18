@@ -268,6 +268,27 @@ export type Database = {
         }
         Relationships: []
       }
+      site_config: {
+        Row: {
+          data: Json
+          id: string
+          singleton: boolean
+          updated_at: string
+        }
+        Insert: {
+          data?: Json
+          id?: string
+          singleton?: boolean
+          updated_at?: string
+        }
+        Update: {
+          data?: Json
+          id?: string
+          singleton?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
