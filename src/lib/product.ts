@@ -1,6 +1,6 @@
 import ampola from "@/assets/ampola.png.asset.json";
 import caixa from "@/assets/caixa-4-ampolas.png";
-import hero from "@/assets/hero-transforme.png.asset.json";
+import hero from "@/assets/hero-transforme-v2.png.asset.json";
 import tabela from "@/assets/tabela-fracionamento.png.asset.json";
 import comoUsar from "@/assets/como-usar.mp4.asset.json";
 import apresentacao from "@/assets/apresentacao-produto.mp4.asset.json";
