@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_auth_settings: {
+        Row: {
+          password_hash: string
+          singleton: boolean
+          updated_at: string
+        }
+        Insert: {
+          password_hash: string
+          singleton?: boolean
+          updated_at?: string
+        }
+        Update: {
+          password_hash?: string
+          singleton?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
       admin_settings: {
         Row: {
           business_days: number[]
