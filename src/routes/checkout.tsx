@@ -496,6 +496,9 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
       await navigator.clipboard.writeText(pixPayload);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+      import("@/lib/analytics/tracker").then(({ track }) =>
+        track("pix_copied", { target: "pix_copy_button", meta: { orderId, total } })
+      );
     } catch {}
   };
 
