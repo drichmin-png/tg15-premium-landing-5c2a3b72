@@ -4,6 +4,7 @@ import { useServerFn } from "@tanstack/react-start";
 import {
   ArrowDown,
   ArrowUp,
+  BarChart3,
   Check,
   Copy,
   ExternalLink,
@@ -16,6 +17,7 @@ import {
   Save,
   Share2,
   ShieldCheck,
+  Sparkles,
 } from "lucide-react";
 
 import { admin, useAdmin, type BlockId } from "@/lib/admin-store";
@@ -25,6 +27,11 @@ import {
   updateOrderStatusAdmin,
   type AdminOrder,
 } from "@/lib/orders-admin.functions";
+import {
+  getAnalyticsReport,
+  getAnalyticsSuggestions,
+  type AnalyticsReport,
+} from "@/lib/analytics/report.functions";
 
 export const Route = createFileRoute("/admin")({
   component: AdminPage,
