@@ -492,6 +492,26 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
     } catch {}
   };
 
+  const maskCPF = (cpf: string) => {
+    const c = (cpf || "").replace(/\D/g, "").padEnd(11, "•");
+    return `${c.slice(0, 3)}.•••.•••-${c.slice(9, 11)}`;
+  };
+  const maskEmail = (email: string) => {
+    if (!email || !email.includes("@")) return email || "—";
+    const [user, domain] = email.split("@");
+    const visible = user.slice(0, 2);
+    return `${visible}${"•".repeat(Math.max(1, user.length - 2))}@${domain}`;
+  };
+  const maskPhone = (phone: string) => {
+    const p = (phone || "").replace(/\D/g, "");
+    if (p.length < 4) return phone || "—";
+    return `(${p.slice(0, 2)}) •••••-${p.slice(-4)}`;
+  };
+  const etaText =
+    state.shipping === "express" ? "1 a 2 dias úteis após a confirmação do pagamento"
+      : state.shipping === "standard" ? "2 a 5 dias úteis após a confirmação do pagamento"
+      : "A combinar após a confirmação do pagamento";
+
   return (
     <div className="text-center py-6">
       <div className="mx-auto grid h-20 w-20 place-items-center rounded-full gradient-brand text-white shadow-2xl shadow-primary/40">
@@ -549,6 +569,75 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
         >
           <MessageCircle className="h-5 w-5" /> {showPix ? "Enviar comprovante no WhatsApp" : "Concluir compra no WhatsApp"}
         </a>
+      </div>
+
+
+
+      {/* Detalhes do pedido — dados do cliente, entrega, prazo e termos */}
+      <div className="mt-8 mx-auto max-w-2xl text-left">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-border bg-card p-5">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+              <ShieldCheck className="h-3.5 w-3.5" /> Dados do cliente
+            </div>
+            <dl className="mt-3 space-y-1.5 text-sm">
+              <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Nome</dt><dd className="font-semibold text-ink text-right">{state.customer.fullName || "—"}</dd></div>
+              <div className="flex justify-between gap-3"><dt className="text-muted-foreground">CPF</dt><dd className="font-semibold text-ink text-right">{maskCPF(state.customer.cpf)}</dd></div>
+              <div className="flex justify-between gap-3"><dt className="text-muted-foreground">E-mail</dt><dd className="font-semibold text-ink text-right break-all">{maskEmail(state.customer.email)}</dd></div>
+              <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Telefone</dt><dd className="font-semibold text-ink text-right">{maskPhone(state.customer.phone)}</dd></div>
+            </dl>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-5">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+              <Truck className="h-3.5 w-3.5" /> Entrega
+            </div>
+            <div className="mt-3 space-y-1.5 text-sm">
+              <div className="text-ink font-semibold">
+                {state.address.street ? `${state.address.street}, ${state.address.number}` : "Endereço não informado"}
+                {state.address.complement ? ` - ${state.address.complement}` : ""}
+              </div>
+              {(state.address.district || state.address.city) && (
+                <div className="text-muted-foreground">
+                  {state.address.district}{state.address.district && (state.address.city || state.address.state) ? " · " : ""}{state.address.city}{state.address.state ? `/${state.address.state}` : ""}
+                </div>
+              )}
+              {state.address.zip && <div className="text-muted-foreground">CEP: {state.address.zip}</div>}
+              {state.address.reference && <div className="text-muted-foreground">Ref.: {state.address.reference}</div>}
+              <div className="mt-2 rounded-lg bg-primary/5 border border-primary/15 p-2.5">
+                <div className="text-[11px] font-bold uppercase tracking-wider text-primary">Prazo estimado</div>
+                <div className="text-sm font-semibold text-ink">{etaText}</div>
+                <div className="text-[11px] text-muted-foreground mt-0.5">{shippingLabel} · embalagem térmica com rastreio</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-5 md:col-span-2">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+              <FileText className="h-3.5 w-3.5" /> Resumo financeiro
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+              <div><dt className="text-muted-foreground text-xs">Pedido</dt><dd className="font-semibold text-ink">#{orderId}</dd></div>
+              <div><dt className="text-muted-foreground text-xs">Produto</dt><dd className="font-semibold text-ink">{v.name} ({state.qty}x)</dd></div>
+              <div><dt className="text-muted-foreground text-xs">Pagamento</dt><dd className="font-semibold text-ink">{paymentLabel}</dd></div>
+              <div><dt className="text-muted-foreground text-xs">Total</dt><dd className="font-price text-lg text-ink">{formatBRL(total)}</dd></div>
+            </dl>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-sand/40 p-5 md:col-span-2">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-foreground/70">
+              <Lock className="h-3.5 w-3.5" /> Termos e condições
+            </div>
+            <ul className="mt-3 space-y-1.5 text-xs text-muted-foreground list-disc pl-4">
+              <li>O envio é iniciado somente após a confirmação do pagamento pela nossa equipe.</li>
+              <li>Produto termolábil: enviado em embalagem refrigerada com gelo térmico e rastreio.</li>
+              <li>Ao receber, confira a integridade da embalagem. Em caso de avaria, registre com foto e envie no WhatsApp em até 24h.</li>
+              <li>Trocas e devoluções seguem o CDC (art. 49) em até 7 dias corridos, desde que o lacre esteja intacto.</li>
+              <li>Seus dados são criptografados e utilizados apenas para o processamento do pedido, conforme a LGPD.</li>
+              <li>Este pedido é válido por 24h. Após esse prazo, será necessário refazê-lo.</li>
+            </ul>
+          </div>
+        </div>
       </div>
 
       <div className="mt-8 flex flex-wrap justify-center gap-3">
