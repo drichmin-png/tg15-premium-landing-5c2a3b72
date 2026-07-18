@@ -1,6 +1,6 @@
-// Client-side behavioral tracker. Writes directly to public.analytics_events
-// using the browser Supabase client (anon key + RLS policy that validates shape).
-import { supabase } from "@/integrations/supabase/client";
+// Client-side behavioral tracker. Uses a local browser database so the site
+// keeps working without backend/service-key configuration.
+import { addLocalAnalyticsEvents } from "@/lib/local-db";
 
 const SESSION_KEY = "tg15_session_id";
 const SESSION_TTL_MS = 30 * 60 * 1000; // 30 min inactivity
@@ -84,8 +84,7 @@ async function flush() {
   if (queue.length === 0) return;
   const rows = queue.splice(0, queue.length);
   try {
-    // Cast: Supabase types treat jsonb as Json (array/scalar/object) — our meta is object-only.
-    await supabase.from("analytics_events").insert(rows as unknown as never);
+    addLocalAnalyticsEvents(rows);
   } catch {
     /* swallow — analytics must never break the app */
   }
