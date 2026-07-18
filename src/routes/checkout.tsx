@@ -522,8 +522,118 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
         Seu pedido <span className="font-semibold text-ink">#{orderId}</span> foi registrado com sucesso.
       </p>
 
+      {/* Resumo do pedido — acima do código de pagamento */}
+      <div className="mt-8 mx-auto max-w-2xl text-left">
+        <div className="card-premium overflow-hidden">
+          <div className="gradient-brand px-5 py-4 text-white flex items-center justify-between">
+            <div>
+              <div className="text-[11px] font-bold uppercase tracking-wider text-white/80">Resumo do pedido</div>
+              <div className="mt-0.5 font-bold">#{orderId}</div>
+            </div>
+            <div className="text-right">
+              <div className="text-[11px] text-white/80">Total</div>
+              <div className="font-price text-2xl text-white">{formatBRL(total)}</div>
+            </div>
+          </div>
+
+          <div className="p-5 space-y-5">
+            {/* Produto */}
+            <div className="flex items-center gap-4">
+              <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-sand">
+                <img src={v.image} alt="" className="h-full w-full object-contain p-1" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-ink text-sm">{v.name}</div>
+                <div className="text-xs text-muted-foreground">15mg/0,5mL · {v.units} {v.units > 1 ? "ampolas" : "ampola"}</div>
+                <div className="text-xs text-muted-foreground">Qtd: {state.qty}</div>
+              </div>
+              <div className="text-sm font-bold text-ink whitespace-nowrap">{formatBRL(total)}</div>
+            </div>
+
+            <div className="h-px bg-border" />
+
+            {/* Dados do cliente */}
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                <ShieldCheck className="h-3.5 w-3.5" /> Dados do cliente
+              </div>
+              <dl className="mt-3 grid gap-y-2 text-sm sm:grid-cols-2 sm:gap-x-6">
+                <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">Nome</dt><dd className="font-semibold text-ink">{state.customer.fullName || "—"}</dd></div>
+                <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">CPF</dt><dd className="font-semibold text-ink">{maskCPF(state.customer.cpf)}</dd></div>
+                <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">E-mail</dt><dd className="font-semibold text-ink break-all">{maskEmail(state.customer.email)}</dd></div>
+                <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">Telefone</dt><dd className="font-semibold text-ink">{maskPhone(state.customer.phone)}</dd></div>
+              </dl>
+            </div>
+
+            <div className="h-px bg-border" />
+
+            {/* Entrega */}
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                <Truck className="h-3.5 w-3.5" /> Entrega
+              </div>
+              <div className="mt-3 text-sm">
+                <div className="font-semibold text-ink">
+                  {state.address.street ? `${state.address.street}, ${state.address.number}` : "Endereço não informado"}
+                  {state.address.complement ? ` - ${state.address.complement}` : ""}
+                </div>
+                {(state.address.district || state.address.city) && (
+                  <div className="text-muted-foreground mt-0.5">
+                    {state.address.district}{state.address.district && (state.address.city || state.address.state) ? " · " : ""}{state.address.city}{state.address.state ? `/${state.address.state}` : ""}
+                  </div>
+                )}
+                {state.address.zip && <div className="text-muted-foreground mt-0.5">CEP: {state.address.zip}</div>}
+                {state.address.reference && <div className="text-muted-foreground mt-0.5">Ref.: {state.address.reference}</div>}
+              </div>
+              <div className="mt-3 rounded-xl bg-primary/[0.04] border border-primary/15 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-primary">Prazo estimado</div>
+                    <div className="text-sm font-semibold text-ink">{etaText}</div>
+                  </div>
+                  <div className="text-right text-[11px] text-muted-foreground whitespace-nowrap">{shippingLabel}</div>
+                </div>
+                <div className="text-[11px] text-muted-foreground mt-1">Embalagem térmica refrigerada com rastreio</div>
+              </div>
+            </div>
+
+            <div className="h-px bg-border" />
+
+            {/* Financeiro */}
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                <FileText className="h-3.5 w-3.5" /> Pagamento
+              </div>
+              <div className="mt-3 space-y-2 text-sm">
+                <div className="flex justify-between"><span className="text-muted-foreground">Forma</span><span className="font-semibold text-ink">{paymentLabel}</span></div>
+                <div className="flex justify-between"><span className="text-muted-foreground">Frete</span><span className="font-semibold text-ink">{shippingLabel}</span></div>
+                <div className="flex justify-between items-baseline pt-2 border-t border-border">
+                  <span className="text-muted-foreground">Total do pedido</span>
+                  <span className="font-price text-xl text-ink">{formatBRL(total)}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Termos */}
+        <div className="mt-4 rounded-2xl border border-border bg-sand/40 p-5 text-left">
+          <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-foreground/70">
+            <Lock className="h-3.5 w-3.5" /> Termos e condições
+          </div>
+          <ul className="mt-3 space-y-1.5 text-xs text-muted-foreground list-disc pl-4">
+            <li>O envio é iniciado somente após a confirmação do pagamento pela nossa equipe.</li>
+            <li>Produto termolábil: enviado em embalagem refrigerada com gelo térmico e rastreio.</li>
+            <li>Ao receber, confira a integridade da embalagem. Em caso de avaria, registre com foto e envie no WhatsApp em até 24h.</li>
+            <li>Trocas e devoluções seguem o CDC (art. 49) em até 7 dias corridos, desde que o lacre esteja intacto.</li>
+            <li>Seus dados são criptografados e utilizados apenas para o processamento do pedido, conforme a LGPD.</li>
+            <li>Este pedido é válido por 24h. Após esse prazo, será necessário refazê-lo.</li>
+          </ul>
+        </div>
+      </div>
+
       {showPix && (
-        <div className="mt-6 mx-auto max-w-md rounded-2xl border border-border bg-card p-5 text-left">
+        <div className="mt-8 mx-auto max-w-md rounded-2xl border border-border bg-card p-5 text-left">
           <div className="flex items-center gap-2 text-sm font-bold text-ink">
             <QrCode className="h-4 w-4 text-primary" /> Pague com Pix — {formatBRL(total)}
           </div>
@@ -548,9 +658,6 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
               <Copy className="h-4 w-4" /> {copied ? "Copiado!" : "Copiar código Pix"}
             </button>
           </div>
-          <p className="mt-3 text-[11px] text-muted-foreground text-center">
-            Valor total do pedido: <span className="font-bold text-ink">{formatBRL(total)}</span>
-          </p>
         </div>
       )}
 
@@ -569,75 +676,6 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
         >
           <MessageCircle className="h-5 w-5" /> {showPix ? "Enviar comprovante no WhatsApp" : "Concluir compra no WhatsApp"}
         </a>
-      </div>
-
-
-
-      {/* Detalhes do pedido — dados do cliente, entrega, prazo e termos */}
-      <div className="mt-8 mx-auto max-w-2xl text-left">
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
-              <ShieldCheck className="h-3.5 w-3.5" /> Dados do cliente
-            </div>
-            <dl className="mt-3 space-y-1.5 text-sm">
-              <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Nome</dt><dd className="font-semibold text-ink text-right">{state.customer.fullName || "—"}</dd></div>
-              <div className="flex justify-between gap-3"><dt className="text-muted-foreground">CPF</dt><dd className="font-semibold text-ink text-right">{maskCPF(state.customer.cpf)}</dd></div>
-              <div className="flex justify-between gap-3"><dt className="text-muted-foreground">E-mail</dt><dd className="font-semibold text-ink text-right break-all">{maskEmail(state.customer.email)}</dd></div>
-              <div className="flex justify-between gap-3"><dt className="text-muted-foreground">Telefone</dt><dd className="font-semibold text-ink text-right">{maskPhone(state.customer.phone)}</dd></div>
-            </dl>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-card p-5">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
-              <Truck className="h-3.5 w-3.5" /> Entrega
-            </div>
-            <div className="mt-3 space-y-1.5 text-sm">
-              <div className="text-ink font-semibold">
-                {state.address.street ? `${state.address.street}, ${state.address.number}` : "Endereço não informado"}
-                {state.address.complement ? ` - ${state.address.complement}` : ""}
-              </div>
-              {(state.address.district || state.address.city) && (
-                <div className="text-muted-foreground">
-                  {state.address.district}{state.address.district && (state.address.city || state.address.state) ? " · " : ""}{state.address.city}{state.address.state ? `/${state.address.state}` : ""}
-                </div>
-              )}
-              {state.address.zip && <div className="text-muted-foreground">CEP: {state.address.zip}</div>}
-              {state.address.reference && <div className="text-muted-foreground">Ref.: {state.address.reference}</div>}
-              <div className="mt-2 rounded-lg bg-primary/5 border border-primary/15 p-2.5">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-primary">Prazo estimado</div>
-                <div className="text-sm font-semibold text-ink">{etaText}</div>
-                <div className="text-[11px] text-muted-foreground mt-0.5">{shippingLabel} · embalagem térmica com rastreio</div>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-card p-5 md:col-span-2">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
-              <FileText className="h-3.5 w-3.5" /> Resumo financeiro
-            </div>
-            <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
-              <div><dt className="text-muted-foreground text-xs">Pedido</dt><dd className="font-semibold text-ink">#{orderId}</dd></div>
-              <div><dt className="text-muted-foreground text-xs">Produto</dt><dd className="font-semibold text-ink">{v.name} ({state.qty}x)</dd></div>
-              <div><dt className="text-muted-foreground text-xs">Pagamento</dt><dd className="font-semibold text-ink">{paymentLabel}</dd></div>
-              <div><dt className="text-muted-foreground text-xs">Total</dt><dd className="font-price text-lg text-ink">{formatBRL(total)}</dd></div>
-            </dl>
-          </div>
-
-          <div className="rounded-2xl border border-border bg-sand/40 p-5 md:col-span-2">
-            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-foreground/70">
-              <Lock className="h-3.5 w-3.5" /> Termos e condições
-            </div>
-            <ul className="mt-3 space-y-1.5 text-xs text-muted-foreground list-disc pl-4">
-              <li>O envio é iniciado somente após a confirmação do pagamento pela nossa equipe.</li>
-              <li>Produto termolábil: enviado em embalagem refrigerada com gelo térmico e rastreio.</li>
-              <li>Ao receber, confira a integridade da embalagem. Em caso de avaria, registre com foto e envie no WhatsApp em até 24h.</li>
-              <li>Trocas e devoluções seguem o CDC (art. 49) em até 7 dias corridos, desde que o lacre esteja intacto.</li>
-              <li>Seus dados são criptografados e utilizados apenas para o processamento do pedido, conforme a LGPD.</li>
-              <li>Este pedido é válido por 24h. Após esse prazo, será necessário refazê-lo.</li>
-            </ul>
-          </div>
-        </div>
       </div>
 
       <div className="mt-8 flex flex-wrap justify-center gap-3">
