@@ -1219,7 +1219,15 @@ function AnalyticsPanel() {
         </div>
       </div>
 
-      {error && <div className="rounded-lg bg-destructive/10 p-3 text-xs text-destructive">{error}</div>}
+      {error && (
+        <div className="rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
+          {/^\s*<!?doctype|^\s*<html/i.test(error)
+            ? "Não foi possível carregar o relatório agora. Toque em Atualizar para tentar de novo."
+            : error.length > 240
+              ? error.slice(0, 240) + "…"
+              : error}
+        </div>
+      )}
 
       {report && (
         <>
