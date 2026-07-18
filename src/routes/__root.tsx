@@ -129,6 +129,11 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  useEffect(() => {
+    // Sincroniza a configuração do painel admin em todos os dispositivos
+    import("@/lib/admin-store").then(({ admin }) => admin.hydrateRemote?.());
+  }, []);
+
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
