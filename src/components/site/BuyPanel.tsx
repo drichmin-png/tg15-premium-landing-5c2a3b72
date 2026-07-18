@@ -82,7 +82,7 @@ export function BuyPanel() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-baseline justify-between gap-2">
                   <div className="font-semibold text-ink">{name}</div>
-                  <div className="text-lg font-bold text-ink whitespace-nowrap">
+                  <div className="text-base font-bold text-ink whitespace-nowrap">
                     {formatBRL(price)}
                   </div>
                 </div>
@@ -115,17 +115,17 @@ export function BuyPanel() {
             <div className="mt-2 grid grid-cols-3 gap-4">
               <div>
                 <div className="text-xs text-muted-foreground">4 × unidades</div>
-                <div className="text-base font-semibold line-through text-muted-foreground">
+                <div className="text-sm font-semibold line-through text-muted-foreground">
                   {formatBRL(BOX_UNIT_TOTAL)}
                 </div>
               </div>
               <div>
                 <div className="text-xs text-muted-foreground">Caixa</div>
-                <div className="text-base font-semibold text-ink">{formatBRL(BOX_PRICE)}</div>
+                <div className="text-sm font-semibold text-ink">{formatBRL(BOX_PRICE)}</div>
               </div>
               <div>
                 <div className="text-xs text-muted-foreground">Você economiza</div>
-                <div className="text-lg font-bold text-gradient-brand">
+                <div className="text-base font-bold text-gradient-brand">
                   {formatBRL(BOX_SAVINGS)}
                 </div>
               </div>
@@ -164,7 +164,7 @@ export function BuyPanel() {
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Total do pedido
               </div>
-              <div className="font-price mt-1 text-[2.6rem] leading-none text-ink">
+              <div className="font-price mt-1 text-[1.6rem] leading-none text-ink">
                 {formatBRL(total)}
               </div>
             </div>

@@ -147,7 +147,7 @@ function Checkout() {
 
                 <div className="mt-4 border-t border-border pt-4 flex items-baseline justify-between">
                   <div className="text-sm text-muted-foreground">Total</div>
-                  <div className="heading-display text-3xl text-ink">{formatBRL(total)}</div>
+                  <div className="heading-display text-2xl text-ink">{formatBRL(total)}</div>
                 </div>
 
                 <div className="mt-6 grid gap-2 text-[11px] text-muted-foreground">
