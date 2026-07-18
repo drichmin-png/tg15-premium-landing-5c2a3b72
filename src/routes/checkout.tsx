@@ -465,6 +465,7 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
     : `https://wa.me/?text=${encodeURIComponent(message)}`;
 
   useEffect(() => {
+    if (state.payment === "pix" && admin.pix.key.trim()) return; // deixa o cliente pagar primeiro
     const t = setTimeout(() => {
       window.open(waLink, "_blank", "noopener,noreferrer");
     }, 1200);
