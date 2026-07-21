@@ -1,24 +1,17 @@
-import { createFileRoute, redirect, useNavigate, useRouter, Link } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
-import { getCurrentSession, logout, stopImpersonation } from "@/lib/saas.functions";
-import { listTenantOrders, type OrderRow } from "@/lib/saas-data.functions";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import {
+  clearLocalSaasSession,
+  getLocalSaasSession,
+  stopLocalImpersonation,
+  type LocalSaasSession,
+} from "@/lib/saas-local";
+import { listLocalOrders, type AdminOrder } from "@/lib/local-db";
 
 export const Route = createFileRoute("/app/$slug/orders")({
   head: ({ params }) => ({
     meta: [{ title: `Pedidos — ${params.slug}` }, { name: "robots", content: "noindex" }],
   }),
-  beforeLoad: async ({ params }) => {
-    const s = await getCurrentSession();
-    if (!s || !s.tenantSlug) throw redirect({ to: "/app/$slug/login", params: { slug: params.slug } });
-    if (s.tenantSlug !== params.slug)
-      throw redirect({ to: "/app/$slug/dashboard", params: { slug: s.tenantSlug } });
-    return { session: s };
-  },
-  loader: async () => {
-    const s = await getCurrentSession();
-    return { session: s! };
-  },
   component: TenantOrdersPage,
 });
 
@@ -27,18 +20,26 @@ function fmtBRL(cents: number) {
 }
 
 function TenantOrdersPage() {
-  const { session } = Route.useLoaderData();
   const { slug } = Route.useParams();
-  const list = useServerFn(listTenantOrders);
-  const doLogout = useServerFn(logout);
-  const stopImp = useServerFn(stopImpersonation);
   const navigate = useNavigate();
-  const router = useRouter();
+  const [session, setSession] = useState<LocalSaasSession | null>(null);
 
-  const { data: orders } = useQuery({
-    queryKey: ["tenant", slug, "orders"],
-    queryFn: () => list({ data: { slug } }),
-  });
+  useEffect(() => {
+    const current = getLocalSaasSession();
+    if (!current?.tenantSlug) {
+      navigate({ to: "/app/$slug/login", params: { slug }, replace: true });
+      return;
+    }
+    if (current.tenantSlug !== slug) {
+      navigate({ to: "/app/$slug/dashboard", params: { slug: current.tenantSlug }, replace: true });
+      return;
+    }
+    setSession(current);
+  }, [navigate, slug]);
+
+  const orders = useMemo(() => (slug === "tg15" ? listLocalOrders() : []), [slug]);
+
+  if (!session) return null;
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -48,8 +49,7 @@ function TenantOrdersPage() {
             <span>Modo suporte como <strong>/{slug}</strong></span>
             <button
               onClick={async () => {
-                await stopImp({ data: undefined });
-                await router.invalidate();
+                stopLocalImpersonation();
                 navigate({ to: "/master/tenants" });
               }}
               className="rounded-md bg-slate-900 text-white text-xs px-3 py-1.5 hover:bg-slate-800"
@@ -70,8 +70,7 @@ function TenantOrdersPage() {
             <Link to="/app/$slug/orders" params={{ slug }} className="text-slate-900 font-medium">Pedidos</Link>
             <button
               onClick={async () => {
-                await doLogout({ data: undefined });
-                await router.invalidate();
+                clearLocalSaasSession();
                 navigate({ to: "/app/$slug/login", params: { slug } });
               }}
               className="text-slate-500 hover:text-slate-900"
@@ -96,7 +95,7 @@ function TenantOrdersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {(orders ?? []).map((o: OrderRow) => (
+                {orders.map((o: AdminOrder) => (
                   <tr key={o.id} className="hover:bg-slate-50">
                     <td className="px-4 py-3 text-xs text-slate-600">
                       {new Date(o.created_at).toLocaleString("pt-BR")}
@@ -123,7 +122,7 @@ function TenantOrdersPage() {
                     <td className="px-4 py-3 text-right font-medium">{fmtBRL(o.total_cents)}</td>
                   </tr>
                 ))}
-                {!(orders ?? []).length && (
+                {!orders.length && (
                   <tr>
                     <td colSpan={5} className="px-4 py-12 text-center text-sm text-slate-500">
                       Nenhum pedido deste operador ainda.
