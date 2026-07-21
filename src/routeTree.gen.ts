@@ -14,7 +14,9 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MasterTenantsRouteImport } from './routes/master.tenants'
+import { Route as MasterOrdersRouteImport } from './routes/master.orders'
 import { Route as MasterLoginRouteImport } from './routes/master.login'
+import { Route as AppSlugOrdersRouteImport } from './routes/app.$slug.orders'
 import { Route as AppSlugLoginRouteImport } from './routes/app.$slug.login'
 import { Route as AppSlugDashboardRouteImport } from './routes/app.$slug.dashboard'
 import { Route as ApiPublicWebhookGatewayRouteImport } from './routes/api/public/webhook.$gateway'
@@ -45,9 +47,19 @@ const MasterTenantsRoute = MasterTenantsRouteImport.update({
   path: '/master/tenants',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MasterOrdersRoute = MasterOrdersRouteImport.update({
+  id: '/master/orders',
+  path: '/master/orders',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MasterLoginRoute = MasterLoginRouteImport.update({
   id: '/master/login',
   path: '/master/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppSlugOrdersRoute = AppSlugOrdersRouteImport.update({
+  id: '/app/$slug/orders',
+  path: '/app/$slug/orders',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppSlugLoginRoute = AppSlugLoginRouteImport.update({
@@ -78,9 +90,11 @@ export interface FileRoutesByFullPath {
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/master/login': typeof MasterLoginRoute
+  '/master/orders': typeof MasterOrdersRoute
   '/master/tenants': typeof MasterTenantsRoute
   '/app/$slug/dashboard': typeof AppSlugDashboardRoute
   '/app/$slug/login': typeof AppSlugLoginRoute
+  '/app/$slug/orders': typeof AppSlugOrdersRoute
   '/api/public/hooks/tick-orders': typeof ApiPublicHooksTickOrdersRoute
   '/api/public/webhook/$gateway': typeof ApiPublicWebhookGatewayRoute
 }
@@ -90,9 +104,11 @@ export interface FileRoutesByTo {
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/master/login': typeof MasterLoginRoute
+  '/master/orders': typeof MasterOrdersRoute
   '/master/tenants': typeof MasterTenantsRoute
   '/app/$slug/dashboard': typeof AppSlugDashboardRoute
   '/app/$slug/login': typeof AppSlugLoginRoute
+  '/app/$slug/orders': typeof AppSlugOrdersRoute
   '/api/public/hooks/tick-orders': typeof ApiPublicHooksTickOrdersRoute
   '/api/public/webhook/$gateway': typeof ApiPublicWebhookGatewayRoute
 }
@@ -103,9 +119,11 @@ export interface FileRoutesById {
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/master/login': typeof MasterLoginRoute
+  '/master/orders': typeof MasterOrdersRoute
   '/master/tenants': typeof MasterTenantsRoute
   '/app/$slug/dashboard': typeof AppSlugDashboardRoute
   '/app/$slug/login': typeof AppSlugLoginRoute
+  '/app/$slug/orders': typeof AppSlugOrdersRoute
   '/api/public/hooks/tick-orders': typeof ApiPublicHooksTickOrdersRoute
   '/api/public/webhook/$gateway': typeof ApiPublicWebhookGatewayRoute
 }
@@ -117,9 +135,11 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/sitemap.xml'
     | '/master/login'
+    | '/master/orders'
     | '/master/tenants'
     | '/app/$slug/dashboard'
     | '/app/$slug/login'
+    | '/app/$slug/orders'
     | '/api/public/hooks/tick-orders'
     | '/api/public/webhook/$gateway'
   fileRoutesByTo: FileRoutesByTo
@@ -129,9 +149,11 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/sitemap.xml'
     | '/master/login'
+    | '/master/orders'
     | '/master/tenants'
     | '/app/$slug/dashboard'
     | '/app/$slug/login'
+    | '/app/$slug/orders'
     | '/api/public/hooks/tick-orders'
     | '/api/public/webhook/$gateway'
   id:
@@ -141,9 +163,11 @@ export interface FileRouteTypes {
     | '/checkout'
     | '/sitemap.xml'
     | '/master/login'
+    | '/master/orders'
     | '/master/tenants'
     | '/app/$slug/dashboard'
     | '/app/$slug/login'
+    | '/app/$slug/orders'
     | '/api/public/hooks/tick-orders'
     | '/api/public/webhook/$gateway'
   fileRoutesById: FileRoutesById
@@ -154,9 +178,11 @@ export interface RootRouteChildren {
   CheckoutRoute: typeof CheckoutRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   MasterLoginRoute: typeof MasterLoginRoute
+  MasterOrdersRoute: typeof MasterOrdersRoute
   MasterTenantsRoute: typeof MasterTenantsRoute
   AppSlugDashboardRoute: typeof AppSlugDashboardRoute
   AppSlugLoginRoute: typeof AppSlugLoginRoute
+  AppSlugOrdersRoute: typeof AppSlugOrdersRoute
   ApiPublicHooksTickOrdersRoute: typeof ApiPublicHooksTickOrdersRoute
   ApiPublicWebhookGatewayRoute: typeof ApiPublicWebhookGatewayRoute
 }
@@ -198,11 +224,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MasterTenantsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/master/orders': {
+      id: '/master/orders'
+      path: '/master/orders'
+      fullPath: '/master/orders'
+      preLoaderRoute: typeof MasterOrdersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/master/login': {
       id: '/master/login'
       path: '/master/login'
       fullPath: '/master/login'
       preLoaderRoute: typeof MasterLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/$slug/orders': {
+      id: '/app/$slug/orders'
+      path: '/app/$slug/orders'
+      fullPath: '/app/$slug/orders'
+      preLoaderRoute: typeof AppSlugOrdersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/$slug/login': {
@@ -242,9 +282,11 @@ const rootRouteChildren: RootRouteChildren = {
   CheckoutRoute: CheckoutRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   MasterLoginRoute: MasterLoginRoute,
+  MasterOrdersRoute: MasterOrdersRoute,
   MasterTenantsRoute: MasterTenantsRoute,
   AppSlugDashboardRoute: AppSlugDashboardRoute,
   AppSlugLoginRoute: AppSlugLoginRoute,
+  AppSlugOrdersRoute: AppSlugOrdersRoute,
   ApiPublicHooksTickOrdersRoute: ApiPublicHooksTickOrdersRoute,
   ApiPublicWebhookGatewayRoute: ApiPublicWebhookGatewayRoute,
 }
