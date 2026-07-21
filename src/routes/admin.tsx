@@ -193,11 +193,16 @@ export function Dashboard() {
 }
 
 function ShareSiteLink() {
+  const state = useAdmin();
   const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const namespace = admin.getNamespace();
+  const isOperatorLink = Boolean(namespace);
   useEffect(() => {
-    if (typeof window !== "undefined") setUrl(window.location.origin);
-  }, []);
+    if (typeof window === "undefined") return;
+    const currentNamespace = admin.getNamespace();
+    setUrl(currentNamespace ? admin.buildStorefrontUrl(currentNamespace, window.location.origin) : window.location.origin);
+  }, [state]);
   const copy = async () => {
     try {
       await navigator.clipboard.writeText(url);
@@ -208,7 +213,7 @@ function ShareSiteLink() {
     }
   };
   const waMsg = encodeURIComponent(
-    `Confira o T.G.15 — Tirzepatida 15mg/0,5mL 💉\nCompre pelo link oficial: ${url}`
+    `Confira o T.G.15 — Tirzepatida 15mg/0,5mL 💉\nCompre pelo meu link: ${url}`
   );
   return (
     <section className="rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 to-orange-50 p-5 shadow-sm">
@@ -217,9 +222,11 @@ function ShareSiteLink() {
           <Share2 className="h-4 w-4" />
         </div>
         <div className="min-w-0 flex-1">
-          <h2 className="text-sm font-bold text-ink">Link oficial do site</h2>
+          <h2 className="text-sm font-bold text-ink">{isOperatorLink ? "Link próprio do operador" : "Link oficial do site"}</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            Compartilhe este link com clientes — sempre reflete as últimas alterações salvas no painel.
+            {isOperatorLink
+              ? "Compartilhe este link exclusivo com clientes. Ele abre a loja deste operador com as configurações atuais."
+              : "Compartilhe este link com clientes — sempre reflete as últimas alterações salvas no painel."}
           </p>
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
             <input

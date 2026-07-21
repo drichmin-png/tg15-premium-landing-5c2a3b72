@@ -209,6 +209,82 @@ const REMOTE_KEYS: (keyof AdminState)[] = [
   "support",
 ];
 
+type PublicStorefrontPayload = {
+  hero: AdminState["hero"];
+  products: AdminState["products"];
+  blocks: AdminState["blocks"];
+  tracking: AdminState["tracking"];
+  pix: AdminState["pix"];
+  support: AdminState["support"];
+};
+
+const PUBLIC_STOREFRONT_KEYS: (keyof PublicStorefrontPayload)[] = [
+  "hero",
+  "products",
+  "blocks",
+  "tracking",
+  "pix",
+  "support",
+];
+
+function encodeStorefrontPayload(payload: PublicStorefrontPayload) {
+  try {
+    const json = JSON.stringify(payload);
+    if (typeof btoa === "function") return btoa(unescape(encodeURIComponent(json)));
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+function decodeStorefrontPayload(token: string): Partial<PublicStorefrontPayload> | null {
+  try {
+    if (typeof atob !== "function") return null;
+    const parsed = JSON.parse(decodeURIComponent(escape(atob(token)))) as Partial<PublicStorefrontPayload>;
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function publicStorefrontPayload(): PublicStorefrontPayload {
+  ensureHydrated();
+  return {
+    hero: state.hero,
+    products: state.products,
+    blocks: state.blocks,
+    tracking: state.tracking,
+    pix: state.pix,
+    support: state.support,
+  };
+}
+
+function buildStorefrontUrl(slug: string, origin: string) {
+  const cleanSlug = slug.trim().toLowerCase();
+  const baseUrl = `${origin}/loja/${cleanSlug}`;
+  const token = encodeStorefrontPayload(publicStorefrontPayload());
+  return token ? `${baseUrl}?store=${encodeURIComponent(token)}` : baseUrl;
+}
+
+function importStorefrontConfig(slug: string, token: string) {
+  const cleanSlug = slug.trim().toLowerCase();
+  setNamespace(cleanSlug);
+  const payload = decodeStorefrontPayload(token);
+  if (!payload) return false;
+  const patch: Partial<AdminState> = {};
+  for (const k of PUBLIC_STOREFRONT_KEYS) {
+    const value = payload[k];
+    if (value === undefined || value === null) continue;
+    if (k === "blocks") patch.blocks = mergeBlocks(value as Block[]);
+    else (patch as Record<string, unknown>)[k] = value;
+  }
+  state = { ...state, ...patch, authed: false };
+  persist(state);
+  notify();
+  return true;
+}
+
 function applyRemoteData(remote: Record<string, unknown> | null | undefined) {
   if (!remote || typeof remote !== "object") return;
   const patch: Partial<AdminState> = {};
@@ -390,6 +466,8 @@ export const admin = {
     notify();
   },
   hydrateRemote,
+  buildStorefrontUrl,
+  importStorefrontConfig,
   getAuthPassword: () => authPassword,
   saveRemote: async () => {
     ensureHydrated();
