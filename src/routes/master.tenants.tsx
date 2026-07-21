@@ -25,6 +25,7 @@ type Tenant = {
   user_limit: number;
   expires_at: string | null;
   last_login_at: string | null;
+  owner_username: string;
   created_at: string;
 };
 
