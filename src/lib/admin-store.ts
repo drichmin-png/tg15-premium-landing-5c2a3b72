@@ -234,6 +234,7 @@ function applyRemoteData(remote: Record<string, unknown> | null | undefined) {
 async function hydrateRemote() {
   ensureHydrated();
   if (typeof window === "undefined") return;
+  if (namespace) return; // per-tenant panels are local-only
   try {
     const { supabase } = await import("@/integrations/supabase/client");
     const { data, error } = await supabase
@@ -246,6 +247,27 @@ async function hydrateRemote() {
   } catch (e) {
     console.warn("[admin] hydrateRemote falhou", e);
   }
+}
+
+function setNamespace(ns: string | null) {
+  const next = ns ? ns.toLowerCase() : null;
+  if (next === namespace) return;
+  namespace = next;
+  hydrated = false;
+  authPassword = null;
+  if (typeof window !== "undefined") {
+    state = load();
+    hydrated = true;
+  }
+  notify();
+}
+
+function markAuthed() {
+  ensureHydrated();
+  authPassword = state.password || "local";
+  state = { ...state, authed: true };
+  persist(state);
+  notify();
 }
 
 export const admin = {
