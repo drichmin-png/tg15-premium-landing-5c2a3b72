@@ -13,6 +13,10 @@ import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as MasterTenantsRouteImport } from './routes/master.tenants'
+import { Route as MasterLoginRouteImport } from './routes/master.login'
+import { Route as AppSlugLoginRouteImport } from './routes/app.$slug.login'
+import { Route as AppSlugDashboardRouteImport } from './routes/app.$slug.dashboard'
 import { Route as ApiPublicWebhookGatewayRouteImport } from './routes/api/public/webhook.$gateway'
 import { Route as ApiPublicHooksTickOrdersRouteImport } from './routes/api/public/hooks/tick-orders'
 
@@ -36,6 +40,26 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MasterTenantsRoute = MasterTenantsRouteImport.update({
+  id: '/master/tenants',
+  path: '/master/tenants',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MasterLoginRoute = MasterLoginRouteImport.update({
+  id: '/master/login',
+  path: '/master/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppSlugLoginRoute = AppSlugLoginRouteImport.update({
+  id: '/app/$slug/login',
+  path: '/app/$slug/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppSlugDashboardRoute = AppSlugDashboardRouteImport.update({
+  id: '/app/$slug/dashboard',
+  path: '/app/$slug/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiPublicWebhookGatewayRoute = ApiPublicWebhookGatewayRouteImport.update({
   id: '/api/public/webhook/$gateway',
   path: '/api/public/webhook/$gateway',
@@ -53,6 +77,10 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/master/login': typeof MasterLoginRoute
+  '/master/tenants': typeof MasterTenantsRoute
+  '/app/$slug/dashboard': typeof AppSlugDashboardRoute
+  '/app/$slug/login': typeof AppSlugLoginRoute
   '/api/public/hooks/tick-orders': typeof ApiPublicHooksTickOrdersRoute
   '/api/public/webhook/$gateway': typeof ApiPublicWebhookGatewayRoute
 }
@@ -61,6 +89,10 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/master/login': typeof MasterLoginRoute
+  '/master/tenants': typeof MasterTenantsRoute
+  '/app/$slug/dashboard': typeof AppSlugDashboardRoute
+  '/app/$slug/login': typeof AppSlugLoginRoute
   '/api/public/hooks/tick-orders': typeof ApiPublicHooksTickOrdersRoute
   '/api/public/webhook/$gateway': typeof ApiPublicWebhookGatewayRoute
 }
@@ -70,6 +102,10 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/master/login': typeof MasterLoginRoute
+  '/master/tenants': typeof MasterTenantsRoute
+  '/app/$slug/dashboard': typeof AppSlugDashboardRoute
+  '/app/$slug/login': typeof AppSlugLoginRoute
   '/api/public/hooks/tick-orders': typeof ApiPublicHooksTickOrdersRoute
   '/api/public/webhook/$gateway': typeof ApiPublicWebhookGatewayRoute
 }
@@ -80,6 +116,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/checkout'
     | '/sitemap.xml'
+    | '/master/login'
+    | '/master/tenants'
+    | '/app/$slug/dashboard'
+    | '/app/$slug/login'
     | '/api/public/hooks/tick-orders'
     | '/api/public/webhook/$gateway'
   fileRoutesByTo: FileRoutesByTo
@@ -88,6 +128,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/checkout'
     | '/sitemap.xml'
+    | '/master/login'
+    | '/master/tenants'
+    | '/app/$slug/dashboard'
+    | '/app/$slug/login'
     | '/api/public/hooks/tick-orders'
     | '/api/public/webhook/$gateway'
   id:
@@ -96,6 +140,10 @@ export interface FileRouteTypes {
     | '/admin'
     | '/checkout'
     | '/sitemap.xml'
+    | '/master/login'
+    | '/master/tenants'
+    | '/app/$slug/dashboard'
+    | '/app/$slug/login'
     | '/api/public/hooks/tick-orders'
     | '/api/public/webhook/$gateway'
   fileRoutesById: FileRoutesById
@@ -105,6 +153,10 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   CheckoutRoute: typeof CheckoutRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  MasterLoginRoute: typeof MasterLoginRoute
+  MasterTenantsRoute: typeof MasterTenantsRoute
+  AppSlugDashboardRoute: typeof AppSlugDashboardRoute
+  AppSlugLoginRoute: typeof AppSlugLoginRoute
   ApiPublicHooksTickOrdersRoute: typeof ApiPublicHooksTickOrdersRoute
   ApiPublicWebhookGatewayRoute: typeof ApiPublicWebhookGatewayRoute
 }
@@ -139,6 +191,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/master/tenants': {
+      id: '/master/tenants'
+      path: '/master/tenants'
+      fullPath: '/master/tenants'
+      preLoaderRoute: typeof MasterTenantsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/master/login': {
+      id: '/master/login'
+      path: '/master/login'
+      fullPath: '/master/login'
+      preLoaderRoute: typeof MasterLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/$slug/login': {
+      id: '/app/$slug/login'
+      path: '/app/$slug/login'
+      fullPath: '/app/$slug/login'
+      preLoaderRoute: typeof AppSlugLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app/$slug/dashboard': {
+      id: '/app/$slug/dashboard'
+      path: '/app/$slug/dashboard'
+      fullPath: '/app/$slug/dashboard'
+      preLoaderRoute: typeof AppSlugDashboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/public/webhook/$gateway': {
       id: '/api/public/webhook/$gateway'
       path: '/api/public/webhook/$gateway'
@@ -161,6 +241,10 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   CheckoutRoute: CheckoutRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  MasterLoginRoute: MasterLoginRoute,
+  MasterTenantsRoute: MasterTenantsRoute,
+  AppSlugDashboardRoute: AppSlugDashboardRoute,
+  AppSlugLoginRoute: AppSlugLoginRoute,
   ApiPublicHooksTickOrdersRoute: ApiPublicHooksTickOrdersRoute,
   ApiPublicWebhookGatewayRoute: ApiPublicWebhookGatewayRoute,
 }
