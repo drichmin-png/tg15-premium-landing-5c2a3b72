@@ -17,6 +17,7 @@ import { Route as MasterIndexRouteImport } from './routes/master.index'
 import { Route as MasterTenantsRouteImport } from './routes/master.tenants'
 import { Route as MasterOrdersRouteImport } from './routes/master.orders'
 import { Route as MasterLoginRouteImport } from './routes/master.login'
+import { Route as LojaSlugRouteImport } from './routes/loja.$slug'
 import { Route as AppSlugOrdersRouteImport } from './routes/app.$slug.orders'
 import { Route as AppSlugLoginRouteImport } from './routes/app.$slug.login'
 import { Route as AppSlugDashboardRouteImport } from './routes/app.$slug.dashboard'
@@ -63,6 +64,11 @@ const MasterLoginRoute = MasterLoginRouteImport.update({
   path: '/master/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LojaSlugRoute = LojaSlugRouteImport.update({
+  id: '/loja/$slug',
+  path: '/loja/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppSlugOrdersRoute = AppSlugOrdersRouteImport.update({
   id: '/app/$slug/orders',
   path: '/app/$slug/orders',
@@ -95,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/loja/$slug': typeof LojaSlugRoute
   '/master/login': typeof MasterLoginRoute
   '/master/orders': typeof MasterOrdersRoute
   '/master/tenants': typeof MasterTenantsRoute
@@ -110,6 +117,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/loja/$slug': typeof LojaSlugRoute
   '/master/login': typeof MasterLoginRoute
   '/master/orders': typeof MasterOrdersRoute
   '/master/tenants': typeof MasterTenantsRoute
@@ -126,6 +134,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/loja/$slug': typeof LojaSlugRoute
   '/master/login': typeof MasterLoginRoute
   '/master/orders': typeof MasterOrdersRoute
   '/master/tenants': typeof MasterTenantsRoute
@@ -143,6 +152,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/checkout'
     | '/sitemap.xml'
+    | '/loja/$slug'
     | '/master/login'
     | '/master/orders'
     | '/master/tenants'
@@ -158,6 +168,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/checkout'
     | '/sitemap.xml'
+    | '/loja/$slug'
     | '/master/login'
     | '/master/orders'
     | '/master/tenants'
@@ -173,6 +184,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/checkout'
     | '/sitemap.xml'
+    | '/loja/$slug'
     | '/master/login'
     | '/master/orders'
     | '/master/tenants'
@@ -189,6 +201,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   CheckoutRoute: typeof CheckoutRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  LojaSlugRoute: typeof LojaSlugRoute
   MasterLoginRoute: typeof MasterLoginRoute
   MasterOrdersRoute: typeof MasterOrdersRoute
   MasterTenantsRoute: typeof MasterTenantsRoute
@@ -258,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MasterLoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/loja/$slug': {
+      id: '/loja/$slug'
+      path: '/loja/$slug'
+      fullPath: '/loja/$slug'
+      preLoaderRoute: typeof LojaSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/$slug/orders': {
       id: '/app/$slug/orders'
       path: '/app/$slug/orders'
@@ -301,6 +321,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   CheckoutRoute: CheckoutRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  LojaSlugRoute: LojaSlugRoute,
   MasterLoginRoute: MasterLoginRoute,
   MasterOrdersRoute: MasterOrdersRoute,
   MasterTenantsRoute: MasterTenantsRoute,
