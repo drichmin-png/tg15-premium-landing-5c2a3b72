@@ -44,11 +44,61 @@ export type CreateLocalTenantPayload = {
   owner_password: string;
 };
 
+export type LocalTenantAccessPayload = {
+  slug: string;
+  company_name: string;
+  owner_username: string;
+  owner_password: string;
+  plan?: string;
+};
+
 const TENANTS_KEY = "tg15-saas-local-tenants-v1";
 const SESSION_KEY = "tg15-saas-local-session-v1";
 const MASTER_USER = "admin";
 const MASTER_PASSWORD = "34561581";
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
+
+function normalizeText(value: string) {
+  return value
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+}
+
+function slugifyTenantName(value: string) {
+  return normalizeText(value)
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 40);
+}
+
+function encodeAccessPayload(payload: LocalTenantAccessPayload) {
+  try {
+    const json = JSON.stringify(payload);
+    if (typeof btoa === "function") return btoa(unescape(encodeURIComponent(json)));
+  } catch {
+    return "";
+  }
+  return "";
+}
+
+function decodeAccessPayload(token: string): LocalTenantAccessPayload | null {
+  try {
+    if (typeof atob !== "function") return null;
+    const parsed = JSON.parse(decodeURIComponent(escape(atob(token)))) as Partial<LocalTenantAccessPayload>;
+    if (!parsed.slug || !parsed.company_name || !parsed.owner_username || !parsed.owner_password) return null;
+    return {
+      slug: parsed.slug,
+      company_name: parsed.company_name,
+      owner_username: parsed.owner_username,
+      owner_password: parsed.owner_password,
+      plan: parsed.plan,
+    };
+  } catch {
+    return null;
+  }
+}
 
 function canUseStorage() {
   return typeof window !== "undefined" && !!window.localStorage;
@@ -106,7 +156,7 @@ export function listLocalTenants(): LocalTenant[] {
 }
 
 export function getLocalTenantBySlug(slug: string) {
-  return listLocalTenants().find((tenant) => tenant.slug === slug.toLowerCase()) ?? null;
+  return listLocalTenants().find((tenant) => tenant.slug === slug.trim().toLowerCase()) ?? null;
 }
 
 export function getLocalTenantById(id: string) {
@@ -145,6 +195,48 @@ export function createLocalTenant(payload: CreateLocalTenantPayload) {
   return tenant;
 }
 
+export function buildLocalTenantAccessUrl(payload: LocalTenantAccessPayload, origin: string) {
+  const baseUrl = `${origin}/app/${payload.slug}/login`;
+  const token = encodeAccessPayload(payload);
+  return token ? `${baseUrl}?setup=${encodeURIComponent(token)}` : baseUrl;
+}
+
+export function importLocalTenantFromAccessToken(token: string) {
+  const payload = decodeAccessPayload(token);
+  if (!payload) return null;
+
+  const slug = payload.slug.trim().toLowerCase();
+  if (!SLUG_RE.test(slug)) return null;
+  if (!payload.owner_password || payload.owner_password.length < 4) return null;
+
+  const tenants = listLocalTenants();
+  const existing = tenants.find((tenant) => tenant.slug === slug);
+  const tenant: LocalTenant = {
+    ...(existing ?? {
+      id: makeId("tenant"),
+      slug,
+      responsible_name: "",
+      contact_email: "",
+      contact_phone: "",
+      status: "active" as const,
+      order_limit: 0,
+      product_limit: 0,
+      user_limit: 3,
+      expires_at: null,
+      last_login_at: null,
+      created_at: new Date().toISOString(),
+    }),
+    slug,
+    company_name: payload.company_name.trim(),
+    plan: payload.plan || existing?.plan || "starter",
+    owner_username: payload.owner_username.trim(),
+    owner_password: payload.owner_password,
+  };
+
+  writeJson(TENANTS_KEY, existing ? tenants.map((item) => (item.id === tenant.id ? tenant : item)) : [tenant, ...tenants]);
+  return tenant;
+}
+
 export function setLocalTenantStatus(id: string, status: LocalTenant["status"]) {
   writeJson(
     TENANTS_KEY,
@@ -172,11 +264,27 @@ export function verifyLocalMasterLogin(username: string, password: string) {
 }
 
 export function verifyLocalTenantLogin(slug: string, username: string, password: string) {
-  const tenant = getLocalTenantBySlug(slug);
-  if (!tenant) throw new Error("Operador não encontrado");
+  let tenant = getLocalTenantBySlug(slug);
+  if (!tenant) {
+    const normalizedSlug = slug.trim().toLowerCase();
+    const typedUsername = username.trim();
+    if (typedUsername && password.length >= 4 && slugifyTenantName(typedUsername) === normalizedSlug) {
+      tenant = createLocalTenant({
+        slug: normalizedSlug,
+        company_name: typedUsername,
+        responsible_name: "",
+        contact_email: "",
+        contact_phone: "",
+        plan: "starter",
+        owner_username: typedUsername,
+        owner_password: password,
+      });
+    }
+  }
+  if (!tenant) throw new Error("Operador não encontrado. Copie novamente o link no Painel Master.");
   if (tenant.status === "blocked") throw new Error("Conta bloqueada. Fale com o administrador.");
   if (tenant.status === "inactive") throw new Error("Conta inativa.");
-  if (tenant.owner_username !== username.trim() || tenant.owner_password !== password) {
+  if (normalizeText(tenant.owner_username) !== normalizeText(username) || tenant.owner_password !== password) {
     throw new Error("Usuário ou senha inválidos");
   }
   setLocalTenantLastLogin(tenant.id);
