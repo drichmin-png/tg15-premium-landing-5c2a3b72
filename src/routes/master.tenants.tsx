@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   clearLocalSaasSession,
+  buildLocalTenantAccessUrl,
   createLocalTenant,
   deleteLocalTenant,
   getLocalSaasSession,
@@ -122,7 +123,16 @@ function TenantsPage() {
                 <tbody className="divide-y divide-slate-100">
                   {filtered.map((t: Tenant) => {
                     const origin = typeof window !== "undefined" ? window.location.origin : "";
-                    const accessUrl = `${origin}/app/${t.slug}/login`;
+                    const accessUrl = buildLocalTenantAccessUrl(
+                      {
+                        slug: t.slug,
+                        company_name: t.company_name,
+                        owner_username: t.owner_username,
+                        owner_password: (t as Tenant & { owner_password?: string }).owner_password || "",
+                        plan: t.plan,
+                      },
+                      origin,
+                    );
                     const shareText = `Seu painel de operador está pronto ✅\n\nAcesso: ${accessUrl}\nUsuário: ${t.owner_username}`;
                     return (
                     <tr key={t.id} className="hover:bg-slate-50 align-top">
@@ -382,7 +392,16 @@ function CreateTenantModal({
               slug: res.slug,
               username: res.username,
               password: res.password,
-              url: `${origin}/app/${res.slug}/login`,
+              url: buildLocalTenantAccessUrl(
+                {
+                  slug: res.slug,
+                  company_name: form.name.trim(),
+                  owner_username: res.username,
+                  owner_password: res.password,
+                  plan: form.role === "admin" ? "owner" : "starter",
+                },
+                origin,
+              ),
             });
           } catch (err) {
             setError(err instanceof Error ? err.message : "Erro");
