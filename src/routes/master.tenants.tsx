@@ -210,9 +210,9 @@ function TenantsPage() {
         <CreateTenantModal
           onClose={() => setShowCreate(false)}
           onCreate={async (payload) => {
-            createLocalTenant(payload);
+            const t = createLocalTenant(payload);
             refresh();
-            setShowCreate(false);
+            return { slug: t.slug, username: t.owner_username, password: payload.owner_password };
           }}
         />
       )}
