@@ -126,7 +126,11 @@ const DEFAULTS: AdminState = {
   },
 };
 
-const STORAGE_KEY = "tg15-admin-v1";
+const BASE_STORAGE_KEY = "tg15-admin-v1";
+let namespace: string | null = null;
+function storageKey() {
+  return namespace ? `${BASE_STORAGE_KEY}:${namespace}` : BASE_STORAGE_KEY;
+}
 
 function load(): AdminState {
   if (typeof window === "undefined") return DEFAULTS;
