@@ -132,6 +132,7 @@ function TenantsPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="font-mono text-xs text-slate-700 mb-1">/app/{t.slug}</div>
+                        <div className="text-[11px] text-slate-500 mb-1">Usuário: <span className="font-mono text-slate-800">{t.owner_username}</span></div>
                         <div className="flex items-center gap-1">
                           <input
                             readOnly
