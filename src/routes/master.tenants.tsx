@@ -74,16 +74,20 @@ function TenantsPage() {
             <div className="text-[11px] uppercase tracking-widest text-slate-400">SaaS · Master</div>
             <h1 className="text-lg font-semibold">Operadores</h1>
           </div>
-          <button
-            onClick={async () => {
-              await doLogout({ data: undefined });
-              await router.invalidate();
-              navigate({ to: "/master/login" });
-            }}
-            className="text-sm text-slate-300 hover:text-white"
-          >
-            Sair
-          </button>
+          <nav className="flex items-center gap-4 text-sm">
+            <Link to="/master/tenants" className="text-white font-medium">Operadores</Link>
+            <Link to="/master/orders" className="text-slate-300 hover:text-white">Pedidos</Link>
+            <button
+              onClick={async () => {
+                await doLogout({ data: undefined });
+                await router.invalidate();
+                navigate({ to: "/master/login" });
+              }}
+              className="text-slate-300 hover:text-white"
+            >
+              Sair
+            </button>
+          </nav>
         </div>
       </header>
 
