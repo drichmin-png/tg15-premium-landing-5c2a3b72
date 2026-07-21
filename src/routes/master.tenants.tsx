@@ -234,7 +234,7 @@ function CreateTenantModal({
     plan: string;
     owner_username: string;
     owner_password: string;
-  }) => Promise<void>;
+  }) => Promise<{ slug: string; username: string; password: string }>;
 }) {
   const [form, setForm] = useState({
     name: "",
@@ -243,6 +243,8 @@ function CreateTenantModal({
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [created, setCreated] = useState<{ slug: string; username: string; password: string; url: string } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const slugify = (s: string) =>
     s
