@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
   ArrowDown,
@@ -31,15 +31,9 @@ import {
 } from "@/lib/local-db";
 
 export const Route = createFileRoute("/admin")({
-  component: AdminPage,
+  head: () => ({ meta: [{ title: "Admin — redirecionando" }, { name: "robots", content: "noindex" }] }),
+  component: () => <Navigate to="/master/login" replace />,
 });
-
-
-function AdminPage() {
-  const state = useAdmin();
-  if (!state.authed) return <LoginScreen />;
-  return <Dashboard />;
-}
 
 function LoginScreen() {
   const [pwd, setPwd] = useState("");
