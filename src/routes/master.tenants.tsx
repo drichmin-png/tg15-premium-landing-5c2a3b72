@@ -237,20 +237,21 @@ function CreateTenantModal({
   }) => Promise<void>;
 }) {
   const [form, setForm] = useState({
-    slug: "",
-    company_name: "",
-    responsible_name: "",
-    contact_email: "",
-    contact_phone: "",
-    plan: "starter",
-    owner_username: "admin",
-    owner_password: "",
+    name: "",
+    role: "operador" as "admin" | "operador",
+    password: "",
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
-    setForm((f) => ({ ...f, [k]: e.target.value }));
+  const slugify = (s: string) =>
+    s
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 40) || `op-${Date.now().toString(36)}`;
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
@@ -259,38 +260,64 @@ function CreateTenantModal({
         onSubmit={async (e) => {
           e.preventDefault();
           setError(null);
+          if (!form.name.trim()) return setError("Informe o nome");
+          if (!form.password || form.password.length < 4) return setError("Senha muito curta");
           setLoading(true);
           try {
-            await onCreate(form);
+            const slug = slugify(form.name);
+            await onCreate({
+              slug,
+              company_name: form.name.trim(),
+              responsible_name: "",
+              contact_email: "",
+              contact_phone: "",
+              plan: form.role === "admin" ? "owner" : "starter",
+              owner_username: form.role === "admin" ? "admin" : "operador",
+              owner_password: form.password,
+            });
           } catch (err) {
             setError(err instanceof Error ? err.message : "Erro");
           } finally {
             setLoading(false);
           }
         }}
-        className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4 max-h-[90vh] overflow-y-auto"
+        className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4"
       >
         <div>
           <h2 className="text-lg font-semibold text-slate-900">Novo operador</h2>
-          <p className="text-xs text-slate-500">Cria o tenant e o usuário dono para acessar em /app/&lt;slug&gt;.</p>
+          <p className="text-xs text-slate-500">Cria um painel de acesso particular para este operador.</p>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <Field label="Nome da empresa *" v={form.company_name} onChange={set("company_name")} />
-          <Field label="Slug (URL) *" v={form.slug} onChange={set("slug")} placeholder="empresa01" />
-          <Field label="Responsável" v={form.responsible_name} onChange={set("responsible_name")} />
-          <Field label="E-mail" v={form.contact_email} onChange={set("contact_email")} type="email" />
-          <Field label="Telefone" v={form.contact_phone} onChange={set("contact_phone")} />
+        <div className="space-y-3">
           <div className="space-y-1">
-            <label className="text-xs font-medium text-slate-600">Plano</label>
-            <select value={form.plan} onChange={set("plan")} className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white">
-              <option value="starter">Starter</option>
-              <option value="pro">Pro</option>
-              <option value="business">Business</option>
-              <option value="owner">Owner</option>
+            <label className="text-xs font-medium text-slate-600">Nome *</label>
+            <input
+              value={form.name}
+              onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              placeholder="Ex.: João Silva"
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-slate-600">Tipo de acesso *</label>
+            <select
+              value={form.role}
+              onChange={(e) => setForm((f) => ({ ...f, role: e.target.value as "admin" | "operador" }))}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 bg-white"
+            >
+              <option value="operador">Operador</option>
+              <option value="admin">Admin</option>
             </select>
           </div>
-          <Field label="Usuário do dono *" v={form.owner_username} onChange={set("owner_username")} />
-          <Field label="Senha do dono *" v={form.owner_password} onChange={set("owner_password")} type="password" />
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-slate-600">Senha de acesso *</label>
+            <input
+              type="password"
+              value={form.password}
+              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2"
+              placeholder="Mínimo 4 caracteres"
+            />
+          </div>
         </div>
         {error && <div className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-md p-2">{error}</div>}
         <div className="flex justify-end gap-2 pt-2">
@@ -304,29 +331,3 @@ function CreateTenantModal({
   );
 }
 
-function Field({
-  label,
-  v,
-  onChange,
-  type = "text",
-  placeholder,
-}: {
-  label: string;
-  v: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  type?: string;
-  placeholder?: string;
-}) {
-  return (
-    <div className="space-y-1">
-      <label className="text-xs font-medium text-slate-600">{label}</label>
-      <input
-        value={v}
-        onChange={onChange}
-        type={type}
-        placeholder={placeholder}
-        className="w-full rounded-lg border border-slate-300 px-3 py-2"
-      />
-    </div>
-  );
-}
