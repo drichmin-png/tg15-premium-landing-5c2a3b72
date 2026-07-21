@@ -135,7 +135,7 @@ function storageKey() {
 function load(): AdminState {
   if (typeof window === "undefined") return DEFAULTS;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey());
     if (!raw) return DEFAULTS;
     const parsed = JSON.parse(raw) as Partial<AdminState>;
     // merge with defaults so new fields are added seamlessly
@@ -180,7 +180,7 @@ function persist(s: AdminState) {
   if (typeof window === "undefined") return;
   try {
     const { authed: _authed, ...rest } = s;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(rest));
+    localStorage.setItem(storageKey(), JSON.stringify(rest));
   } catch {
     /* ignore */
   }
