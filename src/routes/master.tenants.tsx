@@ -119,13 +119,45 @@ function TenantsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100">
-                  {filtered.map((t: Tenant) => (
-                    <tr key={t.id} className="hover:bg-slate-50">
+                  {filtered.map((t: Tenant) => {
+                    const origin = typeof window !== "undefined" ? window.location.origin : "";
+                    const accessUrl = `${origin}/app/${t.slug}/login`;
+                    const shareText = `Seu painel de operador está pronto ✅\n\nAcesso: ${accessUrl}\nUsuário: ${t.owner_username}`;
+                    return (
+                    <tr key={t.id} className="hover:bg-slate-50 align-top">
                       <td className="px-4 py-3">
                         <div className="font-medium text-slate-900">{t.company_name}</div>
                         <div className="text-xs text-slate-500">{t.responsible_name || "—"}</div>
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs text-slate-700">/app/{t.slug}</td>
+                      <td className="px-4 py-3">
+                        <div className="font-mono text-xs text-slate-700 mb-1">/app/{t.slug}</div>
+                        <div className="flex items-center gap-1">
+                          <input
+                            readOnly
+                            value={accessUrl}
+                            onFocus={(e) => e.currentTarget.select()}
+                            className="w-full min-w-[180px] max-w-[240px] rounded-md border border-slate-200 bg-slate-50 px-2 py-1 font-mono text-[11px] text-slate-700"
+                          />
+                          <button
+                            onClick={async () => {
+                              try { await navigator.clipboard.writeText(accessUrl); window.alert("Link copiado!"); } catch {/* */}
+                            }}
+                            title="Copiar link"
+                            className="text-[11px] rounded-md border border-slate-300 px-2 py-1 hover:bg-slate-100"
+                          >
+                            Copiar
+                          </button>
+                          <a
+                            href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            title="Enviar por WhatsApp"
+                            className="text-[11px] rounded-md bg-emerald-600 text-white px-2 py-1 hover:bg-emerald-700"
+                          >
+                            WhatsApp
+                          </a>
+                        </div>
+                      </td>
                       <td className="px-4 py-3 capitalize">{t.plan}</td>
                       <td className="px-4 py-3">
                         <span
