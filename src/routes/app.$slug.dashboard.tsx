@@ -1,6 +1,8 @@
-import { createFileRoute, redirect, useNavigate, useRouter } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate, useRouter, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
+import { useQuery } from "@tanstack/react-query";
 import { getCurrentSession, logout, stopImpersonation } from "@/lib/saas.functions";
+import { tenantStats } from "@/lib/saas-data.functions";
 
 export const Route = createFileRoute("/app/$slug/dashboard")({
   head: ({ params }) => ({
@@ -23,13 +25,23 @@ export const Route = createFileRoute("/app/$slug/dashboard")({
   component: TenantDashboard,
 });
 
+function fmtBRL(cents: number) {
+  return (cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+}
+
 function TenantDashboard() {
   const { session } = Route.useLoaderData();
   const { slug } = Route.useParams();
+  const stats = useServerFn(tenantStats);
   const doLogout = useServerFn(logout);
   const stopImp = useServerFn(stopImpersonation);
   const navigate = useNavigate();
   const router = useRouter();
+
+  const { data: st } = useQuery({
+    queryKey: ["tenant", slug, "stats"],
+    queryFn: () => stats({ data: { slug } }),
+  });
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -37,7 +49,7 @@ function TenantDashboard() {
         <div className="bg-amber-500 text-slate-900 text-sm">
           <div className="max-w-6xl mx-auto px-6 py-2 flex items-center justify-between gap-3">
             <span>
-              <strong>Modo suporte:</strong> você entrou como <code>{slug}</code> a partir de{" "}
+              <strong>Modo suporte:</strong> logado como <code>/{slug}</code> por{" "}
               <strong>{session.impersonation.masterUsername}</strong>.
             </span>
             <button
@@ -62,50 +74,66 @@ function TenantDashboard() {
               {session.tenant?.company_name ?? slug}
             </h1>
           </div>
-          <button
-            onClick={async () => {
-              await doLogout({ data: undefined });
-              await router.invalidate();
-              navigate({ to: "/app/$slug/login", params: { slug } });
-            }}
-            className="text-sm text-slate-500 hover:text-slate-900"
-          >
-            Sair
-          </button>
+          <nav className="flex items-center gap-4 text-sm">
+            <Link to="/app/$slug/dashboard" params={{ slug }} className="text-slate-900 font-medium">Dashboard</Link>
+            <Link to="/app/$slug/orders" params={{ slug }} className="text-slate-500 hover:text-slate-900">Pedidos</Link>
+            <button
+              onClick={async () => {
+                await doLogout({ data: undefined });
+                await router.invalidate();
+                navigate({ to: "/app/$slug/login", params: { slug } });
+              }}
+              className="text-sm text-slate-500 hover:text-slate-900"
+            >
+              Sair
+            </button>
+          </nav>
         </div>
       </header>
 
-      <main className="max-w-6xl mx-auto px-6 py-10">
-        <div className="bg-white rounded-2xl border p-8">
-          <h2 className="text-xl font-semibold text-slate-900">Bem-vindo, {session.username}</h2>
-          <p className="text-sm text-slate-600 mt-2 max-w-lg">
-            Este é o painel do operador <strong>/{slug}</strong>. Nesta Fase 1 apenas a base
-            multi-tenant (login, sessão isolada e URL exclusiva) foi entregue. Nas próximas fases
-            os módulos de pedidos, clientes, produtos, landing pages, financeiro e integrações
-            serão migrados para dentro deste painel, cada um filtrado automaticamente por este
-            tenant.
-          </p>
+      <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <StatCard label="Pedidos" value={String(st?.orders ?? "—")} />
+          <StatCard label="Pendentes" value={String(st?.pending ?? "—")} />
+          <StatCard label="Receita paga" value={st ? fmtBRL(st.revenueCents) : "—"} />
+        </div>
 
-          <dl className="mt-6 grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <dt className="text-xs uppercase text-slate-500">Slug</dt>
-              <dd className="font-mono">{slug}</dd>
-            </div>
-            <div>
-              <dt className="text-xs uppercase text-slate-500">Papel</dt>
-              <dd className="capitalize">{session.role}</dd>
-            </div>
-            <div>
-              <dt className="text-xs uppercase text-slate-500">Status</dt>
-              <dd className="capitalize">{session.tenant?.status ?? "—"}</dd>
-            </div>
-            <div>
-              <dt className="text-xs uppercase text-slate-500">Usuário</dt>
-              <dd>{session.username}</dd>
-            </div>
-          </dl>
+        <div className="bg-white rounded-2xl border p-6">
+          <h2 className="text-base font-semibold text-slate-900">Bem-vindo, {session.username}</h2>
+          <p className="text-sm text-slate-600 mt-2 max-w-2xl">
+            Você está no painel do operador <strong>/{slug}</strong>. Nesta fase estão ativos
+            dashboard e pedidos, isolados por operador. Os próximos módulos (clientes, produtos,
+            cupons, landing pages editáveis, financeiro, e-mails, permissões de usuários internos)
+            serão adicionados nas próximas fases mantendo o mesmo isolamento.
+          </p>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link
+              to="/app/$slug/orders"
+              params={{ slug }}
+              className="text-sm rounded-md bg-slate-900 text-white px-3 py-2 hover:bg-slate-800"
+            >
+              Ver pedidos
+            </Link>
+            {slug === "tg15" && (
+              <Link
+                to="/admin"
+                className="text-sm rounded-md border border-slate-300 px-3 py-2 hover:bg-slate-100"
+              >
+                Abrir painel legado do T.G.15
+              </Link>
+            )}
+          </div>
         </div>
       </main>
+    </div>
+  );
+}
+
+function StatCard({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-2xl border bg-white p-5">
+      <div className="text-[11px] uppercase tracking-widest text-slate-500">{label}</div>
+      <div className="mt-2 text-2xl font-bold text-slate-900">{value}</div>
     </div>
   );
 }
