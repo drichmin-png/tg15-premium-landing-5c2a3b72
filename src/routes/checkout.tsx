@@ -49,8 +49,12 @@ function Checkout() {
   useEffect(() => {
     if (typeof window === "undefined") return;
     const operatorSlug = window.sessionStorage.getItem("tg15-active-operator-slug");
-    if (operatorSlug && admin.getNamespace() !== operatorSlug) admin.setNamespace(operatorSlug);
-  }, []);
+    if (!operatorSlug) {
+      nav({ to: "/", replace: true });
+      return;
+    }
+    if (admin.getNamespace() !== operatorSlug) admin.setNamespace(operatorSlug);
+  }, [nav]);
 
   // InitiateCheckout — apenas ao acessar /checkout (uma vez por sessão de página)
   useEffect(() => {
