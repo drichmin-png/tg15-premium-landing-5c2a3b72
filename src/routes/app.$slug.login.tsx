@@ -1,6 +1,6 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { createTenantSession, verifyLocalTenantLogin } from "@/lib/saas-local";
+import { useEffect, useState } from "react";
+import { createTenantSession, importLocalTenantFromAccessToken, verifyLocalTenantLogin } from "@/lib/saas-local";
 
 export const Route = createFileRoute("/app/$slug/login")({
   head: ({ params }) => ({
@@ -20,6 +20,13 @@ function TenantLoginPage() {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
+  useEffect(() => {
+    const setupToken = new URLSearchParams(window.location.search).get("setup");
+    if (!setupToken) return;
+    const tenant = importLocalTenantFromAccessToken(setupToken);
+    if (tenant) setUsername(tenant.owner_username);
+  }, []);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-200 px-4">
       <form
@@ -28,6 +35,8 @@ function TenantLoginPage() {
           setError(null);
           setLoading(true);
           try {
+            const setupToken = new URLSearchParams(window.location.search).get("setup");
+            if (setupToken) importLocalTenantFromAccessToken(setupToken);
             const tenant = verifyLocalTenantLogin(slug, username, password);
             createTenantSession(tenant, username.trim());
             navigate({ to: "/app/$slug/dashboard", params: { slug } });
