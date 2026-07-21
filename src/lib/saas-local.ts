@@ -125,26 +125,8 @@ function writeJson<T>(key: string, value: T) {
 }
 
 function defaultTenants(): LocalTenant[] {
-  return [
-    {
-      id: "tenant_tg15",
-      slug: "tg15",
-      company_name: "T.G.15",
-      responsible_name: "Administrador",
-      contact_email: "",
-      contact_phone: "",
-      plan: "owner",
-      status: "active",
-      order_limit: 0,
-      product_limit: 0,
-      user_limit: 3,
-      expires_at: null,
-      last_login_at: null,
-      created_at: new Date().toISOString(),
-      owner_username: "admin",
-      owner_password: MASTER_PASSWORD,
-    },
-  ];
+  // Master is not a tenant. Operators are created via the Master panel.
+  return [];
 }
 
 export function listLocalTenants(): LocalTenant[] {

@@ -1,8 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { clearLocalSaasSession, getLocalSaasSession, listLocalTenants } from "@/lib/saas-local";
-import { listLocalOrders } from "@/lib/local-db";
-import type { OrderRow } from "@/lib/saas-data.functions";
+import { listAllLocalOrders } from "@/lib/local-db";
 
 export const Route = createFileRoute("/master/orders")({
   head: () => ({ meta: [{ title: "Pedidos globais — Master" }, { name: "robots", content: "noindex" }] }),
@@ -23,27 +22,27 @@ function MasterOrdersPage() {
   }, [navigate]);
 
   const tenants = useMemo(() => listLocalTenants(), []);
-  const orders = useMemo(
-    () =>
-      listLocalOrders().map((order) => ({
-        ...order,
-        tenant_id: "tenant_tg15",
-        tenant_slug: "tg15",
-        tenant_name: tenants.find((tenant) => tenant.slug === "tg15")?.company_name ?? "T.G.15",
-      })),
-    [tenants],
-  );
+  const orders = useMemo(() => {
+    const bySlug = new Map(tenants.map((t) => [t.slug, t.company_name]));
+    return listAllLocalOrders().map((order) => ({
+      ...order,
+      tenant_name: bySlug.get(order.tenant_slug) ?? order.tenant_slug,
+    }));
+  }, [tenants]);
+
   const st = useMemo(
     () => ({
       tenants: tenants.length,
       orders: orders.length,
-      revenueCents: orders.filter((order) => order.payment_status === "paid").reduce((sum, order) => sum + order.total_cents, 0),
+      revenueCents: orders
+        .filter((order) => order.payment_status === "paid")
+        .reduce((sum, order) => sum + order.total_cents, 0),
     }),
     [orders, tenants.length],
   );
 
-  const filtered = orders.filter((o: OrderRow) => !tenantFilter || o.tenant_slug === tenantFilter);
-  const slugs = Array.from(new Set(tenants.map((tenant) => tenant.slug)));
+  const filtered = orders.filter((o) => !tenantFilter || o.tenant_slug === tenantFilter);
+  const slugs = Array.from(new Set(tenants.map((t) => t.slug)));
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -51,7 +50,7 @@ function MasterOrdersPage() {
         <div className="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
           <div>
             <div className="text-[11px] uppercase tracking-widest text-slate-400">SaaS · Master</div>
-            <h1 className="text-lg font-semibold">Visão global</h1>
+            <h1 className="text-lg font-semibold">Pedidos consolidados</h1>
           </div>
           <nav className="flex items-center gap-4 text-sm">
             <Link to="/master/tenants" className="text-slate-300 hover:text-white">Operadores</Link>
@@ -71,9 +70,9 @@ function MasterOrdersPage() {
 
       <main className="max-w-6xl mx-auto px-6 py-8 space-y-6">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <Stat label="Operadores" value={String(st?.tenants ?? "—")} />
-          <Stat label="Pedidos" value={String(st?.orders ?? "—")} />
-          <Stat label="Receita paga" value={st ? fmtBRL(st.revenueCents) : "—"} />
+          <Stat label="Operadores" value={String(st.tenants)} />
+          <Stat label="Pedidos" value={String(st.orders)} />
+          <Stat label="Receita paga" value={fmtBRL(st.revenueCents)} />
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
@@ -104,14 +103,14 @@ function MasterOrdersPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
-                {filtered.map((o: OrderRow) => (
-                  <tr key={o.id} className="hover:bg-slate-50">
+                {filtered.map((o) => (
+                  <tr key={`${o.tenant_slug}-${o.id}`} className="hover:bg-slate-50">
                     <td className="px-4 py-3 text-xs text-slate-600">
                       {new Date(o.created_at).toLocaleString("pt-BR")}
                     </td>
                     <td className="px-4 py-3">
-                      <div className="font-medium">{o.tenant_name ?? "—"}</div>
-                      <div className="text-xs text-slate-500 font-mono">/{o.tenant_slug ?? "?"}</div>
+                      <div className="font-medium">{o.tenant_name}</div>
+                      <div className="text-xs text-slate-500 font-mono">/{o.tenant_slug}</div>
                     </td>
                     <td className="px-4 py-3">
                       <div className="font-medium">{o.customer_name}</div>

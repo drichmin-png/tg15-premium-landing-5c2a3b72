@@ -244,10 +244,6 @@ function TenantsPage() {
             </div>
           </div>
         )}
-
-        <div className="text-xs text-slate-500">
-          <Link to="/admin" className="underline">Painel legado do T.G.15</Link>
-        </div>
       </main>
 
       {showCreate && (
