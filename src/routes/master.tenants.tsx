@@ -1,17 +1,15 @@
-import { createFileRoute, useNavigate, useRouter, redirect, Link } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useEffect, useState } from "react";
 import {
-  getCurrentSession,
-  listTenants,
-  createTenant,
-  setTenantStatus,
-  deleteTenant,
-  resetTenantOwnerPassword,
-  impersonateTenant,
-  logout,
-} from "@/lib/saas.functions";
+  clearLocalSaasSession,
+  createLocalTenant,
+  deleteLocalTenant,
+  getLocalSaasSession,
+  impersonateLocalTenant,
+  listLocalTenants,
+  resetLocalTenantPassword,
+  setLocalTenantStatus,
+} from "@/lib/saas-local";
 
 type Tenant = {
   id: string;
@@ -32,35 +30,29 @@ type Tenant = {
 
 export const Route = createFileRoute("/master/tenants")({
   head: () => ({ meta: [{ title: "Operadores — Admin Master" }, { name: "robots", content: "noindex" }] }),
-  beforeLoad: async () => {
-    const s = await getCurrentSession();
-    if (!s || s.role !== "master") throw redirect({ to: "/master/login" });
-  },
   component: TenantsPage,
 });
 
 function TenantsPage() {
-  const list = useServerFn(listTenants);
-  const create = useServerFn(createTenant);
-  const setStatus = useServerFn(setTenantStatus);
-  const del = useServerFn(deleteTenant);
-  const resetPwd = useServerFn(resetTenantOwnerPassword);
-  const impersonate = useServerFn(impersonateTenant);
-  const doLogout = useServerFn(logout);
-
   const navigate = useNavigate();
-  const router = useRouter();
-  const qc = useQueryClient();
-
-  const { data: tenants, isLoading } = useQuery({
-    queryKey: ["master", "tenants"],
-    queryFn: () => list(),
-  });
-
+  const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [q, setQ] = useState("");
   const [showCreate, setShowCreate] = useState(false);
 
-  const filtered = (tenants ?? []).filter((t: Tenant) => {
+  const refresh = () => setTenants(listLocalTenants());
+
+  useEffect(() => {
+    const session = getLocalSaasSession();
+    if (!session || session.role !== "master") {
+      navigate({ to: "/master/login", replace: true });
+      return;
+    }
+    refresh();
+    setIsLoading(false);
+  }, [navigate]);
+
+  const filtered = tenants.filter((t: Tenant) => {
     if (!q.trim()) return true;
     const s = q.toLowerCase();
     return t.slug.includes(s) || t.company_name.toLowerCase().includes(s);
@@ -79,8 +71,7 @@ function TenantsPage() {
             <Link to="/master/orders" className="text-slate-300 hover:text-white">Pedidos</Link>
             <button
               onClick={async () => {
-                await doLogout({ data: undefined });
-                await router.invalidate();
+                clearLocalSaasSession();
                 navigate({ to: "/master/login" });
               }}
               className="text-slate-300 hover:text-white"
@@ -157,8 +148,7 @@ function TenantsPage() {
                         <div className="flex justify-end gap-2 flex-wrap">
                           <button
                             onClick={async () => {
-                              const r = await impersonate({ data: { tenantId: t.id } });
-                              await router.invalidate();
+                              const r = impersonateLocalTenant(t.id);
                               navigate({ to: "/app/$slug/dashboard", params: { slug: r.slug } });
                             }}
                             className="text-xs rounded-md bg-slate-900 text-white px-2.5 py-1 hover:bg-slate-800"
@@ -170,8 +160,9 @@ function TenantsPage() {
                               const pwd = window.prompt("Nova senha do dono:");
                               if (!pwd) return;
                               try {
-                                await resetPwd({ data: { tenantId: t.id, newPassword: pwd } });
+                                resetLocalTenantPassword(t.id, pwd);
                                 window.alert("Senha atualizada.");
+                                refresh();
                               } catch (e) {
                                 window.alert(e instanceof Error ? e.message : "Erro");
                               }
@@ -183,8 +174,8 @@ function TenantsPage() {
                           <button
                             onClick={async () => {
                               const next = t.status === "blocked" ? "active" : "blocked";
-                              await setStatus({ data: { id: t.id, status: next } });
-                              qc.invalidateQueries({ queryKey: ["master", "tenants"] });
+                              setLocalTenantStatus(t.id, next);
+                              refresh();
                             }}
                             className="text-xs rounded-md border border-slate-300 px-2.5 py-1 hover:bg-slate-100"
                           >
@@ -193,8 +184,8 @@ function TenantsPage() {
                           <button
                             onClick={async () => {
                               if (!window.confirm(`Excluir ${t.company_name}? Todos os dados serão removidos.`)) return;
-                              await del({ data: { id: t.id } });
-                              qc.invalidateQueries({ queryKey: ["master", "tenants"] });
+                              deleteLocalTenant(t.id);
+                              refresh();
                             }}
                             className="text-xs rounded-md border border-red-200 text-red-700 px-2.5 py-1 hover:bg-red-50"
                           >
@@ -219,8 +210,8 @@ function TenantsPage() {
         <CreateTenantModal
           onClose={() => setShowCreate(false)}
           onCreate={async (payload) => {
-            await create({ data: payload });
-            qc.invalidateQueries({ queryKey: ["master", "tenants"] });
+            createLocalTenant(payload);
+            refresh();
             setShowCreate(false);
           }}
         />

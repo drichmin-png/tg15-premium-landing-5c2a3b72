@@ -1,7 +1,6 @@
-import { createFileRoute, useNavigate, useRouter, Link } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { masterLogin } from "@/lib/saas.functions";
+import { createMasterSession, verifyLocalMasterLogin } from "@/lib/saas-local";
 
 export const Route = createFileRoute("/master/login")({
   head: () => ({
@@ -14,9 +13,7 @@ export const Route = createFileRoute("/master/login")({
 });
 
 function MasterLoginPage() {
-  const login = useServerFn(masterLogin);
   const navigate = useNavigate();
-  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -30,8 +27,8 @@ function MasterLoginPage() {
           setError(null);
           setLoading(true);
           try {
-            await login({ data: { username, password } });
-            await router.invalidate();
+            if (!verifyLocalMasterLogin(username, password)) throw new Error("Usuário ou senha inválidos");
+            createMasterSession(username.trim() || "admin");
             navigate({ to: "/master/tenants" });
           } catch (err) {
             setError(err instanceof Error ? err.message : "Falha ao entrar");
