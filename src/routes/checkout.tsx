@@ -7,7 +7,7 @@ import { trackLead, trackInitiateCheckout, trackAddPaymentInfo, trackPurchase } 
 import { cleanCPF, formatCPF, isValidCPF } from "@/lib/validation/cpf";
 import { cleanCEP, formatCEP, lookupCEP } from "@/lib/validation/cep";
 import { installmentOptions } from "@/lib/payments/installments";
-import { useAdmin } from "@/lib/admin-store";
+import { admin, useAdmin } from "@/lib/admin-store";
 import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
 import { saveLocalOrder } from "@/lib/local-db";
 
@@ -45,6 +45,12 @@ function Checkout() {
   const total = subtotal + shippingCost;
   const boxSavingsUnit = Math.max(0, products.single.price * 4 - products.box.price);
   const savings = state.variant === "box" ? boxSavingsUnit * state.qty : 0;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const operatorSlug = window.sessionStorage.getItem("tg15-active-operator-slug");
+    if (operatorSlug && admin.getNamespace() !== operatorSlug) admin.setNamespace(operatorSlug);
+  }, []);
 
   // InitiateCheckout — apenas ao acessar /checkout (uma vez por sessão de página)
   useEffect(() => {
