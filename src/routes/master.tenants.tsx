@@ -210,9 +210,9 @@ function TenantsPage() {
         <CreateTenantModal
           onClose={() => setShowCreate(false)}
           onCreate={async (payload) => {
-            createLocalTenant(payload);
+            const t = createLocalTenant(payload);
             refresh();
-            setShowCreate(false);
+            return { slug: t.slug, username: t.owner_username, password: payload.owner_password };
           }}
         />
       )}
@@ -234,7 +234,7 @@ function CreateTenantModal({
     plan: string;
     owner_username: string;
     owner_password: string;
-  }) => Promise<void>;
+  }) => Promise<{ slug: string; username: string; password: string }>;
 }) {
   const [form, setForm] = useState({
     name: "",
@@ -243,6 +243,8 @@ function CreateTenantModal({
   });
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [created, setCreated] = useState<{ slug: string; username: string; password: string; url: string } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const slugify = (s: string) =>
     s
@@ -252,6 +254,72 @@ function CreateTenantModal({
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-+|-+$/g, "")
       .slice(0, 40) || `op-${Date.now().toString(36)}`;
+
+  if (created) {
+    const shareText = `Seu painel de operador está pronto ✅\n\nAcesso: ${created.url}\nUsuário: ${created.username}\nSenha: ${created.password}`;
+    return (
+      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
+        <div onClick={(e) => e.stopPropagation()} className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4">
+          <div>
+            <div className="text-xs uppercase tracking-widest text-emerald-600 font-semibold">Operador criado</div>
+            <h2 className="text-lg font-semibold text-slate-900 mt-1">Compartilhe o acesso</h2>
+            <p className="text-xs text-slate-500 mt-1">Envie o link e as credenciais abaixo para o operador.</p>
+          </div>
+
+          <div className="space-y-2">
+            <div className="text-xs font-medium text-slate-600">Link de acesso</div>
+            <div className="flex gap-2">
+              <input readOnly value={created.url} onFocus={(e) => e.currentTarget.select()} className="flex-1 min-w-0 rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 font-mono text-xs" />
+              <button
+                onClick={async () => {
+                  try { await navigator.clipboard.writeText(created.url); setCopied(true); setTimeout(() => setCopied(false), 1600); } catch {/* */}
+                }}
+                className="text-xs rounded-lg bg-slate-900 text-white px-3 py-2 hover:bg-slate-800"
+              >
+                {copied ? "Copiado!" : "Copiar"}
+              </button>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="text-[10px] uppercase tracking-widest text-slate-500">Usuário</div>
+              <div className="text-sm font-mono text-slate-900">{created.username}</div>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+              <div className="text-[10px] uppercase tracking-widest text-slate-500">Senha</div>
+              <div className="text-sm font-mono text-slate-900">{created.password}</div>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap gap-2 pt-2">
+            <a
+              href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs rounded-lg bg-emerald-600 text-white px-3 py-2 hover:bg-emerald-700"
+            >
+              Enviar por WhatsApp
+            </a>
+            <button
+              onClick={async () => {
+                try { await navigator.clipboard.writeText(shareText); setCopied(true); setTimeout(() => setCopied(false), 1600); } catch {/* */}
+              }}
+              className="text-xs rounded-lg border border-slate-300 px-3 py-2 hover:bg-slate-100"
+            >
+              Copiar credenciais
+            </button>
+            <button
+              onClick={onClose}
+              className="ml-auto text-xs rounded-lg bg-slate-900 text-white px-3 py-2 hover:bg-slate-800"
+            >
+              Concluir
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" onClick={onClose}>
@@ -265,7 +333,7 @@ function CreateTenantModal({
           setLoading(true);
           try {
             const slug = slugify(form.name);
-            await onCreate({
+            const res = await onCreate({
               slug,
               company_name: form.name.trim(),
               responsible_name: "",
@@ -274,6 +342,13 @@ function CreateTenantModal({
               plan: form.role === "admin" ? "owner" : "starter",
               owner_username: form.role === "admin" ? "admin" : "operador",
               owner_password: form.password,
+            });
+            const origin = typeof window !== "undefined" ? window.location.origin : "";
+            setCreated({
+              slug: res.slug,
+              username: res.username,
+              password: res.password,
+              url: `${origin}/app/${res.slug}/login`,
             });
           } catch (err) {
             setError(err instanceof Error ? err.message : "Erro");

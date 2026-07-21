@@ -126,12 +126,16 @@ const DEFAULTS: AdminState = {
   },
 };
 
-const STORAGE_KEY = "tg15-admin-v1";
+const BASE_STORAGE_KEY = "tg15-admin-v1";
+let namespace: string | null = null;
+function storageKey() {
+  return namespace ? `${BASE_STORAGE_KEY}:${namespace}` : BASE_STORAGE_KEY;
+}
 
 function load(): AdminState {
   if (typeof window === "undefined") return DEFAULTS;
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey());
     if (!raw) return DEFAULTS;
     const parsed = JSON.parse(raw) as Partial<AdminState>;
     // merge with defaults so new fields are added seamlessly
@@ -176,7 +180,7 @@ function persist(s: AdminState) {
   if (typeof window === "undefined") return;
   try {
     const { authed: _authed, ...rest } = s;
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(rest));
+    localStorage.setItem(storageKey(), JSON.stringify(rest));
   } catch {
     /* ignore */
   }
@@ -230,6 +234,7 @@ function applyRemoteData(remote: Record<string, unknown> | null | undefined) {
 async function hydrateRemote() {
   ensureHydrated();
   if (typeof window === "undefined") return;
+  if (namespace) return; // per-tenant panels are local-only
   try {
     const { supabase } = await import("@/integrations/supabase/client");
     const { data, error } = await supabase
@@ -242,6 +247,27 @@ async function hydrateRemote() {
   } catch (e) {
     console.warn("[admin] hydrateRemote falhou", e);
   }
+}
+
+function setNamespace(ns: string | null) {
+  const next = ns ? ns.toLowerCase() : null;
+  if (next === namespace) return;
+  namespace = next;
+  hydrated = false;
+  authPassword = null;
+  if (typeof window !== "undefined") {
+    state = load();
+    hydrated = true;
+  }
+  notify();
+}
+
+function markAuthed() {
+  ensureHydrated();
+  authPassword = state.password || "local";
+  state = { ...state, authed: true };
+  persist(state);
+  notify();
 }
 
 export const admin = {
@@ -366,9 +392,14 @@ export const admin = {
   hydrateRemote,
   getAuthPassword: () => authPassword,
   saveRemote: async () => {
-    if (!authPassword) throw new Error("Faça login novamente para salvar");
     ensureHydrated();
     persist(state);
+    if (namespace) {
+      // per-tenant panel: local-only save
+      notify();
+      return;
+    }
+    if (!authPassword) throw new Error("Faça login novamente para salvar");
     const payload: Record<string, unknown> = {};
     for (const k of REMOTE_KEYS) payload[k as string] = state[k];
     try {
@@ -384,6 +415,9 @@ export const admin = {
     }
     notify();
   },
+  setNamespace,
+  markAuthed,
+  getNamespace: () => namespace,
   subscribe: (l: () => void) => {
     listeners.add(l);
     return () => listeners.delete(l);

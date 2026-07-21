@@ -99,7 +99,7 @@ function LoginScreen() {
 
 type Tab = "pedidos" | "relatorio" | "produtos" | "blocos" | "hero" | "tracking" | "gateway" | "pix" | "suporte" | "seguranca";
 
-function Dashboard() {
+export function Dashboard() {
   const [tab, setTab] = useState<Tab>("pedidos");
   const s = useAdmin();
 
