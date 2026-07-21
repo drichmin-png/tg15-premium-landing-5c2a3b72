@@ -373,7 +373,7 @@ function CreateTenantModal({
               contact_email: "",
               contact_phone: "",
               plan: form.role === "admin" ? "owner" : "starter",
-              owner_username: form.role === "admin" ? "admin" : "operador",
+              owner_username: form.name.trim(),
               owner_password: form.password,
             });
             const origin = typeof window !== "undefined" ? window.location.origin : "";
