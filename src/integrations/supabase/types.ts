@@ -131,6 +131,56 @@ export type Database = {
         }
         Relationships: []
       }
+      app_users: {
+        Row: {
+          created_at: string
+          display_name: string
+          id: string
+          last_login_at: string | null
+          password_hash: string
+          password_salt: string
+          role: string
+          status: string
+          tenant_id: string | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          last_login_at?: string | null
+          password_hash: string
+          password_salt: string
+          role: string
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          created_at?: string
+          display_name?: string
+          id?: string
+          last_login_at?: string | null
+          password_hash?: string
+          password_salt?: string
+          role?: string
+          status?: string
+          tenant_id?: string | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "app_users_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       gateways: {
         Row: {
           ativo: boolean
@@ -178,6 +228,51 @@ export type Database = {
           webhook_secret?: string
         }
         Relationships: []
+      }
+      impersonation_logs: {
+        Row: {
+          ended_at: string | null
+          id: string
+          ip: string | null
+          master_user_id: string
+          started_at: string
+          tenant_id: string
+          user_agent: string | null
+        }
+        Insert: {
+          ended_at?: string | null
+          id?: string
+          ip?: string | null
+          master_user_id: string
+          started_at?: string
+          tenant_id: string
+          user_agent?: string | null
+        }
+        Update: {
+          ended_at?: string | null
+          id?: string
+          ip?: string | null
+          master_user_id?: string
+          started_at?: string
+          tenant_id?: string
+          user_agent?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "impersonation_logs_master_user_id_fkey"
+            columns: ["master_user_id"]
+            isOneToOne: false
+            referencedRelation: "app_users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "impersonation_logs_tenant_id_fkey"
+            columns: ["tenant_id"]
+            isOneToOne: false
+            referencedRelation: "tenants"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       order_items: {
         Row: {
@@ -343,6 +438,60 @@ export type Database = {
           id?: string
           singleton?: boolean
           updated_at?: string
+        }
+        Relationships: []
+      }
+      tenants: {
+        Row: {
+          company_name: string
+          contact_email: string
+          contact_phone: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          last_login_at: string | null
+          order_limit: number
+          plan: string
+          product_limit: number
+          responsible_name: string
+          slug: string
+          status: string
+          updated_at: string
+          user_limit: number
+        }
+        Insert: {
+          company_name: string
+          contact_email?: string
+          contact_phone?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_login_at?: string | null
+          order_limit?: number
+          plan?: string
+          product_limit?: number
+          responsible_name?: string
+          slug: string
+          status?: string
+          updated_at?: string
+          user_limit?: number
+        }
+        Update: {
+          company_name?: string
+          contact_email?: string
+          contact_phone?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_login_at?: string | null
+          order_limit?: number
+          plan?: string
+          product_limit?: number
+          responsible_name?: string
+          slug?: string
+          status?: string
+          updated_at?: string
+          user_limit?: number
         }
         Relationships: []
       }
