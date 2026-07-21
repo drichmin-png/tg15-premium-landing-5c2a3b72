@@ -73,9 +73,30 @@ export interface AnalyticsReport {
   };
 }
 
-const ORDERS_KEY = "tg15-local-orders-v1";
-const EVENTS_KEY = "tg15-local-analytics-v1";
+const ORDERS_KEY_BASE = "tg15-local-orders-v1";
+const EVENTS_KEY_BASE = "tg15-local-analytics-v1";
 const MAX_EVENTS = 5000;
+
+function currentNamespace(): string | null {
+  if (typeof window === "undefined") return null;
+  try {
+    const active = window.sessionStorage.getItem("tg15-active-operator-slug");
+    if (active) return active.toLowerCase();
+  } catch {
+    /* ignore */
+  }
+  return null;
+}
+
+function ordersKey(ns?: string | null) {
+  const n = ns === undefined ? currentNamespace() : ns;
+  return n ? `${ORDERS_KEY_BASE}:${n}` : ORDERS_KEY_BASE;
+}
+
+function eventsKey(ns?: string | null) {
+  const n = ns === undefined ? currentNamespace() : ns;
+  return n ? `${EVENTS_KEY_BASE}:${n}` : EVENTS_KEY_BASE;
+}
 
 function canUseStorage() {
   return typeof window !== "undefined" && !!window.localStorage;
@@ -100,43 +121,62 @@ function writeJson<T>(key: string, value: T) {
   }
 }
 
-export function listLocalOrders(): AdminOrder[] {
-  return readJson<AdminOrder[]>(ORDERS_KEY, []).sort(
+export function listLocalOrders(ns?: string | null): AdminOrder[] {
+  return readJson<AdminOrder[]>(ordersKey(ns), []).sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
 }
 
-export function saveLocalOrder(order: AdminOrder) {
-  const current = listLocalOrders();
+/** Master-only: aggregate orders across every operator namespace present on this device. */
+export function listAllLocalOrders(): Array<AdminOrder & { tenant_slug: string }> {
+  if (!canUseStorage()) return [];
+  const result: Array<AdminOrder & { tenant_slug: string }> = [];
+  for (let i = 0; i < window.localStorage.length; i += 1) {
+    const key = window.localStorage.key(i);
+    if (!key || !key.startsWith(ORDERS_KEY_BASE)) continue;
+    const slug = key === ORDERS_KEY_BASE ? "" : key.slice(ORDERS_KEY_BASE.length + 1);
+    if (!slug) continue;
+    const rows = readJson<AdminOrder[]>(key, []);
+    for (const row of rows) result.push({ ...row, tenant_slug: slug });
+  }
+  return result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+}
+
+export function saveLocalOrder(order: AdminOrder, ns?: string | null) {
+  const key = ordersKey(ns);
+  const current = readJson<AdminOrder[]>(key, []);
   const next = [order, ...current.filter((o) => o.id !== order.id && o.public_token !== order.public_token)];
-  writeJson(ORDERS_KEY, next);
+  writeJson(key, next);
 }
 
 export function updateLocalOrder(
   orderId: string,
   patch: Partial<Pick<AdminOrder, "payment_status" | "delivery_status_override" | "invoice_url" | "notes">>,
+  ns?: string | null,
 ) {
-  const next = listLocalOrders().map((order) => {
+  const key = ordersKey(ns);
+  const next = readJson<AdminOrder[]>(key, []).map((order) => {
     if (order.id !== orderId) return order;
     const paid_at = patch.payment_status === "paid" && !order.paid_at ? new Date().toISOString() : order.paid_at;
     return { ...order, ...patch, paid_at };
   });
-  writeJson(ORDERS_KEY, next);
+  writeJson(key, next);
 }
 
 export function addLocalAnalyticsEvents(rows: Omit<LocalAnalyticsEvent, "created_at">[]) {
-  const current = readJson<LocalAnalyticsEvent[]>(EVENTS_KEY, []);
+  const key = eventsKey();
+  const current = readJson<LocalAnalyticsEvent[]>(key, []);
   const created = new Date().toISOString();
   const next = [
     ...current,
     ...rows.map((row) => ({ ...row, created_at: created })),
   ].slice(-MAX_EVENTS);
-  writeJson(EVENTS_KEY, next);
+  writeJson(key, next);
 }
 
 function listLocalAnalyticsEvents(days: number) {
   const since = Date.now() - days * 24 * 60 * 60 * 1000;
-  return readJson<LocalAnalyticsEvent[]>(EVENTS_KEY, []).filter(
+  return readJson<LocalAnalyticsEvent[]>(eventsKey(), []).filter(
     (ev) => new Date(ev.created_at).getTime() >= since,
   );
 }
