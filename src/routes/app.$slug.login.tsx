@@ -1,7 +1,6 @@
-import { createFileRoute, useNavigate, useRouter, Link } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { tenantLogin } from "@/lib/saas.functions";
+import { createTenantSession, verifyLocalTenantLogin } from "@/lib/saas-local";
 
 export const Route = createFileRoute("/app/$slug/login")({
   head: ({ params }) => ({
@@ -15,9 +14,7 @@ export const Route = createFileRoute("/app/$slug/login")({
 
 function TenantLoginPage() {
   const { slug } = Route.useParams();
-  const login = useServerFn(tenantLogin);
   const navigate = useNavigate();
-  const router = useRouter();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -31,8 +28,8 @@ function TenantLoginPage() {
           setError(null);
           setLoading(true);
           try {
-            await login({ data: { slug, username, password } });
-            await router.invalidate();
+            const tenant = verifyLocalTenantLogin(slug, username, password);
+            createTenantSession(tenant, username.trim());
             navigate({ to: "/app/$slug/dashboard", params: { slug } });
           } catch (err) {
             setError(err instanceof Error ? err.message : "Falha ao entrar");

@@ -1,16 +1,11 @@
-import { createFileRoute, redirect, Link, useNavigate, useRouter } from "@tanstack/react-router";
-import { useServerFn } from "@tanstack/react-start";
-import { useQuery } from "@tanstack/react-query";
-import { getCurrentSession, logout } from "@/lib/saas.functions";
-import { listAllOrders, globalStats, type OrderRow } from "@/lib/saas-data.functions";
-import { useState } from "react";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { clearLocalSaasSession, getLocalSaasSession, listLocalTenants } from "@/lib/saas-local";
+import { listLocalOrders } from "@/lib/local-db";
+import type { OrderRow } from "@/lib/saas-data.functions";
 
 export const Route = createFileRoute("/master/orders")({
   head: () => ({ meta: [{ title: "Pedidos globais — Master" }, { name: "robots", content: "noindex" }] }),
-  beforeLoad: async () => {
-    const s = await getCurrentSession();
-    if (!s || s.role !== "master") throw redirect({ to: "/master/login" });
-  },
   component: MasterOrdersPage,
 });
 
@@ -19,19 +14,36 @@ function fmtBRL(cents: number) {
 }
 
 function MasterOrdersPage() {
-  const list = useServerFn(listAllOrders);
-  const stats = useServerFn(globalStats);
-  const doLogout = useServerFn(logout);
   const navigate = useNavigate();
-  const router = useRouter();
-
   const [tenantFilter, setTenantFilter] = useState<string>("");
 
-  const { data: orders } = useQuery({ queryKey: ["master", "orders"], queryFn: () => list() });
-  const { data: st } = useQuery({ queryKey: ["master", "stats"], queryFn: () => stats() });
+  useEffect(() => {
+    const session = getLocalSaasSession();
+    if (!session || session.role !== "master") navigate({ to: "/master/login", replace: true });
+  }, [navigate]);
 
-  const filtered = (orders ?? []).filter((o: OrderRow) => !tenantFilter || o.tenant_slug === tenantFilter);
-  const slugs = Array.from(new Set((orders ?? []).map((o: OrderRow) => o.tenant_slug).filter(Boolean))) as string[];
+  const tenants = useMemo(() => listLocalTenants(), []);
+  const orders = useMemo(
+    () =>
+      listLocalOrders().map((order) => ({
+        ...order,
+        tenant_id: "tenant_tg15",
+        tenant_slug: "tg15",
+        tenant_name: tenants.find((tenant) => tenant.slug === "tg15")?.company_name ?? "T.G.15",
+      })),
+    [tenants],
+  );
+  const st = useMemo(
+    () => ({
+      tenants: tenants.length,
+      orders: orders.length,
+      revenueCents: orders.filter((order) => order.payment_status === "paid").reduce((sum, order) => sum + order.total_cents, 0),
+    }),
+    [orders, tenants.length],
+  );
+
+  const filtered = orders.filter((o: OrderRow) => !tenantFilter || o.tenant_slug === tenantFilter);
+  const slugs = Array.from(new Set(tenants.map((tenant) => tenant.slug)));
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -46,8 +58,7 @@ function MasterOrdersPage() {
             <Link to="/master/orders" className="text-white font-medium">Pedidos</Link>
             <button
               onClick={async () => {
-                await doLogout({ data: undefined });
-                await router.invalidate();
+                clearLocalSaasSession();
                 navigate({ to: "/master/login" });
               }}
               className="text-slate-300 hover:text-white"
