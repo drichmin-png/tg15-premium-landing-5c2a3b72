@@ -236,20 +236,26 @@ export const updateTenant = createServerFn({ method: "POST" })
   .handler(async ({ data }) => {
     await requireMaster();
     const sb = await admin();
-    const patch: Record<string, unknown> = {};
-    for (const k of [
-      "company_name",
-      "responsible_name",
-      "contact_email",
-      "contact_phone",
-      "plan",
-      "order_limit",
-      "product_limit",
-      "user_limit",
-      "expires_at",
-    ] as const) {
-      if (data[k] !== undefined) patch[k] = data[k];
-    }
+    const patch: {
+      company_name?: string;
+      responsible_name?: string;
+      contact_email?: string;
+      contact_phone?: string;
+      plan?: string;
+      order_limit?: number;
+      product_limit?: number;
+      user_limit?: number;
+      expires_at?: string | null;
+    } = {};
+    if (data.company_name !== undefined) patch.company_name = data.company_name;
+    if (data.responsible_name !== undefined) patch.responsible_name = data.responsible_name;
+    if (data.contact_email !== undefined) patch.contact_email = data.contact_email;
+    if (data.contact_phone !== undefined) patch.contact_phone = data.contact_phone;
+    if (data.plan !== undefined) patch.plan = data.plan;
+    if (data.order_limit !== undefined) patch.order_limit = data.order_limit;
+    if (data.product_limit !== undefined) patch.product_limit = data.product_limit;
+    if (data.user_limit !== undefined) patch.user_limit = data.user_limit;
+    if (data.expires_at !== undefined) patch.expires_at = data.expires_at;
     const { error } = await sb.from("tenants").update(patch).eq("id", data.id);
     if (error) throw new Error(error.message);
     return { ok: true };
