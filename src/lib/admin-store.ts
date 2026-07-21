@@ -392,9 +392,14 @@ export const admin = {
   hydrateRemote,
   getAuthPassword: () => authPassword,
   saveRemote: async () => {
-    if (!authPassword) throw new Error("Faça login novamente para salvar");
     ensureHydrated();
     persist(state);
+    if (namespace) {
+      // per-tenant panel: local-only save
+      notify();
+      return;
+    }
+    if (!authPassword) throw new Error("Faça login novamente para salvar");
     const payload: Record<string, unknown> = {};
     for (const k of REMOTE_KEYS) payload[k as string] = state[k];
     try {
@@ -410,6 +415,9 @@ export const admin = {
     }
     notify();
   },
+  setNamespace,
+  markAuthed,
+  getNamespace: () => namespace,
   subscribe: (l: () => void) => {
     listeners.add(l);
     return () => listeners.delete(l);
