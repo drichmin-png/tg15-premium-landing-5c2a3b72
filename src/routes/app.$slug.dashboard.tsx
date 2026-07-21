@@ -35,13 +35,18 @@ function TenantPanel() {
       navigate({ to: "/app/$slug/dashboard", params: { slug: current.tenantSlug }, replace: true });
       return;
     }
-    // isolate this operator's admin data by namespace
     admin.setNamespace(slug);
     admin.markAuthed();
+    if (typeof window !== "undefined") {
+      window.sessionStorage.setItem("tg15-active-operator-slug", slug);
+    }
     setSession(current);
     setReady(true);
     return () => {
       admin.setNamespace(null);
+      if (typeof window !== "undefined") {
+        window.sessionStorage.removeItem("tg15-active-operator-slug");
+      }
     };
   }, [navigate, slug]);
 
