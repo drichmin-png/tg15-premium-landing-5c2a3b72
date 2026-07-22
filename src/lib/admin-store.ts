@@ -84,7 +84,8 @@ const DEFAULT_BLOCKS: Block[] = [
 ];
 
 const DEFAULTS: AdminState = {
-  password: "34561581",
+  // Never hardcode a password in the shipped bundle. Real auth happens server-side.
+  password: "",
   authed: false,
   hero: {
     eyebrow: "Tecnologia Avançada · Resultados Reais",
@@ -312,14 +313,10 @@ async function hydrateRemote() {
   if (typeof window === "undefined") return;
   if (namespace) return; // per-tenant panels are local-only
   try {
-    const { supabase } = await import("@/integrations/supabase/client");
-    const { data, error } = await supabase
-      .from("site_config")
-      .select("data")
-      .eq("singleton", true)
-      .maybeSingle();
-    if (error) throw error;
-    applyRemoteData((data?.data ?? null) as Record<string, unknown> | null);
+    const { getSiteConfig } = await import("@/lib/site-config.functions");
+    const res = await getSiteConfig();
+    const parsed = res?.data ? (JSON.parse(res.data) as Record<string, unknown>) : null;
+    applyRemoteData(parsed);
   } catch (e) {
     console.warn("[admin] hydrateRemote falhou", e);
   }
@@ -391,42 +388,22 @@ export const admin = {
     persist(state);
     notify();
   },
-  login: (password: string) => {
-    ensureHydrated();
-    if (password === state.password || password === DEFAULTS.password) {
-      authPassword = password;
-      state = { ...state, authed: true, password };
-      persist(state);
-      notify();
-      return true;
-    }
+  login: (_password: string) => {
+    // Client-side password check removed — only server-verified logins are accepted.
     return false;
   },
   loginRemote: async (password: string) => {
     ensureHydrated();
     const pwd = password.trim();
-    try {
-      const { supabase } = await import("@/integrations/supabase/client");
-      const { data, error } = await supabase.rpc("verify_admin_password", { pwd });
-      if (!error && data === true) {
-        authPassword = pwd;
-        state = { ...state, authed: true, password: pwd };
-        persist(state);
-        notify();
-        return true;
-      }
-      if (error) console.warn("[admin] verify_admin_password erro", error);
-    } catch (e) {
-      console.warn("[admin] loginRemote falhou, fallback local", e);
-    }
-    if (pwd === state.password || pwd === DEFAULTS.password) {
-      authPassword = pwd;
-      state = { ...state, authed: true, password: pwd };
-      persist(state);
-      notify();
-      return true;
-    }
-    throw new Error("Senha incorreta");
+    if (!pwd) throw new Error("Informe a senha");
+    const { verifyAdminPassword } = await import("@/lib/site-config.functions");
+    // Any error here (network/RPC/wrong password) propagates — no local fallback.
+    await verifyAdminPassword({ data: { password: pwd } });
+    authPassword = pwd;
+    state = { ...state, authed: true, password: pwd };
+    persist(state);
+    notify();
+    return true;
   },
   logout: () => {
     authPassword = null;
@@ -442,18 +419,11 @@ export const admin = {
   },
   changePasswordRemote: async (next: string) => {
     if (!authPassword) throw new Error("Faça login novamente para alterar a senha");
-    if (!next || next.length < 4) throw new Error("Senha muito curta");
-    try {
-      const { supabase } = await import("@/integrations/supabase/client");
-      const { error } = await supabase.rpc("set_admin_password", {
-        current_pwd: authPassword,
-        new_pwd: next.trim(),
-      });
-      if (error) throw error;
-    } catch (e) {
-      console.warn("[admin] set_admin_password falhou", e);
-      throw e instanceof Error ? e : new Error("Falha ao alterar senha");
-    }
+    if (!next || next.length < 8) throw new Error("Senha muito curta (mínimo 8 caracteres)");
+    const { changeAdminPassword } = await import("@/lib/site-config.functions");
+    await changeAdminPassword({
+      data: { currentPassword: authPassword, nextPassword: next.trim() },
+    });
     authPassword = next.trim();
     state = { ...state, password: next.trim() };
     persist(state);
@@ -480,17 +450,8 @@ export const admin = {
     if (!authPassword) throw new Error("Faça login novamente para salvar");
     const payload: Record<string, unknown> = {};
     for (const k of REMOTE_KEYS) payload[k as string] = state[k];
-    try {
-      const { supabase } = await import("@/integrations/supabase/client");
-      const { error } = await supabase.rpc("save_site_config", {
-        pwd: authPassword,
-        payload: payload as never,
-      });
-      if (error) throw error;
-    } catch (e) {
-      console.error("[admin] saveRemote falhou", e);
-      throw e instanceof Error ? e : new Error("Falha ao salvar no servidor");
-    }
+    const { saveSiteConfig } = await import("@/lib/site-config.functions");
+    await saveSiteConfig({ data: { password: authPassword, data: JSON.stringify(payload) } });
     notify();
   },
   setNamespace,

@@ -1,6 +1,11 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { createTenantSession, importLocalTenantFromAccessToken, verifyLocalTenantLogin } from "@/lib/saas-local";
+import {
+  createTenantSession,
+  getLocalTenantBySlug,
+  importLocalTenantFromAccessToken,
+} from "@/lib/saas-local";
+import { tenantLogin } from "@/lib/saas.functions";
 
 export const Route = createFileRoute("/app/$slug/login")({
   head: ({ params }) => ({
@@ -35,10 +40,37 @@ function TenantLoginPage() {
           setError(null);
           setLoading(true);
           try {
-            const setupToken = new URLSearchParams(window.location.search).get("setup");
-            if (setupToken) importLocalTenantFromAccessToken(setupToken);
-            const tenant = verifyLocalTenantLogin(slug, username, password);
-            createTenantSession(tenant, username.trim());
+            const trimmedUser = username.trim();
+            // Server verifies the credentials against the bcrypt hash stored in `app_users`.
+            await tenantLogin({ data: { slug, username: trimmedUser, password } });
+            // Populate the local session shell so client-side UI gates work.
+            const tenant = getLocalTenantBySlug(slug);
+            if (tenant) {
+              createTenantSession(tenant, trimmedUser);
+            } else {
+              // Fallback minimal session; server cookie is the source of truth.
+              createTenantSession(
+                {
+                  id: slug,
+                  slug,
+                  company_name: slug,
+                  responsible_name: "",
+                  contact_email: "",
+                  contact_phone: "",
+                  plan: "starter",
+                  status: "active",
+                  order_limit: 0,
+                  product_limit: 0,
+                  user_limit: 3,
+                  expires_at: null,
+                  last_login_at: null,
+                  created_at: new Date().toISOString(),
+                  owner_username: trimmedUser,
+                  owner_password: "",
+                },
+                trimmedUser,
+              );
+            }
             navigate({ to: "/app/$slug/dashboard", params: { slug } });
           } catch (err) {
             setError(err instanceof Error ? err.message : "Falha ao entrar");

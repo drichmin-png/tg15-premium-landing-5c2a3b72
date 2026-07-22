@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
-import { createMasterSession, verifyLocalMasterLogin } from "@/lib/saas-local";
+import { createMasterSession } from "@/lib/saas-local";
+import { masterLogin } from "@/lib/saas.functions";
 
 export const Route = createFileRoute("/master/login")({
   head: () => ({
@@ -27,11 +28,12 @@ function MasterLoginPage() {
           setError(null);
           setLoading(true);
           try {
-            if (!verifyLocalMasterLogin(username, password)) throw new Error("Usuário ou senha inválidos");
-            createMasterSession(username.trim() || "admin");
+            const trimmedUser = username.trim();
+            await masterLogin({ data: { username: trimmedUser, password } });
+            createMasterSession(trimmedUser || "admin");
             navigate({ to: "/master/tenants" });
           } catch (err) {
-            setError(err instanceof Error ? err.message : "Falha ao entrar");
+            setError(err instanceof Error ? err.message : "Usuário ou senha inválidos");
           } finally {
             setLoading(false);
           }
