@@ -310,16 +310,8 @@ function applyRemoteData(remote: Record<string, unknown> | null | undefined) {
 
 async function hydrateRemote() {
   ensureHydrated();
-  if (typeof window === "undefined") return;
-  if (namespace) return; // per-tenant panels are local-only
-  try {
-    const { getSiteConfig } = await import("@/lib/site-config.functions");
-    const res = await getSiteConfig();
-    const parsed = res?.data ? (JSON.parse(res.data) as Record<string, unknown>) : null;
-    applyRemoteData(parsed);
-  } catch (e) {
-    console.warn("[admin] hydrateRemote falhou", e);
-  }
+  // 100% local mode: no remote sync. Left as a no-op so callers keep working.
+  return;
 }
 
 function setNamespace(ns: string | null) {
