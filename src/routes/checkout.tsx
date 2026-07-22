@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronLeft, Copy, CreditCard, Lock, QrCode, ShieldCheck, Truck, FileText, MessageCircle } from "lucide-react";
+import { Check, ChevronLeft, Copy, CreditCard, Lock, QrCode, ShieldCheck, Truck, FileText, MessageCircle, Package } from "lucide-react";
 import { cart, useCart } from "@/lib/cart-store";
 import { BOX_SAVINGS, formatBRL, variants } from "@/lib/product";
 import { trackLead, trackInitiateCheckout, trackAddPaymentInfo, trackPurchase } from "@/lib/tracking/metaPixel";
