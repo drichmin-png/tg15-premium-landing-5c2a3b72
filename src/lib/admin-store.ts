@@ -310,8 +310,16 @@ function applyRemoteData(remote: Record<string, unknown> | null | undefined) {
 
 async function hydrateRemote() {
   ensureHydrated();
-  // 100% local mode: no remote sync. Left as a no-op so callers keep working.
-  return;
+  if (typeof window === "undefined") return;
+  try {
+    const { getSiteConfig } = await import("@/lib/site-config.functions");
+    const res = await getSiteConfig();
+    if (!res?.data) return;
+    const parsed = JSON.parse(res.data) as Record<string, unknown>;
+    applyRemoteData(parsed);
+  } catch {
+    // fallback silencioso: mantém modo local
+  }
 }
 
 function setNamespace(ns: string | null) {
