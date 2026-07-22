@@ -1188,7 +1188,7 @@ function AnalyticsPanel() {
     setLoading(true);
     setError(null);
     try {
-      const r = getLocalAnalyticsReport(days);
+      const r = getLocalAnalyticsReport(days, true);
       setReport(r);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha ao carregar");
