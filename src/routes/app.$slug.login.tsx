@@ -5,7 +5,6 @@ import {
   getLocalTenantBySlug,
   importLocalTenantFromAccessToken,
 } from "@/lib/saas-local";
-import { tenantLogin } from "@/lib/saas.functions";
 
 export const Route = createFileRoute("/app/$slug/login")({
   head: ({ params }) => ({
