@@ -48,7 +48,8 @@ function Checkout() {
   const v = variants[state.variant];
   const unitPrice = state.variant === "box" ? products.box.price : products.single.price;
   const subtotal = unitPrice * state.qty;
-  const shippingCost = state.shipping === "express" ? 39.9 : state.shipping === "standard" ? 19.9 : 0;
+  const freeShipping = state.variant === "box" || (state.variant === "single" && state.qty > 2);
+  const shippingCost = freeShipping ? 0 : state.shipping === "express" ? 39.9 : state.shipping === "standard" ? 19.9 : 0;
   const total = subtotal + shippingCost;
   const boxSavingsUnit = Math.max(0, products.single.price * 4 - products.box.price);
   const savings = state.variant === "box" ? boxSavingsUnit * state.qty : 0;
