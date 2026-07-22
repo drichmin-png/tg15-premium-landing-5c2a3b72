@@ -535,8 +535,9 @@ function StepConfirm({ orderId, trackingCode, total, state }: { orderId: string;
       : state.shipping === "standard" ? "Padrão (2 a 5 dias úteis)"
       : "A combinar";
 
+  const highValue = total > 499;
   const message =
-`Olá! Acabei de finalizar meu pedido no site T.G.15 e gostaria de concluir a compra.
+`Olá! Acabei de finalizar meu pedido no site T.G.15 e gostaria de concluir a compra.${highValue ? "\n\n*Atenção:* pedido acima de R$ 499,00 — necessária *verificação de estoque* antes da confirmação." : ""}
 
 *Pedido:* #${orderId}
 *Produto:* ${v.name} (${state.qty}x)
@@ -555,14 +556,14 @@ ${state.address.street}, ${state.address.number}${state.address.complement ? " -
 ${state.address.district} - ${state.address.city}/${state.address.state}
 CEP: ${state.address.zip}${state.address.reference ? "\nReferência: " + state.address.reference : ""}
 
-Aguardo as instruções para finalizar o pagamento. Obrigado!`;
+${highValue ? "Aguardo a verificação de estoque e as instruções para finalizar o pagamento. Obrigado!" : "Aguardo as instruções para finalizar o pagamento. Obrigado!"}`;
 
   const waLink = phone
     ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
     : `https://wa.me/?text=${encodeURIComponent(message)}`;
 
   useEffect(() => {
-    if (state.payment === "pix" && admin.pix.key.trim()) return; // deixa o cliente pagar primeiro
+    if (!highValue && state.payment === "pix" && admin.pix.key.trim()) return; // deixa o cliente pagar primeiro
     const t = setTimeout(() => {
       window.open(waLink, "_blank", "noopener,noreferrer");
     }, 1200);
@@ -570,7 +571,8 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const showPix = state.payment === "pix" && admin.pix.key.trim().length > 0;
+  const showPix = !highValue && state.payment === "pix" && admin.pix.key.trim().length > 0;
+
   const pixPayload = showPix
     ? buildPixPayload({
         key: admin.pix.key,
@@ -889,7 +891,9 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
       )}
 
       <p className="mt-6 text-sm text-muted-foreground max-w-md mx-auto">
-        {showPix
+        {highValue
+          ? "Pedidos acima de R$ 499,00 exigem verificação de estoque. Continue no WhatsApp com nossa equipe para confirmar a disponibilidade e receber as instruções de pagamento."
+          : showPix
           ? "Após o pagamento, envie o comprovante pelo WhatsApp para liberarmos o envio."
           : "Para concluir a compra e receber as instruções de pagamento, finalize o atendimento pelo WhatsApp com nossa equipe."}
       </p>
@@ -901,9 +905,10 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
           rel="noreferrer"
           className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-8 py-4 text-base font-bold text-white shadow-xl shadow-[#25D366]/40 hover:brightness-110"
         >
-          <MessageCircle className="h-5 w-5" /> {showPix ? "Enviar comprovante no WhatsApp" : "Concluir compra no WhatsApp"}
+          <MessageCircle className="h-5 w-5" /> {highValue ? "Verificar estoque no WhatsApp" : showPix ? "Enviar comprovante no WhatsApp" : "Concluir compra no WhatsApp"}
         </a>
       </div>
+
 
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         {admin.support.whatsappGroupLink && (
