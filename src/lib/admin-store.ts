@@ -313,14 +313,10 @@ async function hydrateRemote() {
   if (typeof window === "undefined") return;
   if (namespace) return; // per-tenant panels are local-only
   try {
-    const { supabase } = await import("@/integrations/supabase/client");
-    const { data, error } = await supabase
-      .from("site_config")
-      .select("data")
-      .eq("singleton", true)
-      .maybeSingle();
-    if (error) throw error;
-    applyRemoteData((data?.data ?? null) as Record<string, unknown> | null);
+    const { getSiteConfig } = await import("@/lib/site-config.functions");
+    const res = await getSiteConfig();
+    const parsed = res?.data ? (JSON.parse(res.data) as Record<string, unknown>) : null;
+    applyRemoteData(parsed);
   } catch (e) {
     console.warn("[admin] hydrateRemote falhou", e);
   }
