@@ -96,6 +96,7 @@ function loadLikes(): Record<string, boolean> {
 export function Reviews() {
   const [likes, setLikes] = React.useState<Record<string, boolean>>({});
   const [visible, setVisible] = React.useState(6);
+  const [lightbox, setLightbox] = React.useState<string | null>(null);
 
   React.useEffect(() => { setLikes(loadLikes()); }, []);
 
