@@ -15,32 +15,32 @@ type ZoomTarget = "custom" | "official" | null;
 
 function CustomTable({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="card-premium overflow-hidden h-full">
-      <div className="gradient-brand px-3 py-3 md:px-6 md:py-5 text-white">
-        <div className={`grid grid-cols-3 gap-2 md:gap-4 font-bold uppercase tracking-wider ${compact ? "text-[8px] md:text-xs" : "text-xs"}`}>
-          <div>Qtd (mg)</div>
+    <div className="card-premium overflow-hidden h-full flex flex-col">
+      <div className={`gradient-brand text-white ${compact ? "px-2 py-2 md:px-6 md:py-5" : "px-3 py-3 md:px-6 md:py-5"}`}>
+        <div className={`grid grid-cols-3 gap-1 md:gap-4 font-bold uppercase tracking-wider ${compact ? "text-[7px] md:text-xs" : "text-xs"}`}>
+          <div>Qtd</div>
           <div>Semanas</div>
           <div>Seringa</div>
         </div>
       </div>
-      <div className="divide-y divide-border">
+      <div className="divide-y divide-border flex-1">
         {rows.map((r, i) => (
           <div
             key={r.mg}
-            className={`grid grid-cols-3 items-center gap-2 md:gap-4 px-3 py-2 md:px-6 md:py-4 ${i % 2 ? "bg-sand/60" : "bg-card"}`}
+            className={`grid grid-cols-3 items-center gap-1 md:gap-4 ${compact ? "px-2 py-1.5 md:px-6 md:py-4" : "px-3 py-2 md:px-6 md:py-4"} ${i % 2 ? "bg-sand/60" : "bg-card"}`}
           >
-            <div className={`font-bold text-gradient-brand ${compact ? "text-sm md:text-2xl" : "text-2xl"}`}>{r.mg}</div>
-            <div>
-              <div className={`font-semibold text-ink ${compact ? "text-xs md:text-lg" : "text-lg"}`}>{r.weeks}</div>
-              <div className={`text-muted-foreground ${compact ? "text-[9px] md:text-xs" : "text-xs"}`}>({r.applications})</div>
+            <div className={`font-bold text-gradient-brand leading-tight ${compact ? "text-[11px] md:text-2xl" : "text-2xl"}`}>{r.mg}</div>
+            <div className="min-w-0">
+              <div className={`font-semibold text-ink leading-tight ${compact ? "text-[10px] md:text-lg" : "text-lg"}`}>{r.weeks}</div>
+              <div className={`text-muted-foreground leading-tight ${compact ? "text-[8px] md:text-xs" : "text-xs"}`}>({r.applications})</div>
             </div>
-            <div className={`font-bold text-ink ${compact ? "text-sm md:text-2xl" : "text-2xl"}`}>{r.ui}</div>
+            <div className={`font-bold text-ink leading-tight ${compact ? "text-[11px] md:text-2xl" : "text-2xl"}`}>{r.ui}</div>
           </div>
         ))}
       </div>
-      <div className={`flex items-center gap-2 px-3 py-2 md:px-6 md:py-4 border-t border-border bg-sand/60 text-muted-foreground ${compact ? "text-[9px] md:text-xs" : "text-xs"}`}>
+      <div className={`flex items-center gap-1 border-t border-border bg-sand/60 text-muted-foreground ${compact ? "px-2 py-1.5 text-[8px] md:px-6 md:py-4 md:text-xs" : "px-3 py-2 text-[9px] md:px-6 md:py-4 md:text-xs"}`}>
         <Info className="h-3 w-3 md:h-3.5 md:w-3.5 text-primary shrink-0" />
-        *1 dose por semana. Consulte seu médico.
+        <span className="leading-tight">*1 dose/semana. Consulte seu médico.</span>
       </div>
     </div>
   );
