@@ -36,7 +36,13 @@ function Checkout() {
   const { products } = useAdmin();
   const [step, setStep] = useState(1);
   const [orderId, setOrderId] = useState("TG-XXXXXX");
-  useEffect(() => { setOrderId("TG-" + Math.random().toString(36).slice(2, 8).toUpperCase()); }, []);
+  const [trackingCode, setTrackingCode] = useState("BR000000000TG");
+  useEffect(() => {
+    setOrderId("TG-" + Math.random().toString(36).slice(2, 8).toUpperCase());
+    setTrackingCode(
+      "BR" + Math.random().toString(36).slice(2, 11).toUpperCase() + "TG"
+    );
+  }, []);
   useEffect(() => { admin.hydrateRemote(); }, []);
 
   const v = variants[state.variant];
@@ -174,7 +180,7 @@ function Checkout() {
             {step === 2 && <StepAddress state={state} onNext={next} />}
             {step === 3 && <StepShipping state={state} onNext={next} />}
             {step === 4 && <StepPayment state={state} onNext={next} total={total} />}
-            {step === 5 && <StepConfirm orderId={orderId} total={total} state={state} />}
+            {step === 5 && <StepConfirm orderId={orderId} trackingCode={trackingCode} total={total} state={state} />}
           </div>
         </div>
       </div>
@@ -432,7 +438,42 @@ function StepPayment({ state, onNext, total }: { state: ReturnType<typeof useCar
   );
 }
 
-function StepConfirm({ orderId, total, state }: { orderId: string; total: number; state: ReturnType<typeof useCart> }) {
+type RegionalEta = { region: string; range: string; center: string };
+const REGIONAL_ETA: Record<string, RegionalEta> = {
+  SP: { region: "São Paulo", range: "No mesmo dia ou até 2 dias úteis", center: "São Paulo (SP)" },
+  RJ: { region: "Sudeste", range: "1 a 3 dias úteis", center: "Rio de Janeiro (RJ)" },
+  MG: { region: "Sudeste", range: "1 a 3 dias úteis", center: "Belo Horizonte (MG)" },
+  ES: { region: "Sudeste", range: "1 a 3 dias úteis", center: "Rio de Janeiro (RJ)" },
+  PR: { region: "Sul", range: "1 a 3 dias úteis", center: "Curitiba (PR)" },
+  SC: { region: "Sul", range: "1 a 3 dias úteis", center: "Curitiba (PR)" },
+  RS: { region: "Sul", range: "1 a 3 dias úteis", center: "Porto Alegre (RS)" },
+  DF: { region: "Centro-Oeste", range: "2 a 5 dias úteis", center: "Brasília (DF)" },
+  GO: { region: "Centro-Oeste", range: "2 a 5 dias úteis", center: "Brasília (DF)" },
+  MT: { region: "Centro-Oeste", range: "2 a 5 dias úteis", center: "Brasília (DF)" },
+  MS: { region: "Centro-Oeste", range: "2 a 5 dias úteis", center: "Brasília (DF)" },
+  BA: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Salvador (BA)" },
+  SE: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Salvador (BA)" },
+  AL: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Recife (PE)" },
+  PE: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Recife (PE)" },
+  PB: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Recife (PE)" },
+  RN: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Recife (PE)" },
+  CE: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Fortaleza (CE)" },
+  PI: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Fortaleza (CE)" },
+  MA: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Fortaleza (CE)" },
+  PA: { region: "Norte", range: "5 a 10 dias úteis", center: "Fortaleza (CE)" },
+  AP: { region: "Norte", range: "5 a 10 dias úteis", center: "Fortaleza (CE)" },
+  AM: { region: "Norte", range: "5 a 10 dias úteis", center: "Fortaleza (CE)" },
+  RR: { region: "Norte", range: "5 a 10 dias úteis", center: "Fortaleza (CE)" },
+  RO: { region: "Norte", range: "5 a 10 dias úteis", center: "Brasília (DF)" },
+  AC: { region: "Norte", range: "5 a 10 dias úteis", center: "Brasília (DF)" },
+  TO: { region: "Norte", range: "5 a 10 dias úteis", center: "Brasília (DF)" },
+};
+function getRegionalEta(uf: string): RegionalEta {
+  const key = (uf || "").toUpperCase();
+  return REGIONAL_ETA[key] || { region: "Brasil", range: "3 a 7 dias úteis", center: "São Paulo (SP)" };
+}
+
+function StepConfirm({ orderId, trackingCode, total, state }: { orderId: string; trackingCode: string; total: number; state: ReturnType<typeof useCart> }) {
   const admin = useAdmin();
   const savedOrder = useRef(false);
   useEffect(() => {
@@ -572,6 +613,9 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
       : state.shipping === "standard" ? "2 a 5 dias úteis após a confirmação do pagamento"
       : "A combinar após a confirmação do pagamento";
 
+  const regionalEta = getRegionalEta(state.address.state);
+  const emissionDate = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+
   return (
     <div className="text-center py-6">
       <div className="mx-auto grid h-20 w-20 place-items-center rounded-full gradient-brand text-white shadow-2xl shadow-primary/40">
@@ -617,7 +661,7 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
                 <ShieldCheck className="h-3.5 w-3.5" /> Dados do cliente
               </div>
-              <dl className="mt-3 grid gap-y-2 text-sm sm:grid-cols-2 sm:gap-x-6">
+              <dl className="mt-3 grid grid-cols-2 gap-y-2 gap-x-4 text-sm sm:gap-x-6">
                 <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">Nome</dt><dd className="font-semibold text-ink">{state.customer.fullName || "—"}</dd></div>
                 <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">CPF</dt><dd className="font-semibold text-ink">{maskCPF(state.customer.cpf)}</dd></div>
                 <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">E-mail</dt><dd className="font-semibold text-ink break-all">{maskEmail(state.customer.email)}</dd></div>
@@ -673,8 +717,86 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
                 </div>
               </div>
             </div>
+
+            <div className="h-px bg-border" />
+
+            {/* Nota de compra + Rastreio */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-xl border border-border bg-sand/40 p-4">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                  <FileText className="h-3.5 w-3.5" /> Nota de compra
+                </div>
+                <dl className="mt-3 space-y-1.5 text-sm">
+                  <div className="flex justify-between"><dt className="text-muted-foreground">Nº do pedido</dt><dd className="font-semibold text-ink">#{orderId}</dd></div>
+                  <div className="flex justify-between"><dt className="text-muted-foreground">Emissão</dt><dd className="font-semibold text-ink">{emissionDate}</dd></div>
+                  <div className="flex justify-between"><dt className="text-muted-foreground">Valor</dt><dd className="font-price text-ink">{formatBRL(total)}</dd></div>
+                </dl>
+                <p className="mt-2 text-[11px] text-muted-foreground">A nota fiscal eletrônica será enviada por e-mail após a confirmação do pagamento.</p>
+              </div>
+              <div className="rounded-xl border border-border bg-sand/40 p-4">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                  <Truck className="h-3.5 w-3.5" /> Código de rastreio
+                </div>
+                <div className="mt-3 font-mono text-sm font-bold text-ink break-all">{trackingCode}</div>
+                <p className="mt-2 text-[11px] text-muted-foreground">Ativado assim que o pedido for despachado do centro de distribuição.</p>
+              </div>
+            </div>
+
+            <div className="h-px bg-border" />
+
+            {/* Prazo por região */}
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                <Truck className="h-3.5 w-3.5" /> Prazo de entrega — {regionalEta.region}
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-lg bg-primary/[0.05] border border-primary/15 p-3">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Estimativa para sua região</div>
+                  <div className="mt-1 text-sm font-bold text-ink">{regionalEta.range}</div>
+                </div>
+                <div className="rounded-lg bg-sand/60 border border-border p-3">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Centro de distribuição mais próximo</div>
+                  <div className="mt-1 text-sm font-bold text-ink">{regionalEta.center}</div>
+                </div>
+              </div>
+              <details className="mt-3 text-xs text-muted-foreground">
+                <summary className="cursor-pointer font-semibold text-foreground/80">Ver prazos por região e centros de distribuição</summary>
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  <ul className="space-y-1 list-disc pl-4">
+                    <li>São Paulo (capital e interior): mesmo dia ou até 2 dias úteis.</li>
+                    <li>Sul e Sudeste: 1 a 3 dias úteis.</li>
+                    <li>Centro-Oeste: 2 a 5 dias úteis.</li>
+                    <li>Nordeste: 3 a 7 dias úteis.</li>
+                    <li>Norte: 5 a 10 dias úteis (pode variar em cidades afastadas).</li>
+                  </ul>
+                  <ul className="space-y-1 list-disc pl-4">
+                    <li>São Paulo (SP) — hub logístico principal.</li>
+                    <li>Rio de Janeiro (RJ) — Sudeste.</li>
+                    <li>Belo Horizonte (MG) — Minas / Centro-Sul.</li>
+                    <li>Brasília (DF) — Centro-Oeste.</li>
+                    <li>Curitiba (PR) e Porto Alegre (RS) — Sul.</li>
+                    <li>Salvador (BA), Recife (PE) e Fortaleza (CE) — Nordeste e Norte.</li>
+                  </ul>
+                </div>
+              </details>
+            </div>
+
+            <div className="h-px bg-border" />
+
+            {/* Empresa */}
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                <ShieldCheck className="h-3.5 w-3.5" /> Empresa responsável
+              </div>
+              <dl className="mt-3 grid grid-cols-2 gap-y-2 gap-x-4 text-sm sm:gap-x-6">
+                <div className="col-span-2 flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">Razão social</dt><dd className="font-semibold text-ink">TGFarmacêutica Indústria e Comércio LTDA.</dd></div>
+                <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">CNPJ</dt><dd className="font-semibold text-ink">48.327.915/0001-72</dd></div>
+                <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">Endereço</dt><dd className="font-semibold text-ink">Av. Paulista, 1106 — Bela Vista, São Paulo/SP</dd></div>
+              </dl>
+            </div>
           </div>
         </div>
+
 
         {/* Termos */}
         <div className="mt-4 rounded-2xl border border-border bg-sand/40 p-5 text-left">
