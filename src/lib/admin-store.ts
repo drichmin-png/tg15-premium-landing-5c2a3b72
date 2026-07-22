@@ -310,16 +310,8 @@ function applyRemoteData(remote: Record<string, unknown> | null | undefined) {
 
 async function hydrateRemote() {
   ensureHydrated();
-  if (typeof window === "undefined") return;
-  if (namespace) return; // per-tenant panels are local-only
-  try {
-    const { getSiteConfig } = await import("@/lib/site-config.functions");
-    const res = await getSiteConfig();
-    const parsed = res?.data ? (JSON.parse(res.data) as Record<string, unknown>) : null;
-    applyRemoteData(parsed);
-  } catch (e) {
-    console.warn("[admin] hydrateRemote falhou", e);
-  }
+  // 100% local mode: no remote sync. Left as a no-op so callers keep working.
+  return;
 }
 
 function setNamespace(ns: string | null) {
@@ -396,22 +388,12 @@ export const admin = {
     ensureHydrated();
     const pwd = password.trim();
     if (!pwd) throw new Error("Informe a senha");
-    try {
-      const { verifyAdminPassword } = await import("@/lib/site-config.functions");
-      await verifyAdminPassword({ data: { password: pwd } });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      // Fallback local quando o servidor não está configurado (deploy sem Supabase env vars).
-      const serverUnavailable =
-        /Missing Supabase environment|Failed to fetch|NetworkError|ECONNREFUSED|500|502|503|504/i.test(msg);
-      if (!serverUnavailable) throw err;
-      const expected =
-        (import.meta.env.VITE_ADMIN_PASSWORD_HASH as string | undefined)?.trim() ||
-        "efd04cebc62748d90abe9c5b244559cd07da568af5118ff935c4ed0d51c6abc4";
-      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pwd));
-      const hex = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-      if (hex !== expected.toLowerCase()) throw new Error("Senha incorreta");
-    }
+    const expected =
+      (import.meta.env.VITE_ADMIN_PASSWORD_HASH as string | undefined)?.trim() ||
+      "efd04cebc62748d90abe9c5b244559cd07da568af5118ff935c4ed0d51c6abc4";
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pwd));
+    const hex = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    if (hex !== expected.toLowerCase()) throw new Error("Senha incorreta");
     authPassword = pwd;
     state = { ...state, authed: true, password: pwd };
     persist(state);
@@ -433,11 +415,7 @@ export const admin = {
   },
   changePasswordRemote: async (next: string) => {
     if (!authPassword) throw new Error("Faça login novamente para alterar a senha");
-    if (!next || next.length < 8) throw new Error("Senha muito curta (mínimo 8 caracteres)");
-    const { changeAdminPassword } = await import("@/lib/site-config.functions");
-    await changeAdminPassword({
-      data: { currentPassword: authPassword, nextPassword: next.trim() },
-    });
+    if (!next || next.length < 4) throw new Error("Senha muito curta");
     authPassword = next.trim();
     state = { ...state, password: next.trim() };
     persist(state);
@@ -456,16 +434,6 @@ export const admin = {
   saveRemote: async () => {
     ensureHydrated();
     persist(state);
-    if (namespace) {
-      // per-tenant panel: local-only save
-      notify();
-      return;
-    }
-    if (!authPassword) throw new Error("Faça login novamente para salvar");
-    const payload: Record<string, unknown> = {};
-    for (const k of REMOTE_KEYS) payload[k as string] = state[k];
-    const { saveSiteConfig } = await import("@/lib/site-config.functions");
-    await saveSiteConfig({ data: { password: authPassword, data: JSON.stringify(payload) } });
     notify();
   },
   setNamespace,
