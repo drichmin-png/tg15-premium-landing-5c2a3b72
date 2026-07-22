@@ -61,11 +61,7 @@ export const Route = createFileRoute("/api/public/webhook/$gateway")({
             throw new Error("Identificador de pedido em formato inválido");
           }
 
-          let orderById: Awaited<
-            ReturnType<typeof supabaseAdmin.from<"orders">>
-          > extends never
-            ? never
-            : any = null;
+          let orderById: any = null;
           if (UUID_RE.test(rawId)) {
             const { data } = await supabaseAdmin
               .from("orders")
