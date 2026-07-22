@@ -147,12 +147,6 @@ export function Dashboard() {
           </div>
           <div className="flex items-center gap-2">
             <a
-              href="/master/login"
-              className="rounded-full border border-primary/40 bg-primary/10 text-primary px-3 py-1.5 text-xs font-bold hover:bg-primary/20"
-            >
-              Painel Master (Operadores)
-            </a>
-            <a
               href="/"
               className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold hover:border-primary/40"
             >
@@ -166,6 +160,7 @@ export function Dashboard() {
               <LogOut className="h-3.5 w-3.5" /> Sair
             </button>
           </div>
+
         </div>
       </header>
 
