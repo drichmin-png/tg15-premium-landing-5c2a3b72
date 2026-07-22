@@ -174,16 +174,29 @@ export function addLocalAnalyticsEvents(rows: Omit<LocalAnalyticsEvent, "created
   writeJson(key, next);
 }
 
-function listLocalAnalyticsEvents(days: number) {
+function listLocalAnalyticsEvents(days: number, allNamespaces = false) {
   const since = Date.now() - days * 24 * 60 * 60 * 1000;
-  return readJson<LocalAnalyticsEvent[]>(eventsKey(), []).filter(
-    (ev) => new Date(ev.created_at).getTime() >= since,
-  );
+  if (!allNamespaces) {
+    return readJson<LocalAnalyticsEvent[]>(eventsKey(), []).filter(
+      (ev) => new Date(ev.created_at).getTime() >= since,
+    );
+  }
+  if (!canUseStorage()) return [] as LocalAnalyticsEvent[];
+  const all: LocalAnalyticsEvent[] = [];
+  for (let i = 0; i < window.localStorage.length; i += 1) {
+    const key = window.localStorage.key(i);
+    if (!key || !key.startsWith(EVENTS_KEY_BASE)) continue;
+    for (const ev of readJson<LocalAnalyticsEvent[]>(key, [])) {
+      if (new Date(ev.created_at).getTime() >= since) all.push(ev);
+    }
+  }
+  return all;
 }
 
-export function getLocalAnalyticsReport(daysInput = 14): AnalyticsReport {
+export function getLocalAnalyticsReport(daysInput = 14, allNamespaces = false): AnalyticsReport {
   const days = Math.min(Math.max(daysInput, 1), 90);
-  const events = listLocalAnalyticsEvents(days);
+  const events = listLocalAnalyticsEvents(days, allNamespaces);
+
 
   const sessionsSet = new Set<string>();
   const sessionsPageView = new Set<string>();
