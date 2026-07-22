@@ -264,7 +264,7 @@ export function clearLocalSaasSession() {
   window.localStorage.removeItem(SESSION_KEY);
 }
 
-export function createMasterSession(username = MASTER_USER): LocalSaasSession {
+export function createMasterSession(username = "admin"): LocalSaasSession {
   const session: LocalSaasSession = {
     userId: "master_local",
     username,
