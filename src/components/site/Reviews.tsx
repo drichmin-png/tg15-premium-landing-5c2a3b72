@@ -85,6 +85,7 @@ type Review = {
   text: string;
   likes: number;
   photos: string[];
+  avatar: string;
 };
 
 const REVIEWS: Review[] = COMMENTS.map((text, i) => {
@@ -101,6 +102,7 @@ const REVIEWS: Review[] = COMMENTS.map((text, i) => {
     text,
     likes: 8 + ((i * 13) % 90),
     photos,
+    avatar: AVATARS[i % AVATARS.length],
   };
 });
 
