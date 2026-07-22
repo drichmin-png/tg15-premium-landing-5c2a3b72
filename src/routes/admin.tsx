@@ -24,8 +24,8 @@ import { admin, useAdmin, type BlockId } from "@/lib/admin-store";
 import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
 import {
   type AdminOrder,
-  listLocalOrders,
   listAllLocalOrders,
+
 
   updateLocalOrder,
   getLocalAnalyticsReport,
