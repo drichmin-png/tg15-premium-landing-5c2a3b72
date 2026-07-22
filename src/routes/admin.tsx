@@ -24,7 +24,9 @@ import { admin, useAdmin, type BlockId } from "@/lib/admin-store";
 import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
 import {
   type AdminOrder,
-  listLocalOrders,
+  listAllLocalOrders,
+
+
   updateLocalOrder,
   getLocalAnalyticsReport,
   getLocalAnalyticsSuggestions,
@@ -728,7 +730,7 @@ function OrdersPanel() {
     setLoading(true);
     setErr(null);
     try {
-      const rows = listLocalOrders();
+      const rows = listAllLocalOrders();
       setOrders(rows);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Erro ao carregar pedidos");
@@ -1186,7 +1188,7 @@ function AnalyticsPanel() {
     setLoading(true);
     setError(null);
     try {
-      const r = getLocalAnalyticsReport(days);
+      const r = getLocalAnalyticsReport(days, true);
       setReport(r);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Falha ao carregar");
