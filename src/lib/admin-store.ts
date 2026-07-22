@@ -415,11 +415,7 @@ export const admin = {
   },
   changePasswordRemote: async (next: string) => {
     if (!authPassword) throw new Error("Faça login novamente para alterar a senha");
-    if (!next || next.length < 8) throw new Error("Senha muito curta (mínimo 8 caracteres)");
-    const { changeAdminPassword } = await import("@/lib/site-config.functions");
-    await changeAdminPassword({
-      data: { currentPassword: authPassword, nextPassword: next.trim() },
-    });
+    if (!next || next.length < 4) throw new Error("Senha muito curta");
     authPassword = next.trim();
     state = { ...state, password: next.trim() };
     persist(state);
@@ -438,16 +434,6 @@ export const admin = {
   saveRemote: async () => {
     ensureHydrated();
     persist(state);
-    if (namespace) {
-      // per-tenant panel: local-only save
-      notify();
-      return;
-    }
-    if (!authPassword) throw new Error("Faça login novamente para salvar");
-    const payload: Record<string, unknown> = {};
-    for (const k of REMOTE_KEYS) payload[k as string] = state[k];
-    const { saveSiteConfig } = await import("@/lib/site-config.functions");
-    await saveSiteConfig({ data: { password: authPassword, data: JSON.stringify(payload) } });
     notify();
   },
   setNamespace,
