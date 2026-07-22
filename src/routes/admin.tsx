@@ -1093,10 +1093,11 @@ function PixPreview({ s }: { s: ReturnType<typeof useAdmin> }) {
   try {
     payload = buildPixPayload({
       key,
+      keyType: s.pix.keyType,
       amount: 1.0,
-      merchantName: s.pix.merchantName || "RECEBEDOR",
+      merchantName: s.pix.merchantName || "TG15 ONLINE",
       merchantCity: s.pix.merchantCity || "SAO PAULO",
-      txid: "TESTE",
+      txid: "***",
     });
   } catch (e) {
     error = e instanceof Error ? e.message : "Erro ao gerar payload";
