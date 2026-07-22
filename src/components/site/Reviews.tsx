@@ -34,7 +34,8 @@ import a12 from "@/assets/reviews/avatars/avatar-12.jpg.asset.json";
 import a13 from "@/assets/reviews/avatars/avatar-13.jpg.asset.json";
 import a14 from "@/assets/reviews/avatars/avatar-14.jpg.asset.json";
 import a15 from "@/assets/reviews/avatars/avatar-15.jpg.asset.json";
-const AVATARS = [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15].map((p) => assetUrl(p.url));
+const FEMALE_AVATARS = [a1, a2, a3, a4, a5, a6, a7, a8, a11, a12].map((p) => assetUrl(p.url));
+const MALE_AVATARS = [a9, a10, a13, a14, a15].map((p) => assetUrl(p.url));
 
 const COMMENTS = [
   "Produto muito bem embalado. A apresentação ficou excelente.",
