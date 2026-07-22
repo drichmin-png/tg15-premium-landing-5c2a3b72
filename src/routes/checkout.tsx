@@ -179,7 +179,7 @@ function Checkout() {
           <div className="lg:order-1 py-2">
             {step === 1 && <StepCustomer state={state} onNext={next} />}
             {step === 2 && <StepAddress state={state} onNext={next} />}
-            {step === 3 && <StepShipping state={state} onNext={next} />}
+            {step === 3 && <StepShipping state={state} onNext={next} freeShipping={freeShipping} />}
             {step === 4 && <StepPayment state={state} onNext={next} total={total} />}
             {step === 5 && <StepConfirm orderId={orderId} trackingCode={trackingCode} total={total} state={state} />}
           </div>
