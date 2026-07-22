@@ -19,6 +19,18 @@ import p15 from "@/assets/reviews/IMG_4989.webp.asset.json";
 
 const PHOTOS = [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15].map((p) => assetUrl(p.url));
 
+import a1 from "@/assets/reviews/avatars/avatar1.jpeg.asset.json";
+import a2 from "@/assets/reviews/avatars/avatar2.jpeg.asset.json";
+import a3 from "@/assets/reviews/avatars/avatar3.jpeg.asset.json";
+import a4 from "@/assets/reviews/avatars/avatar4.jpeg.asset.json";
+import a5 from "@/assets/reviews/avatars/avatar5.jpeg.asset.json";
+import a6 from "@/assets/reviews/avatars/avatar6.jpeg.asset.json";
+import a7 from "@/assets/reviews/avatars/avatar7.jpeg.asset.json";
+import a8 from "@/assets/reviews/avatars/avatar8.jpeg.asset.json";
+import a9 from "@/assets/reviews/avatars/avatar9.jpeg.asset.json";
+import a10 from "@/assets/reviews/avatars/avatar10.jpeg.asset.json";
+const AVATARS = [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10].map((p) => assetUrl(p.url));
+
 const COMMENTS = [
   "Produto muito bem embalado. A apresentação ficou excelente.",
   "Gostei bastante da organização da embalagem. Passa uma boa impressão.",
@@ -73,6 +85,7 @@ type Review = {
   text: string;
   likes: number;
   photos: string[];
+  avatar: string;
 };
 
 const REVIEWS: Review[] = COMMENTS.map((text, i) => {
@@ -89,6 +102,7 @@ const REVIEWS: Review[] = COMMENTS.map((text, i) => {
     text,
     likes: 8 + ((i * 13) % 90),
     photos,
+    avatar: AVATARS[i % AVATARS.length],
   };
 });
 
@@ -135,8 +149,8 @@ export function Reviews() {
           return (
             <article key={r.id} className="card-premium p-5 flex flex-col">
               <header className="flex items-center gap-3">
-                <div className="grid h-11 w-11 place-items-center rounded-full gradient-brand text-white font-bold">
-                  {r.name.charAt(0)}
+                <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full ring-2 ring-primary/20 bg-sand">
+                  <img src={r.avatar} alt={r.name} loading="lazy" className="h-full w-full object-cover" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-ink truncate">{r.name}</div>
