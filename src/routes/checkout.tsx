@@ -794,6 +794,50 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
                 <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">Endereço</dt><dd className="font-semibold text-ink">Av. Paulista, 1106 — Bela Vista, São Paulo/SP</dd></div>
               </dl>
             </div>
+
+            <div className="h-px bg-border" />
+
+            {/* Informações sobre o envio */}
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                <Package className="h-3.5 w-3.5" /> Informações sobre o envio
+              </div>
+              <div className="mt-3 space-y-3 text-sm">
+                <p className="text-muted-foreground leading-relaxed">
+                  Seu pedido será despachado a partir do nosso Centro de Distribuição localizado em{" "}
+                  <span className="font-semibold text-ink">{regionalEta.center}</span>, com prazo estimado de entrega de{" "}
+                  <span className="font-semibold text-ink">{regionalEta.range}</span>.
+                </p>
+
+                <div className="rounded-xl border border-border bg-sand/40 p-4">
+                  <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Transportadora responsável pelo envio</div>
+                  <div className="mt-1 font-semibold text-ink">Empresa Brasileira de Correios e Telégrafos (ECT)</div>
+                  <dl className="mt-3 grid grid-cols-1 gap-y-1.5 text-xs sm:grid-cols-2">
+                    <div className="flex flex-col"><dt className="text-muted-foreground">Razão Social</dt><dd className="font-semibold text-ink">Empresa Brasileira de Correios e Telégrafos (Correios)</dd></div>
+                    <div className="flex flex-col"><dt className="text-muted-foreground">CNPJ Sede (Brasília/DF)</dt><dd className="font-semibold text-ink">34.028.316/0001-03</dd></div>
+                    <div className="flex flex-col sm:col-span-2"><dt className="text-muted-foreground">CNPJ emissão de Notas Fiscais (São Paulo/SP)</dt><dd className="font-semibold text-ink">34.028.316/0031-29</dd></div>
+                  </dl>
+                </div>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <div className="rounded-xl border border-border bg-sand/40 p-4">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Código de rastreamento</div>
+                    <div className="mt-1 font-mono text-sm font-bold text-ink break-all">{trackingCode}</div>
+                    <p className="mt-1 text-[11px] text-muted-foreground">Todos os pedidos são enviados com código de rastreamento, permitindo o acompanhamento completo da entrega.</p>
+                  </div>
+                  <div className="rounded-xl border border-border bg-sand/40 p-4">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Garantia</div>
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed">
+                      Oferecemos garantia contra defeitos de fabricação. Caso o produto apresente algum defeito de origem, realizaremos a substituição ou o reembolso, conforme nossa política de garantia.
+                    </p>
+                  </div>
+                </div>
+
+                <p className="text-[11px] text-muted-foreground leading-relaxed">
+                  Agradecemos pela confiança e permanecemos à disposição para qualquer dúvida.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
 
