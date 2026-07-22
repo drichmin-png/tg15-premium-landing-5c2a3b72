@@ -1,4 +1,5 @@
-import { createHash, randomBytes } from "crypto";
+import { createHash } from "crypto";
+import bcrypt from "bcryptjs";
 import { useSession } from "@tanstack/react-start/server";
 
 export type SaasRole = "master" | "owner" | "staff";
@@ -36,13 +37,26 @@ export async function getSaasSession() {
   return useSession<SaasSessionData>(sessionConfig());
 }
 
-export function hashPassword(password: string, salt?: string) {
-  const s = salt ?? randomBytes(16).toString("hex");
-  const h = createHash("sha256").update(s + password).digest("hex");
-  return { salt: s, hash: h };
+function isBcryptHash(hash: string) {
+  return typeof hash === "string" && /^\$2[aby]\$/.test(hash);
+}
+
+/**
+ * Hash a password with bcrypt.
+ * `salt` is kept for schema compatibility with the existing `app_users` table
+ * (which has a NOT NULL `password_salt` column) but is unused — bcrypt embeds
+ * its own salt inside the hash.
+ */
+export function hashPassword(password: string, _salt?: string) {
+  return { salt: "", hash: bcrypt.hashSync(password, 10) };
 }
 
 export function verifyPassword(password: string, salt: string, expectedHash: string) {
-  const h = createHash("sha256").update(salt + password).digest("hex");
-  return h === expectedHash;
+  if (isBcryptHash(expectedHash)) {
+    return bcrypt.compareSync(password, expectedHash);
+  }
+  // Legacy fallback: fast SHA-256 with prepended salt. Kept only so pre-existing
+  // rows can still log in; callers should re-hash to bcrypt on next successful login.
+  const legacy = createHash("sha256").update(salt + password).digest("hex");
+  return legacy === expectedHash;
 }

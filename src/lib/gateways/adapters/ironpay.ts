@@ -21,7 +21,9 @@ export const ironpayAdapter: GatewayAdapter = {
 
   verifySignature(rawBody, headers, cred) {
     const secret = cred.webhook_secret || cred.chave_secreta;
-    if (!secret) return true; // fail-open when not configured yet — logged as false
+    // Fail-closed: without a configured webhook secret we cannot verify the
+    // sender, so reject the request instead of trusting it.
+    if (!secret) return false;
     const sig = headers.get("x-ironpay-signature") ?? headers.get("x-signature") ?? "";
     if (!sig) return false;
     try {
