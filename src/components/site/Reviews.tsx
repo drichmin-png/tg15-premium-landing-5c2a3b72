@@ -151,16 +151,18 @@ export function Reviews() {
 
               <p className="mt-3 text-sm text-ink/90 leading-relaxed">"{r.text}"</p>
 
-              {r.photos > 0 && (
+              {r.photos.length > 0 && (
                 <div className="mt-4 flex gap-2">
-                  {Array.from({ length: r.photos }).map((_, i) => (
-                    <div
+                  {r.photos.map((src, i) => (
+                    <button
                       key={i}
-                      className="grid h-16 w-16 place-items-center rounded-lg border border-border bg-sand/60 text-muted-foreground"
-                      aria-label={`Foto ${i + 1}`}
+                      type="button"
+                      onClick={() => setLightbox(src)}
+                      className="h-16 w-16 overflow-hidden rounded-lg border border-border bg-sand/60 hover:border-primary/60 transition"
+                      aria-label={`Ver foto ${i + 1}`}
                     >
-                      <ImageIcon className="h-5 w-5" />
-                    </div>
+                      <img src={src} alt={`Foto do pedido ${i + 1}`} loading="lazy" className="h-full w-full object-cover" />
+                    </button>
                   ))}
                 </div>
               )}
