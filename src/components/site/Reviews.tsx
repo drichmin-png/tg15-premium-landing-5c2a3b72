@@ -83,6 +83,11 @@ const NAMES = [
   "Renata F.","Eduardo Q.","Priscila W.","Henrique Z.","Tatiane J.",
 ];
 
+const MALE_NAMES = new Set([
+  "Carlos M.","João P.","Rafael T.","Lucas F.","Rodrigo A.","Diego S.","Marcelo B.",
+  "Thiago R.","Bruno H.","Felipe M.","Gustavo L.","Eduardo Q.","Henrique Z.",
+]);
+
 type Review = {
   id: string;
   name: string;
