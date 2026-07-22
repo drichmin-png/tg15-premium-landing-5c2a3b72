@@ -84,7 +84,8 @@ const DEFAULT_BLOCKS: Block[] = [
 ];
 
 const DEFAULTS: AdminState = {
-  password: "34561581",
+  // Never hardcode a password in the shipped bundle. Real auth happens server-side.
+  password: "",
   authed: false,
   hero: {
     eyebrow: "Tecnologia Avançada · Resultados Reais",
@@ -391,42 +392,22 @@ export const admin = {
     persist(state);
     notify();
   },
-  login: (password: string) => {
-    ensureHydrated();
-    if (password === state.password || password === DEFAULTS.password) {
-      authPassword = password;
-      state = { ...state, authed: true, password };
-      persist(state);
-      notify();
-      return true;
-    }
+  login: (_password: string) => {
+    // Client-side password check removed — only server-verified logins are accepted.
     return false;
   },
   loginRemote: async (password: string) => {
     ensureHydrated();
     const pwd = password.trim();
-    try {
-      const { supabase } = await import("@/integrations/supabase/client");
-      const { data, error } = await supabase.rpc("verify_admin_password", { pwd });
-      if (!error && data === true) {
-        authPassword = pwd;
-        state = { ...state, authed: true, password: pwd };
-        persist(state);
-        notify();
-        return true;
-      }
-      if (error) console.warn("[admin] verify_admin_password erro", error);
-    } catch (e) {
-      console.warn("[admin] loginRemote falhou, fallback local", e);
-    }
-    if (pwd === state.password || pwd === DEFAULTS.password) {
-      authPassword = pwd;
-      state = { ...state, authed: true, password: pwd };
-      persist(state);
-      notify();
-      return true;
-    }
-    throw new Error("Senha incorreta");
+    if (!pwd) throw new Error("Informe a senha");
+    const { verifyAdminPassword } = await import("@/lib/site-config.functions");
+    // Any error here (network/RPC/wrong password) propagates — no local fallback.
+    await verifyAdminPassword({ data: { password: pwd } });
+    authPassword = pwd;
+    state = { ...state, authed: true, password: pwd };
+    persist(state);
+    notify();
+    return true;
   },
   logout: () => {
     authPassword = null;
