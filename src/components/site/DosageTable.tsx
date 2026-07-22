@@ -11,8 +11,44 @@ const rows = [
   { mg: "15mg", weeks: "1 semana", applications: "1 aplicação", ui: "50 UI" },
 ];
 
+type ZoomTarget = "custom" | "official" | null;
+
+function CustomTable({ compact = false }: { compact?: boolean }) {
+  return (
+    <div className="card-premium overflow-hidden h-full">
+      <div className="gradient-brand px-3 py-3 md:px-6 md:py-5 text-white">
+        <div className={`grid grid-cols-3 gap-2 md:gap-4 font-bold uppercase tracking-wider ${compact ? "text-[8px] md:text-xs" : "text-xs"}`}>
+          <div>Qtd (mg)</div>
+          <div>Semanas</div>
+          <div>Seringa</div>
+        </div>
+      </div>
+      <div className="divide-y divide-border">
+        {rows.map((r, i) => (
+          <div
+            key={r.mg}
+            className={`grid grid-cols-3 items-center gap-2 md:gap-4 px-3 py-2 md:px-6 md:py-4 ${i % 2 ? "bg-sand/60" : "bg-card"}`}
+          >
+            <div className={`font-bold text-gradient-brand ${compact ? "text-sm md:text-2xl" : "text-2xl"}`}>{r.mg}</div>
+            <div>
+              <div className={`font-semibold text-ink ${compact ? "text-xs md:text-lg" : "text-lg"}`}>{r.weeks}</div>
+              <div className={`text-muted-foreground ${compact ? "text-[9px] md:text-xs" : "text-xs"}`}>({r.applications})</div>
+            </div>
+            <div className={`font-bold text-ink ${compact ? "text-sm md:text-2xl" : "text-2xl"}`}>{r.ui}</div>
+          </div>
+        ))}
+      </div>
+      <div className={`flex items-center gap-2 px-3 py-2 md:px-6 md:py-4 border-t border-border bg-sand/60 text-muted-foreground ${compact ? "text-[9px] md:text-xs" : "text-xs"}`}>
+        <Info className="h-3 w-3 md:h-3.5 md:w-3.5 text-primary shrink-0" />
+        *1 dose por semana. Consulte seu médico.
+      </div>
+    </div>
+  );
+}
+
 export function DosageTable() {
-  const [zoom, setZoom] = useState(false);
+  const [zoom, setZoom] = useState<ZoomTarget>(null);
+
   return (
     <section id="dosagem" className="container-x mt-24">
       <div className="max-w-2xl">
@@ -25,53 +61,35 @@ export function DosageTable() {
         </p>
       </div>
 
-      <div className="mt-10 grid gap-6 lg:grid-cols-[1.1fr_1fr]">
-        <div className="card-premium overflow-hidden">
-          <div className="gradient-brand px-6 py-5 text-white">
-            <div className="grid grid-cols-3 gap-4 text-xs uppercase tracking-wider font-bold">
-              <div>Quantidade (mg)</div>
-              <div>Nº de semanas (aplicações)</div>
-              <div>Medida na Seringa</div>
-            </div>
-          </div>
-          <div className="divide-y divide-border">
-            {rows.map((r, i) => (
-              <div
-                key={r.mg}
-                className={`grid grid-cols-3 items-center gap-4 px-6 py-4 ${i % 2 ? "bg-sand/60" : "bg-card"}`}
-              >
-                <div className="text-2xl font-bold text-gradient-brand">{r.mg}</div>
-                <div>
-                  <div className="text-lg font-semibold text-ink">{r.weeks}</div>
-                  <div className="text-xs text-muted-foreground">({r.applications})</div>
-                </div>
-                <div className="text-2xl font-bold text-ink">{r.ui}</div>
-              </div>
-            ))}
-          </div>
-          <div className="flex items-center gap-2 px-6 py-4 border-t border-border bg-sand/60 text-xs text-muted-foreground">
-            <Info className="h-3.5 w-3.5 text-primary" />
-            *Cálculo baseado em 1 dose por semana. Consulte seu médico.
-          </div>
-        </div>
+      <div className="mt-10 grid grid-cols-2 gap-3 md:gap-6">
+        <button
+          type="button"
+          onClick={() => setZoom("custom")}
+          className="group relative text-left"
+          aria-label="Ampliar tabela de dosagem"
+        >
+          <CustomTable compact />
+          <span className="absolute top-2 right-2 md:top-3 md:right-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[10px] md:text-xs font-semibold text-ink shadow">
+            <Maximize2 className="h-3 w-3" /> Zoom
+          </span>
+        </button>
 
-        <div className="relative card-premium overflow-hidden">
-          <button
-            onClick={() => setZoom(true)}
-            className="group relative block h-full w-full"
-            aria-label="Ampliar tabela oficial"
-          >
-            <img
-              src={media.tabela}
-              alt="Tabela de fracionamento oficial T.G.15"
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/30 via-transparent to-transparent" />
-            <span className="absolute bottom-4 right-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 px-3 py-2 text-xs font-semibold text-ink shadow">
-              <Maximize2 className="h-3.5 w-3.5" /> Ampliar tabela oficial
-            </span>
-          </button>
-        </div>
+        <button
+          type="button"
+          onClick={() => setZoom("official")}
+          className="group relative card-premium overflow-hidden"
+          aria-label="Ampliar tabela oficial"
+        >
+          <img
+            src={media.tabela}
+            alt="Tabela de fracionamento oficial T.G.15"
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-ink/20 via-transparent to-transparent" />
+          <span className="absolute top-2 right-2 md:top-3 md:right-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[10px] md:text-xs font-semibold text-ink shadow">
+            <Maximize2 className="h-3 w-3" /> Zoom
+          </span>
+        </button>
       </div>
 
       <div className="mt-8 flex items-start gap-3 rounded-2xl border border-primary/20 bg-primary/[0.04] p-5">
@@ -88,21 +106,43 @@ export function DosageTable() {
 
       {zoom && (
         <div
-          onClick={() => setZoom(false)}
-          className="fixed inset-0 z-[100] grid place-items-center bg-ink/80 backdrop-blur-sm p-4"
+          onClick={() => setZoom(null)}
+          className="fixed inset-0 z-[100] grid place-items-center bg-ink/85 backdrop-blur-sm p-4"
         >
           <button
-            className="absolute right-6 top-6 grid h-10 w-10 place-items-center rounded-full bg-white text-ink shadow"
+            onClick={() => setZoom(null)}
+            className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full bg-white text-ink shadow"
             aria-label="Fechar"
           >
             <X className="h-5 w-5" />
           </button>
-          <img
-            src={media.tabela}
-            alt="Tabela ampliada"
-            className="max-h-[90vh] max-w-[95vw] rounded-2xl shadow-2xl"
+
+          <div
+            className="flex flex-col items-center gap-4 max-h-full w-full"
             onClick={(e) => e.stopPropagation()}
-          />
+          >
+            <div className="max-h-[75vh] max-w-[95vw] overflow-auto rounded-2xl shadow-2xl bg-white">
+              {zoom === "custom" ? (
+                <div className="w-[92vw] max-w-3xl">
+                  <CustomTable />
+                </div>
+              ) : (
+                <img
+                  src={media.tabela}
+                  alt="Tabela ampliada"
+                  className="max-h-[75vh] max-w-[95vw] object-contain"
+                />
+              )}
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setZoom(zoom === "custom" ? "official" : "custom")}
+              className="inline-flex items-center gap-2 rounded-full bg-white/95 px-4 py-2 text-sm font-semibold text-ink shadow hover:bg-white"
+            >
+              Ver {zoom === "custom" ? "tabela oficial" : "tabela de dosagem"}
+            </button>
+          </div>
         </div>
       )}
     </section>
