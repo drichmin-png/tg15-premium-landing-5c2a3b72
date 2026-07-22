@@ -717,8 +717,86 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
                 </div>
               </div>
             </div>
+
+            <div className="h-px bg-border" />
+
+            {/* Nota de compra + Rastreio */}
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-xl border border-border bg-sand/40 p-4">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                  <FileText className="h-3.5 w-3.5" /> Nota de compra
+                </div>
+                <dl className="mt-3 space-y-1.5 text-sm">
+                  <div className="flex justify-between"><dt className="text-muted-foreground">Nº do pedido</dt><dd className="font-semibold text-ink">#{orderId}</dd></div>
+                  <div className="flex justify-between"><dt className="text-muted-foreground">Emissão</dt><dd className="font-semibold text-ink">{emissionDate}</dd></div>
+                  <div className="flex justify-between"><dt className="text-muted-foreground">Valor</dt><dd className="font-price text-ink">{formatBRL(total)}</dd></div>
+                </dl>
+                <p className="mt-2 text-[11px] text-muted-foreground">A nota fiscal eletrônica será enviada por e-mail após a confirmação do pagamento.</p>
+              </div>
+              <div className="rounded-xl border border-border bg-sand/40 p-4">
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                  <Truck className="h-3.5 w-3.5" /> Código de rastreio
+                </div>
+                <div className="mt-3 font-mono text-sm font-bold text-ink break-all">{trackingCode}</div>
+                <p className="mt-2 text-[11px] text-muted-foreground">Ativado assim que o pedido for despachado do centro de distribuição.</p>
+              </div>
+            </div>
+
+            <div className="h-px bg-border" />
+
+            {/* Prazo por região */}
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                <Truck className="h-3.5 w-3.5" /> Prazo de entrega — {regionalEta.region}
+              </div>
+              <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                <div className="rounded-lg bg-primary/[0.05] border border-primary/15 p-3">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Estimativa para sua região</div>
+                  <div className="mt-1 text-sm font-bold text-ink">{regionalEta.range}</div>
+                </div>
+                <div className="rounded-lg bg-sand/60 border border-border p-3">
+                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Centro de distribuição mais próximo</div>
+                  <div className="mt-1 text-sm font-bold text-ink">{regionalEta.center}</div>
+                </div>
+              </div>
+              <details className="mt-3 text-xs text-muted-foreground">
+                <summary className="cursor-pointer font-semibold text-foreground/80">Ver prazos por região e centros de distribuição</summary>
+                <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                  <ul className="space-y-1 list-disc pl-4">
+                    <li>São Paulo (capital e interior): mesmo dia ou até 2 dias úteis.</li>
+                    <li>Sul e Sudeste: 1 a 3 dias úteis.</li>
+                    <li>Centro-Oeste: 2 a 5 dias úteis.</li>
+                    <li>Nordeste: 3 a 7 dias úteis.</li>
+                    <li>Norte: 5 a 10 dias úteis (pode variar em cidades afastadas).</li>
+                  </ul>
+                  <ul className="space-y-1 list-disc pl-4">
+                    <li>São Paulo (SP) — hub logístico principal.</li>
+                    <li>Rio de Janeiro (RJ) — Sudeste.</li>
+                    <li>Belo Horizonte (MG) — Minas / Centro-Sul.</li>
+                    <li>Brasília (DF) — Centro-Oeste.</li>
+                    <li>Curitiba (PR) e Porto Alegre (RS) — Sul.</li>
+                    <li>Salvador (BA), Recife (PE) e Fortaleza (CE) — Nordeste e Norte.</li>
+                  </ul>
+                </div>
+              </details>
+            </div>
+
+            <div className="h-px bg-border" />
+
+            {/* Empresa */}
+            <div>
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                <ShieldCheck className="h-3.5 w-3.5" /> Empresa responsável
+              </div>
+              <dl className="mt-3 grid grid-cols-2 gap-y-2 gap-x-4 text-sm sm:gap-x-6">
+                <div className="col-span-2 flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">Razão social</dt><dd className="font-semibold text-ink">TGFarmacêutica Indústria e Comércio LTDA.</dd></div>
+                <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">CNPJ</dt><dd className="font-semibold text-ink">48.327.915/0001-72</dd></div>
+                <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">Endereço</dt><dd className="font-semibold text-ink">Av. Paulista, 1106 — Bela Vista, São Paulo/SP</dd></div>
+              </dl>
+            </div>
           </div>
         </div>
+
 
         {/* Termos */}
         <div className="mt-4 rounded-2xl border border-border bg-sand/40 p-5 text-left">
