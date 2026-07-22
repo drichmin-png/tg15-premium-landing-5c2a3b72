@@ -54,8 +54,6 @@ export type LocalTenantAccessPayload = {
 
 const TENANTS_KEY = "tg15-saas-local-tenants-v1";
 const SESSION_KEY = "tg15-saas-local-session-v1";
-const MASTER_USER = "admin";
-const MASTER_PASSWORD = "34561581";
 const SLUG_RE = /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/;
 
 function normalizeText(value: string) {
@@ -241,37 +239,10 @@ export function resetLocalTenantPassword(id: string, password: string) {
   );
 }
 
-export function verifyLocalMasterLogin(username: string, password: string) {
-  return username.trim() === MASTER_USER && password === MASTER_PASSWORD;
-}
-
-export function verifyLocalTenantLogin(slug: string, username: string, password: string) {
-  let tenant = getLocalTenantBySlug(slug);
-  if (!tenant) {
-    const normalizedSlug = slug.trim().toLowerCase();
-    const typedUsername = username.trim();
-    if (typedUsername && password.length >= 4 && slugifyTenantName(typedUsername) === normalizedSlug) {
-      tenant = createLocalTenant({
-        slug: normalizedSlug,
-        company_name: typedUsername,
-        responsible_name: "",
-        contact_email: "",
-        contact_phone: "",
-        plan: "starter",
-        owner_username: typedUsername,
-        owner_password: password,
-      });
-    }
-  }
-  if (!tenant) throw new Error("Operador não encontrado. Copie novamente o link no Painel Master.");
-  if (tenant.status === "blocked") throw new Error("Conta bloqueada. Fale com o administrador.");
-  if (tenant.status === "inactive") throw new Error("Conta inativa.");
-  if (normalizeText(tenant.owner_username) !== normalizeText(username) || tenant.owner_password !== password) {
-    throw new Error("Usuário ou senha inválidos");
-  }
-  setLocalTenantLastLogin(tenant.id);
-  return getLocalTenantById(tenant.id)!;
-}
+// NOTE: Client-side password verification was removed. Master and tenant logins
+// now go through the server functions in `saas.functions.ts`, which check bcrypt
+// hashes stored in the `app_users` table. The helpers below only manage the
+// browser-side session shell that other pages read for UI gating.
 
 export function getLocalSaasSession(): LocalSaasSession | null {
   const session = readJson<LocalSaasSession | null>(SESSION_KEY, null);
