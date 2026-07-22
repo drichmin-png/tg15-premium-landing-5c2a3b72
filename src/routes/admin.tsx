@@ -1,5 +1,5 @@
-import { createFileRoute, Navigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowDown,
   ArrowUp,
@@ -17,6 +17,7 @@ import {
   Share2,
   ShieldCheck,
   Sparkles,
+  Users,
 } from "lucide-react";
 
 import { admin, useAdmin, type BlockId } from "@/lib/admin-store";
@@ -29,11 +30,27 @@ import {
   getLocalAnalyticsSuggestions,
   type AnalyticsReport,
 } from "@/lib/local-db";
+import {
+  buildLocalTenantAccessUrl,
+  createLocalTenant,
+  deleteLocalTenant,
+  impersonateLocalTenant,
+  listLocalTenants,
+  resetLocalTenantPassword,
+  setLocalTenantStatus,
+  type LocalTenant,
+} from "@/lib/saas-local";
 
 export const Route = createFileRoute("/admin")({
-  head: () => ({ meta: [{ title: "Admin — redirecionando" }, { name: "robots", content: "noindex" }] }),
-  component: () => <Navigate to="/master/login" replace />,
+  head: () => ({ meta: [{ title: "Painel T.G.15 — Administração" }, { name: "robots", content: "noindex" }] }),
+  component: AdminEntry,
 });
+
+function AdminEntry() {
+  const s = useAdmin();
+  return s.authed ? <Dashboard /> : <LoginScreen />;
+}
+
 
 function LoginScreen() {
   const [pwd, setPwd] = useState("");
