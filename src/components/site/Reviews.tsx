@@ -149,8 +149,8 @@ export function Reviews() {
           return (
             <article key={r.id} className="card-premium p-5 flex flex-col">
               <header className="flex items-center gap-3">
-                <div className="grid h-11 w-11 place-items-center rounded-full gradient-brand text-white font-bold">
-                  {r.name.charAt(0)}
+                <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full ring-2 ring-primary/20 bg-sand">
+                  <img src={r.avatar} alt={r.name} loading="lazy" className="h-full w-full object-cover" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="font-semibold text-ink truncate">{r.name}</div>
