@@ -310,8 +310,16 @@ function applyRemoteData(remote: Record<string, unknown> | null | undefined) {
 
 async function hydrateRemote() {
   ensureHydrated();
-  // 100% local mode: no remote sync. Left as a no-op so callers keep working.
-  return;
+  if (typeof window === "undefined") return;
+  try {
+    const { getSiteConfig } = await import("@/lib/site-config.functions");
+    const res = await getSiteConfig();
+    if (!res?.data) return;
+    const parsed = JSON.parse(res.data) as Record<string, unknown>;
+    applyRemoteData(parsed);
+  } catch {
+    // fallback silencioso: mantém modo local
+  }
 }
 
 function setNamespace(ns: string | null) {
@@ -435,6 +443,16 @@ export const admin = {
     ensureHydrated();
     persist(state);
     notify();
+    const pwd = authPassword;
+    if (!pwd) return;
+    try {
+      const payload: Record<string, unknown> = {};
+      for (const k of REMOTE_KEYS) payload[k as string] = state[k];
+      const { saveSiteConfig } = await import("@/lib/site-config.functions");
+      await saveSiteConfig({ data: { password: pwd, data: JSON.stringify(payload) } });
+    } catch {
+      // silencioso: continua funcionando localmente
+    }
   },
   setNamespace,
   markAuthed,
