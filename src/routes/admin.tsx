@@ -25,6 +25,8 @@ import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
 import {
   type AdminOrder,
   listLocalOrders,
+  listAllLocalOrders,
+
   updateLocalOrder,
   getLocalAnalyticsReport,
   getLocalAnalyticsSuggestions,
