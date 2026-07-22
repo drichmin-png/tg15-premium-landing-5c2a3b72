@@ -98,7 +98,7 @@ function Checkout() {
         </div>
       </header>
 
-      <div className="container-x py-10">
+      <div className={step === 5 ? "w-full py-10" : "container-x py-10"}>
         <button onClick={() => (step === 1 ? nav({ to: "/" }) : prev())} className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary">
           <ChevronLeft className="h-4 w-4" />
           {step === 1 ? "Voltar à loja" : "Etapa anterior"}
@@ -175,7 +175,7 @@ function Checkout() {
           </aside>
 
           {/* Form */}
-          <div className={step === 5 ? "card-premium p-6 md:p-8 lg:order-1" : "lg:order-1 py-2"}>
+          <div className="lg:order-1 py-2">
             {step === 1 && <StepCustomer state={state} onNext={next} />}
             {step === 2 && <StepAddress state={state} onNext={next} />}
             {step === 3 && <StepShipping state={state} onNext={next} />}
