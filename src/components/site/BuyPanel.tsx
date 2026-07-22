@@ -213,7 +213,7 @@ export function BuyPanel() {
                 rel="noreferrer"
                 className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-[#25D366]/30 hover:brightness-110"
               >
-                <MessageCircle className="h-4 w-4" /> Atendimento via WhatsApp
+                <MessageCircle className="h-4 w-4" /> Atendimento rápido
               </a>
             )}
             {groupLink && (
