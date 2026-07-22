@@ -118,7 +118,7 @@ const DEFAULTS: AdminState = {
     mode: "key",
     key: "",
     keyType: "cpf",
-    merchantName: "T.G.15",
+    merchantName: "TG15 ONLINE",
     merchantCity: "SAO PAULO",
   },
   support: {

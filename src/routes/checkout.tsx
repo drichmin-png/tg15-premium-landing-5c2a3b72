@@ -533,10 +533,11 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
   const pixPayload = showPix
     ? buildPixPayload({
         key: admin.pix.key,
+        keyType: admin.pix.keyType,
         amount: total,
-        merchantName: admin.pix.merchantName || "T.G.15",
+        merchantName: admin.pix.merchantName || "TG15 ONLINE",
         merchantCity: admin.pix.merchantCity || "SAO PAULO",
-        txid: orderId.replace(/[^A-Za-z0-9]/g, "").slice(0, 25),
+        txid: "***",
       })
     : "";
   const [copied, setCopied] = useState(false);
