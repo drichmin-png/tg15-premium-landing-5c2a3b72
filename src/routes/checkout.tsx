@@ -48,7 +48,8 @@ function Checkout() {
   const v = variants[state.variant];
   const unitPrice = state.variant === "box" ? products.box.price : products.single.price;
   const subtotal = unitPrice * state.qty;
-  const shippingCost = state.shipping === "express" ? 39.9 : state.shipping === "standard" ? 19.9 : 0;
+  const freeShipping = state.variant === "box" || (state.variant === "single" && state.qty > 2);
+  const shippingCost = freeShipping ? 0 : state.shipping === "express" ? 39.9 : state.shipping === "standard" ? 19.9 : 0;
   const total = subtotal + shippingCost;
   const boxSavingsUnit = Math.max(0, products.single.price * 4 - products.box.price);
   const savings = state.variant === "box" ? boxSavingsUnit * state.qty : 0;
@@ -178,7 +179,7 @@ function Checkout() {
           <div className="lg:order-1 py-2">
             {step === 1 && <StepCustomer state={state} onNext={next} />}
             {step === 2 && <StepAddress state={state} onNext={next} />}
-            {step === 3 && <StepShipping state={state} onNext={next} />}
+            {step === 3 && <StepShipping state={state} onNext={next} freeShipping={freeShipping} />}
             {step === 4 && <StepPayment state={state} onNext={next} total={total} />}
             {step === 5 && <StepConfirm orderId={orderId} trackingCode={trackingCode} total={total} state={state} />}
           </div>
@@ -326,7 +327,7 @@ function StepAddress({ state, onNext }: { state: ReturnType<typeof useCart>; onN
   );
 }
 
-function StepShipping({ state, onNext }: { state: ReturnType<typeof useCart>; onNext: () => void }) {
+function StepShipping({ state, onNext, freeShipping }: { state: ReturnType<typeof useCart>; onNext: () => void; freeShipping: boolean }) {
   const options = [
     { id: "standard" as const, label: "Envio Refrigerado Padrão", eta: "2 a 5 dias úteis", price: 19.9 },
     { id: "express" as const, label: "Envio Refrigerado Expresso", eta: "1 a 2 dias úteis", price: 39.9 },
@@ -335,6 +336,11 @@ function StepShipping({ state, onNext }: { state: ReturnType<typeof useCart>; on
     <form onSubmit={(e) => { e.preventDefault(); if (state.shipping) onNext(); }}>
       <h2 className="heading-display text-2xl md:text-3xl text-ink">Frete</h2>
       <p className="mt-1.5 text-sm text-muted-foreground">Todos os envios com embalagem refrigerada e rastreio.</p>
+      {freeShipping && (
+        <div className="mt-4 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-700">
+          🎉 Frete grátis liberado para este pedido!
+        </div>
+      )}
       <div className="mt-6 grid gap-3">
         {options.map((o) => {
           const selected = state.shipping === o.id;
@@ -352,7 +358,9 @@ function StepShipping({ state, onNext }: { state: ReturnType<typeof useCart>; on
                 <div className="font-semibold text-ink">{o.label}</div>
                 <div className="text-xs text-muted-foreground">{o.eta}</div>
               </div>
-              <div className="text-sm font-bold text-ink">{formatBRL(o.price)}</div>
+              <div className="text-sm font-bold text-ink">
+                {freeShipping ? <span className="text-emerald-600">Grátis</span> : formatBRL(o.price)}
+              </div>
               <div className={`grid h-6 w-6 place-items-center rounded-full border-2 ${selected ? "border-primary bg-primary text-white" : "border-border"}`}>
                 {selected && <Check className="h-3.5 w-3.5" strokeWidth={3} />}
               </div>
