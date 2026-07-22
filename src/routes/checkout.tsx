@@ -661,7 +661,7 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
               <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
                 <ShieldCheck className="h-3.5 w-3.5" /> Dados do cliente
               </div>
-              <dl className="mt-3 grid gap-y-2 text-sm sm:grid-cols-2 sm:gap-x-6">
+              <dl className="mt-3 grid grid-cols-2 gap-y-2 gap-x-4 text-sm sm:gap-x-6">
                 <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">Nome</dt><dd className="font-semibold text-ink">{state.customer.fullName || "—"}</dd></div>
                 <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">CPF</dt><dd className="font-semibold text-ink">{maskCPF(state.customer.cpf)}</dd></div>
                 <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">E-mail</dt><dd className="font-semibold text-ink break-all">{maskEmail(state.customer.email)}</dd></div>
