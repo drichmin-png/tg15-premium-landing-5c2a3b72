@@ -1,5 +1,17 @@
 import * as React from "react";
-import { Star, Heart, ImageIcon, MapPin, ThumbsUp } from "lucide-react";
+import { Star, Heart, MapPin, ThumbsUp, X } from "lucide-react";
+import { assetUrl } from "@/lib/asset-url";
+import p1 from "@/assets/reviews/IMG_4990.jpeg.asset.json";
+import p2 from "@/assets/reviews/IMG_4991.jpeg.asset.json";
+import p3 from "@/assets/reviews/IMG_4992.jpeg.asset.json";
+import p4 from "@/assets/reviews/IMG_4993.jpeg.asset.json";
+import p5 from "@/assets/reviews/IMG_4994.jpeg.asset.json";
+import p6 from "@/assets/reviews/IMG_4995.jpeg.asset.json";
+import p7 from "@/assets/reviews/IMG_4996.jpeg.asset.json";
+import p8 from "@/assets/reviews/IMG_4998.jpeg.asset.json";
+import p9 from "@/assets/reviews/IMG_4999.jpeg.asset.json";
+
+const PHOTOS = [p1, p2, p3, p4, p5, p6, p7, p8, p9].map((p) => assetUrl(p.url));
 
 const COMMENTS = [
   "Produto muito bem embalado. A apresentação ficou excelente.",
