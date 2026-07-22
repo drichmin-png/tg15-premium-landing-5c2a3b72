@@ -134,13 +134,13 @@ export function listAllLocalOrders(): Array<AdminOrder & { tenant_slug: string }
   for (let i = 0; i < window.localStorage.length; i += 1) {
     const key = window.localStorage.key(i);
     if (!key || !key.startsWith(ORDERS_KEY_BASE)) continue;
-    const slug = key === ORDERS_KEY_BASE ? "" : key.slice(ORDERS_KEY_BASE.length + 1);
-    if (!slug) continue;
+    const slug = key === ORDERS_KEY_BASE ? "principal" : key.slice(ORDERS_KEY_BASE.length + 1);
     const rows = readJson<AdminOrder[]>(key, []);
     for (const row of rows) result.push({ ...row, tenant_slug: slug });
   }
   return result.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 }
+
 
 export function saveLocalOrder(order: AdminOrder, ns?: string | null) {
   const key = ordersKey(ns);
