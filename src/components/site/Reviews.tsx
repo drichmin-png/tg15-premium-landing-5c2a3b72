@@ -99,21 +99,28 @@ type Review = {
   avatar: string;
 };
 
+let femaleIdx = 0;
+let maleIdx = 0;
 const REVIEWS: Review[] = COMMENTS.map((text, i) => {
   const count = i % 4; // 0..3
   const photos: string[] = [];
   for (let k = 0; k < count; k++) {
     photos.push(PHOTOS[(i * 3 + k) % PHOTOS.length]);
   }
+  const name = NAMES[i % NAMES.length];
+  const isMale = MALE_NAMES.has(name);
+  const avatar = isMale
+    ? MALE_AVATARS[maleIdx++ % MALE_AVATARS.length]
+    : FEMALE_AVATARS[femaleIdx++ % FEMALE_AVATARS.length];
   return {
     id: `r${i}`,
-    name: NAMES[i % NAMES.length],
+    name,
     city: CITIES[i % CITIES.length],
     daysAgo: ((i * 7 + 3) % 15) + 1,
     text,
     likes: 8 + ((i * 13) % 90),
     photos,
-    avatar: AVATARS[i % AVATARS.length],
+    avatar,
   };
 });
 
