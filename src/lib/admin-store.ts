@@ -443,6 +443,16 @@ export const admin = {
     ensureHydrated();
     persist(state);
     notify();
+    const pwd = authPassword;
+    if (!pwd) return;
+    try {
+      const payload: Record<string, unknown> = {};
+      for (const k of REMOTE_KEYS) payload[k as string] = state[k];
+      const { saveSiteConfig } = await import("@/lib/site-config.functions");
+      await saveSiteConfig({ data: { password: pwd, data: JSON.stringify(payload) } });
+    } catch {
+      // silencioso: continua funcionando localmente
+    }
   },
   setNamespace,
   markAuthed,
