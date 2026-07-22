@@ -10,8 +10,14 @@ import p6 from "@/assets/reviews/IMG_4995.jpeg.asset.json";
 import p7 from "@/assets/reviews/IMG_4996.jpeg.asset.json";
 import p8 from "@/assets/reviews/IMG_4998.jpeg.asset.json";
 import p9 from "@/assets/reviews/IMG_4999.jpeg.asset.json";
+import p10 from "@/assets/reviews/IMG_4984.jpeg.asset.json";
+import p11 from "@/assets/reviews/IMG_4985.jpeg.asset.json";
+import p12 from "@/assets/reviews/IMG_4986.jpeg.asset.json";
+import p13 from "@/assets/reviews/IMG_4987.jpeg.asset.json";
+import p14 from "@/assets/reviews/IMG_4988.jpeg.asset.json";
+import p15 from "@/assets/reviews/IMG_4989.webp.asset.json";
 
-const PHOTOS = [p1, p2, p3, p4, p5, p6, p7, p8, p9].map((p) => assetUrl(p.url));
+const PHOTOS = [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15].map((p) => assetUrl(p.url));
 
 const COMMENTS = [
   "Produto muito bem embalado. A apresentação ficou excelente.",
