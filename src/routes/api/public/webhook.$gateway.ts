@@ -52,14 +52,38 @@ export const Route = createFileRoute("/api/public/webhook/$gateway")({
           const normalized = adapter.parseWebhook(payload, cred);
           if (!normalized) throw new Error("Payload inválido ou status desconhecido");
 
-          // Locate order by id (uuid) or public_token
-          const { data: orderById } = await supabaseAdmin
-            .from("orders")
-            .select("*")
-            .or(`id.eq.${normalized.pedido_id},public_token.eq.${normalized.pedido_id}`)
-            .maybeSingle();
+          // Locate order via safe parameterized lookups. Validate the incoming id
+          // shape first so a crafted value can't smuggle PostgREST filter syntax.
+          const rawId = String(normalized.pedido_id ?? "").trim();
+          const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+          const PUBLIC_TOKEN_RE = /^[0-9a-f]{16,64}$/i;
+          if (!rawId || (!UUID_RE.test(rawId) && !PUBLIC_TOKEN_RE.test(rawId))) {
+            throw new Error("Identificador de pedido em formato inválido");
+          }
 
-          if (!orderById) throw new Error(`Pedido ${normalized.pedido_id} não encontrado`);
+          let orderById: Awaited<
+            ReturnType<typeof supabaseAdmin.from<"orders">>
+          > extends never
+            ? never
+            : any = null;
+          if (UUID_RE.test(rawId)) {
+            const { data } = await supabaseAdmin
+              .from("orders")
+              .select("*")
+              .eq("id", rawId)
+              .maybeSingle();
+            orderById = data ?? null;
+          }
+          if (!orderById) {
+            const { data } = await supabaseAdmin
+              .from("orders")
+              .select("*")
+              .eq("public_token", rawId)
+              .maybeSingle();
+            orderById = data ?? null;
+          }
+
+          if (!orderById) throw new Error(`Pedido ${rawId} não encontrado`);
           pedidoUuid = orderById.id;
 
           const patch: TablesUpdate<"orders"> = {
