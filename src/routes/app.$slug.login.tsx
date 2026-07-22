@@ -40,36 +40,13 @@ function TenantLoginPage() {
           setLoading(true);
           try {
             const trimmedUser = username.trim();
-            // Server verifies the credentials against the bcrypt hash stored in `app_users`.
-            await tenantLogin({ data: { slug, username: trimmedUser, password } });
-            // Populate the local session shell so client-side UI gates work.
             const tenant = getLocalTenantBySlug(slug);
-            if (tenant) {
-              createTenantSession(tenant, trimmedUser);
-            } else {
-              // Fallback minimal session; server cookie is the source of truth.
-              createTenantSession(
-                {
-                  id: slug,
-                  slug,
-                  company_name: slug,
-                  responsible_name: "",
-                  contact_email: "",
-                  contact_phone: "",
-                  plan: "starter",
-                  status: "active",
-                  order_limit: 0,
-                  product_limit: 0,
-                  user_limit: 3,
-                  expires_at: null,
-                  last_login_at: null,
-                  created_at: new Date().toISOString(),
-                  owner_username: trimmedUser,
-                  owner_password: "",
-                },
-                trimmedUser,
-              );
+            if (!tenant) throw new Error("Operador não encontrado neste dispositivo");
+            if (tenant.status !== "active") throw new Error("Operador bloqueado");
+            if (tenant.owner_username !== trimmedUser || tenant.owner_password !== password) {
+              throw new Error("Usuário ou senha incorretos");
             }
+            createTenantSession(tenant, trimmedUser);
             navigate({ to: "/app/$slug/dashboard", params: { slug } });
           } catch (err) {
             setError(err instanceof Error ? err.message : "Falha ao entrar");
