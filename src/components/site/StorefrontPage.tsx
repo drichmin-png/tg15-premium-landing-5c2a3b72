@@ -7,6 +7,7 @@ import { ProductGallery } from "@/components/site/ProductGallery";
 import { BuyPanel } from "@/components/site/BuyPanel";
 import { Benefits } from "@/components/site/Benefits";
 import { DosageTable } from "@/components/site/DosageTable";
+import { Reviews } from "@/components/site/Reviews";
 import { VideoSection } from "@/components/site/VideoSection";
 import { FAQ } from "@/components/site/FAQ";
 import { TrackingScripts } from "@/components/site/TrackingScripts";
@@ -68,12 +69,15 @@ export function StorefrontPage({ operatorSlug }: { operatorSlug?: string }) {
     hero: () => <Hero />,
     trust: () => <TrustBar />,
     produto: () => (
-      <section id="produto" className="container-x mt-16">
-        <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
-          <ProductGallery />
-          <BuyPanel />
-        </div>
-      </section>
+      <>
+        <section id="produto" className="container-x mt-16">
+          <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
+            <ProductGallery />
+            <BuyPanel />
+          </div>
+        </section>
+        <Reviews />
+      </>
     ),
     beneficios: () => <Benefits />,
     dosagem: () => <DosageTable />,

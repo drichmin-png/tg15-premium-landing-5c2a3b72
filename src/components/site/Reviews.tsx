@@ -1,0 +1,183 @@
+import * as React from "react";
+import { Star, Heart, ImageIcon, MapPin, ThumbsUp } from "lucide-react";
+
+const COMMENTS = [
+  "Produto muito bem embalado. A apresentação ficou excelente.",
+  "Gostei bastante da organização da embalagem. Passa uma boa impressão.",
+  "Recebi tudo certinho e ainda veio um mimo junto. Achei um detalhe muito bacana.",
+  "A entrega foi mais rápida do que eu imaginava.",
+  "A tabela explicativa ajudou bastante. Ficou simples de entender.",
+  "O produto chegou em perfeitas condições, sem nenhum dano.",
+  "Fiquei surpresa com o cuidado na embalagem.",
+  "Os brindes deram um toque especial na experiência.",
+  "Veio exatamente como mostrado nas fotos.",
+  "Gostei muito da qualidade da apresentação do pedido.",
+  "Tudo chegou organizado e muito bem protegido.",
+  "Não esperava receber um brinde. Foi uma surpresa bem legal.",
+  "A entrega aconteceu antes do prazo informado.",
+  "Achei a embalagem bonita e discreta.",
+  "Recebi os brindes direitinho. Gostei bastante desse cuidado.",
+  "A experiência de compra foi muito tranquila.",
+  "O pedido chegou completo e muito bem embalado.",
+  "Gostei do capricho em cada detalhe da embalagem.",
+  "Veio tudo certinho e os brindes fizeram diferença.",
+  "A qualidade da apresentação chamou minha atenção.",
+  "Produto bem protegido durante o transporte.",
+  "A entrega foi rápida e tudo veio conforme o esperado.",
+  "A embalagem transmite bastante cuidado.",
+  "Os brindes deixaram a experiência ainda mais especial.",
+  "Achei muito prático e fácil de conferir tudo que veio no pedido.",
+  "Tudo chegou organizado e dentro do prazo previsto.",
+  "Foi uma experiência positiva do início ao fim. Gostei bastante da apresentação e do cuidado com o envio.",
+];
+
+const CITIES = [
+  "São Paulo – SP","Rio de Janeiro – RJ","Belo Horizonte – MG","Brasília – DF","Salvador – BA",
+  "Fortaleza – CE","Recife – PE","Curitiba – PR","Porto Alegre – RS","Goiânia – GO",
+  "Manaus – AM","Belém – PA","Campinas – SP","São Luís – MA","Natal – RN",
+  "João Pessoa – PB","Maceió – AL","Aracaju – SE","Florianópolis – SC","Cuiabá – MT",
+  "Campo Grande – MS","Vitória – ES","Teresina – PI","Ribeirão Preto – SP","São José dos Campos – SP",
+  "Uberlândia – MG","Londrina – PR",
+];
+
+const NAMES = [
+  "Ana R.","Carlos M.","Fernanda S.","João P.","Mariana L.","Rafael T.","Beatriz O.","Lucas F.",
+  "Patrícia N.","Rodrigo A.","Camila V.","Diego S.","Juliana C.","Marcelo B.","Larissa D.",
+  "Thiago R.","Vanessa G.","Bruno H.","Amanda K.","Felipe M.","Isabela P.","Gustavo L.",
+  "Renata F.","Eduardo Q.","Priscila W.","Henrique Z.","Tatiane J.",
+];
+
+type Review = {
+  id: string;
+  name: string;
+  city: string;
+  daysAgo: number;
+  text: string;
+  likes: number;
+  photos: number;
+};
+
+const REVIEWS: Review[] = COMMENTS.map((text, i) => ({
+  id: `r${i}`,
+  name: NAMES[i % NAMES.length],
+  city: CITIES[i % CITIES.length],
+  daysAgo: ((i * 7 + 3) % 15) + 1,
+  text,
+  likes: 8 + ((i * 13) % 90),
+  photos: (i % 4), // 0..3
+}));
+
+const STORAGE_KEY = "tg15-review-likes";
+
+function loadLikes(): Record<string, boolean> {
+  if (typeof window === "undefined") return {};
+  try { return JSON.parse(window.localStorage.getItem(STORAGE_KEY) || "{}"); } catch { return {}; }
+}
+
+export function Reviews() {
+  const [likes, setLikes] = React.useState<Record<string, boolean>>({});
+  const [visible, setVisible] = React.useState(6);
+
+  React.useEffect(() => { setLikes(loadLikes()); }, []);
+
+  const toggle = (id: string) => {
+    setLikes(prev => {
+      const next = { ...prev, [id]: !prev[id] };
+      try { window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next)); } catch {}
+      return next;
+    });
+  };
+
+  const list = REVIEWS.slice(0, visible);
+
+  return (
+    <section id="avaliacoes" className="container-x mt-24">
+      <div className="max-w-2xl">
+        <div className="eyebrow">Avaliações reais</div>
+        <h2 className="heading-display mt-3 text-4xl md:text-5xl text-ink">
+          O que dizem <span className="text-gradient-brand">nossos clientes</span>
+        </h2>
+        <p className="mt-3 text-muted-foreground">
+          Depoimentos de quem já recebeu o T.G.15 em casa.
+        </p>
+      </div>
+
+      <div className="mt-10 grid gap-5 md:grid-cols-2 lg:grid-cols-3">
+        {list.map((r) => {
+          const liked = !!likes[r.id];
+          const count = r.likes + (liked ? 1 : 0);
+          return (
+            <article key={r.id} className="card-premium p-5 flex flex-col">
+              <header className="flex items-center gap-3">
+                <div className="grid h-11 w-11 place-items-center rounded-full gradient-brand text-white font-bold">
+                  {r.name.charAt(0)}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-semibold text-ink truncate">{r.name}</div>
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <MapPin className="h-3 w-3" /> {r.city}
+                  </div>
+                </div>
+                <div className="text-xs text-muted-foreground whitespace-nowrap">
+                  há {r.daysAgo} {r.daysAgo === 1 ? "dia" : "dias"}
+                </div>
+              </header>
+
+              <div className="mt-3 flex items-center gap-0.5 text-primary">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <Star key={i} className="h-4 w-4 fill-current" />
+                ))}
+              </div>
+
+              <p className="mt-3 text-sm text-ink/90 leading-relaxed">"{r.text}"</p>
+
+              {r.photos > 0 && (
+                <div className="mt-4 flex gap-2">
+                  {Array.from({ length: r.photos }).map((_, i) => (
+                    <div
+                      key={i}
+                      className="grid h-16 w-16 place-items-center rounded-lg border border-border bg-sand/60 text-muted-foreground"
+                      aria-label={`Foto ${i + 1}`}
+                    >
+                      <ImageIcon className="h-5 w-5" />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <footer className="mt-4 pt-4 border-t border-border flex items-center justify-between">
+                <button
+                  type="button"
+                  onClick={() => toggle(r.id)}
+                  aria-pressed={liked}
+                  className={`inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold transition-all ${
+                    liked
+                      ? "bg-primary/10 text-primary"
+                      : "bg-sand/60 text-ink hover:bg-sand"
+                  }`}
+                >
+                  <Heart className={`h-4 w-4 ${liked ? "fill-current" : ""}`} />
+                  {count}
+                </button>
+                <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
+                  <ThumbsUp className="h-3 w-3" /> Compra verificada
+                </span>
+              </footer>
+            </article>
+          );
+        })}
+      </div>
+
+      {visible < REVIEWS.length && (
+        <div className="mt-8 flex justify-center">
+          <button
+            onClick={() => setVisible((v) => Math.min(v + 6, REVIEWS.length))}
+            className="rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-ink hover:bg-sand transition-colors"
+          >
+            Ver mais avaliações
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
