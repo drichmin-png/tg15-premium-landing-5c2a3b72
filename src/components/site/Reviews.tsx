@@ -34,7 +34,8 @@ import a12 from "@/assets/reviews/avatars/avatar-12.jpg.asset.json";
 import a13 from "@/assets/reviews/avatars/avatar-13.jpg.asset.json";
 import a14 from "@/assets/reviews/avatars/avatar-14.jpg.asset.json";
 import a15 from "@/assets/reviews/avatars/avatar-15.jpg.asset.json";
-const AVATARS = [a1, a2, a3, a4, a5, a6, a7, a8, a9, a10, a11, a12, a13, a14, a15].map((p) => assetUrl(p.url));
+const FEMALE_AVATARS = [a1, a2, a3, a4, a5, a6, a7, a8, a11, a12].map((p) => assetUrl(p.url));
+const MALE_AVATARS = [a9, a10, a13, a14, a15].map((p) => assetUrl(p.url));
 
 const COMMENTS = [
   "Produto muito bem embalado. A apresentação ficou excelente.",
@@ -82,6 +83,11 @@ const NAMES = [
   "Renata F.","Eduardo Q.","Priscila W.","Henrique Z.","Tatiane J.",
 ];
 
+const MALE_NAMES = new Set([
+  "Carlos M.","João P.","Rafael T.","Lucas F.","Rodrigo A.","Diego S.","Marcelo B.",
+  "Thiago R.","Bruno H.","Felipe M.","Gustavo L.","Eduardo Q.","Henrique Z.",
+]);
+
 type Review = {
   id: string;
   name: string;
@@ -93,21 +99,28 @@ type Review = {
   avatar: string;
 };
 
+let femaleIdx = 0;
+let maleIdx = 0;
 const REVIEWS: Review[] = COMMENTS.map((text, i) => {
   const count = i % 4; // 0..3
   const photos: string[] = [];
   for (let k = 0; k < count; k++) {
     photos.push(PHOTOS[(i * 3 + k) % PHOTOS.length]);
   }
+  const name = NAMES[i % NAMES.length];
+  const isMale = MALE_NAMES.has(name);
+  const avatar = isMale
+    ? MALE_AVATARS[maleIdx++ % MALE_AVATARS.length]
+    : FEMALE_AVATARS[femaleIdx++ % FEMALE_AVATARS.length];
   return {
     id: `r${i}`,
-    name: NAMES[i % NAMES.length],
+    name,
     city: CITIES[i % CITIES.length],
     daysAgo: ((i * 7 + 3) % 15) + 1,
     text,
     likes: 8 + ((i * 13) % 90),
     photos,
-    avatar: AVATARS[i % AVATARS.length],
+    avatar,
   };
 });
 
