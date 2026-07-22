@@ -578,6 +578,9 @@ Aguardo as instruções para finalizar o pagamento. Obrigado!`;
       : state.shipping === "standard" ? "2 a 5 dias úteis após a confirmação do pagamento"
       : "A combinar após a confirmação do pagamento";
 
+  const regionalEta = getRegionalEta(state.address.state);
+  const emissionDate = new Date().toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+
   return (
     <div className="text-center py-6">
       <div className="mx-auto grid h-20 w-20 place-items-center rounded-full gradient-brand text-white shadow-2xl shadow-primary/40">
