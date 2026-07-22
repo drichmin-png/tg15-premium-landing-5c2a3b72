@@ -438,7 +438,7 @@ function StepPayment({ state, onNext, total }: { state: ReturnType<typeof useCar
   );
 }
 
-function StepConfirm({ orderId, total, state }: { orderId: string; total: number; state: ReturnType<typeof useCart> }) {
+function StepConfirm({ orderId, trackingCode, total, state }: { orderId: string; trackingCode: string; total: number; state: ReturnType<typeof useCart> }) {
   const admin = useAdmin();
   const savedOrder = useRef(false);
   useEffect(() => {
