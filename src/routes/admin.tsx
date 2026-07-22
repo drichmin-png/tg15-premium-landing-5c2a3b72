@@ -192,7 +192,9 @@ export function Dashboard() {
           {tab === "pix" && <PixPanel s={s} />}
           {tab === "gateway" && <GatewayPanel s={s} />}
           {tab === "suporte" && <SupportPanel s={s} />}
+          {tab === "operadores" && <OperadoresPanel />}
           {tab === "seguranca" && <SecurityPanel />}
+
         </main>
 
       </div>
