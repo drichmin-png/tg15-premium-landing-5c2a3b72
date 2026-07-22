@@ -1,16 +1,6 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
-import { getLocalSaasSession } from "@/lib/saas-local";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/master/")({
-  component: MasterIndexRedirect,
+  head: () => ({ meta: [{ title: "Redirecionando..." }, { name: "robots", content: "noindex" }] }),
+  component: () => <Navigate to="/admin" replace />,
 });
-
-function MasterIndexRedirect() {
-  const navigate = useNavigate();
-  useEffect(() => {
-    const session = getLocalSaasSession();
-    navigate({ to: session?.role === "master" ? "/master/tenants" : "/master/login", replace: true });
-  }, [navigate]);
-  return null;
-}
