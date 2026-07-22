@@ -77,15 +77,14 @@ export function DosageTable() {
         <button
           type="button"
           onClick={() => setZoom("official")}
-          className="group relative card-premium overflow-hidden"
+          className="group relative card-premium overflow-hidden bg-white flex items-center justify-center"
           aria-label="Ampliar tabela oficial"
         >
           <img
             src={media.tabela}
             alt="Tabela de fracionamento oficial T.G.15"
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className="h-full w-full object-contain transition-transform duration-700 group-hover:scale-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-ink/20 via-transparent to-transparent" />
           <span className="absolute top-2 right-2 md:top-3 md:right-3 inline-flex items-center gap-1 rounded-full bg-white/95 px-2 py-1 text-[10px] md:text-xs font-semibold text-ink shadow">
             <Maximize2 className="h-3 w-3" /> Zoom
           </span>
