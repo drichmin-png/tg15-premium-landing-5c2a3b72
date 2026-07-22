@@ -180,7 +180,7 @@ function Checkout() {
             {step === 2 && <StepAddress state={state} onNext={next} />}
             {step === 3 && <StepShipping state={state} onNext={next} />}
             {step === 4 && <StepPayment state={state} onNext={next} total={total} />}
-            {step === 5 && <StepConfirm orderId={orderId} total={total} state={state} />}
+            {step === 5 && <StepConfirm orderId={orderId} trackingCode={trackingCode} total={total} state={state} />}
           </div>
         </div>
       </div>
