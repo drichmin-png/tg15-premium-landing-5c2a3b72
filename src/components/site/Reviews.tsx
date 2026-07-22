@@ -1,5 +1,17 @@
 import * as React from "react";
-import { Star, Heart, ImageIcon, MapPin, ThumbsUp } from "lucide-react";
+import { Star, Heart, MapPin, ThumbsUp, X } from "lucide-react";
+import { assetUrl } from "@/lib/asset-url";
+import p1 from "@/assets/reviews/IMG_4990.jpeg.asset.json";
+import p2 from "@/assets/reviews/IMG_4991.jpeg.asset.json";
+import p3 from "@/assets/reviews/IMG_4992.jpeg.asset.json";
+import p4 from "@/assets/reviews/IMG_4993.jpeg.asset.json";
+import p5 from "@/assets/reviews/IMG_4994.jpeg.asset.json";
+import p6 from "@/assets/reviews/IMG_4995.jpeg.asset.json";
+import p7 from "@/assets/reviews/IMG_4996.jpeg.asset.json";
+import p8 from "@/assets/reviews/IMG_4998.jpeg.asset.json";
+import p9 from "@/assets/reviews/IMG_4999.jpeg.asset.json";
+
+const PHOTOS = [p1, p2, p3, p4, p5, p6, p7, p8, p9].map((p) => assetUrl(p.url));
 
 const COMMENTS = [
   "Produto muito bem embalado. A apresentação ficou excelente.",
@@ -54,18 +66,25 @@ type Review = {
   daysAgo: number;
   text: string;
   likes: number;
-  photos: number;
+  photos: string[];
 };
 
-const REVIEWS: Review[] = COMMENTS.map((text, i) => ({
-  id: `r${i}`,
-  name: NAMES[i % NAMES.length],
-  city: CITIES[i % CITIES.length],
-  daysAgo: ((i * 7 + 3) % 15) + 1,
-  text,
-  likes: 8 + ((i * 13) % 90),
-  photos: (i % 4), // 0..3
-}));
+const REVIEWS: Review[] = COMMENTS.map((text, i) => {
+  const count = i % 4; // 0..3
+  const photos: string[] = [];
+  for (let k = 0; k < count; k++) {
+    photos.push(PHOTOS[(i * 3 + k) % PHOTOS.length]);
+  }
+  return {
+    id: `r${i}`,
+    name: NAMES[i % NAMES.length],
+    city: CITIES[i % CITIES.length],
+    daysAgo: ((i * 7 + 3) % 15) + 1,
+    text,
+    likes: 8 + ((i * 13) % 90),
+    photos,
+  };
+});
 
 const STORAGE_KEY = "tg15-review-likes";
 
@@ -77,6 +96,7 @@ function loadLikes(): Record<string, boolean> {
 export function Reviews() {
   const [likes, setLikes] = React.useState<Record<string, boolean>>({});
   const [visible, setVisible] = React.useState(6);
+  const [lightbox, setLightbox] = React.useState<string | null>(null);
 
   React.useEffect(() => { setLikes(loadLikes()); }, []);
 
@@ -131,16 +151,18 @@ export function Reviews() {
 
               <p className="mt-3 text-sm text-ink/90 leading-relaxed">"{r.text}"</p>
 
-              {r.photos > 0 && (
+              {r.photos.length > 0 && (
                 <div className="mt-4 flex gap-2">
-                  {Array.from({ length: r.photos }).map((_, i) => (
-                    <div
+                  {r.photos.map((src, i) => (
+                    <button
                       key={i}
-                      className="grid h-16 w-16 place-items-center rounded-lg border border-border bg-sand/60 text-muted-foreground"
-                      aria-label={`Foto ${i + 1}`}
+                      type="button"
+                      onClick={() => setLightbox(src)}
+                      className="h-16 w-16 overflow-hidden rounded-lg border border-border bg-sand/60 hover:border-primary/60 transition"
+                      aria-label={`Ver foto ${i + 1}`}
                     >
-                      <ImageIcon className="h-5 w-5" />
-                    </div>
+                      <img src={src} alt={`Foto do pedido ${i + 1}`} loading="lazy" className="h-full w-full object-cover" />
+                    </button>
                   ))}
                 </div>
               )}
@@ -176,6 +198,23 @@ export function Reviews() {
           >
             Ver mais avaliações
           </button>
+        </div>
+      )}
+
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightbox(null)}
+            className="absolute top-4 right-4 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20"
+            aria-label="Fechar"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img src={lightbox} alt="Foto do pedido" className="max-h-[90vh] max-w-[95vw] rounded-xl object-contain" />
         </div>
       )}
     </section>
