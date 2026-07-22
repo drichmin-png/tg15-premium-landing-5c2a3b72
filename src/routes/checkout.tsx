@@ -36,7 +36,13 @@ function Checkout() {
   const { products } = useAdmin();
   const [step, setStep] = useState(1);
   const [orderId, setOrderId] = useState("TG-XXXXXX");
-  useEffect(() => { setOrderId("TG-" + Math.random().toString(36).slice(2, 8).toUpperCase()); }, []);
+  const [trackingCode, setTrackingCode] = useState("BR000000000TG");
+  useEffect(() => {
+    setOrderId("TG-" + Math.random().toString(36).slice(2, 8).toUpperCase());
+    setTrackingCode(
+      "BR" + Math.random().toString(36).slice(2, 11).toUpperCase() + "TG"
+    );
+  }, []);
   useEffect(() => { admin.hydrateRemote(); }, []);
 
   const v = variants[state.variant];
