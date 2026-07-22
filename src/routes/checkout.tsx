@@ -37,6 +37,7 @@ function Checkout() {
   const [step, setStep] = useState(1);
   const [orderId, setOrderId] = useState("TG-XXXXXX");
   useEffect(() => { setOrderId("TG-" + Math.random().toString(36).slice(2, 8).toUpperCase()); }, []);
+  useEffect(() => { admin.hydrateRemote(); }, []);
 
   const v = variants[state.variant];
   const unitPrice = state.variant === "box" ? products.box.price : products.single.price;
