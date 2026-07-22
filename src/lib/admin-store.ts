@@ -423,18 +423,11 @@ export const admin = {
   },
   changePasswordRemote: async (next: string) => {
     if (!authPassword) throw new Error("Faça login novamente para alterar a senha");
-    if (!next || next.length < 4) throw new Error("Senha muito curta");
-    try {
-      const { supabase } = await import("@/integrations/supabase/client");
-      const { error } = await supabase.rpc("set_admin_password", {
-        current_pwd: authPassword,
-        new_pwd: next.trim(),
-      });
-      if (error) throw error;
-    } catch (e) {
-      console.warn("[admin] set_admin_password falhou", e);
-      throw e instanceof Error ? e : new Error("Falha ao alterar senha");
-    }
+    if (!next || next.length < 8) throw new Error("Senha muito curta (mínimo 8 caracteres)");
+    const { changeAdminPassword } = await import("@/lib/site-config.functions");
+    await changeAdminPassword({
+      data: { currentPassword: authPassword, nextPassword: next.trim() },
+    });
     authPassword = next.trim();
     state = { ...state, password: next.trim() };
     persist(state);
@@ -461,17 +454,8 @@ export const admin = {
     if (!authPassword) throw new Error("Faça login novamente para salvar");
     const payload: Record<string, unknown> = {};
     for (const k of REMOTE_KEYS) payload[k as string] = state[k];
-    try {
-      const { supabase } = await import("@/integrations/supabase/client");
-      const { error } = await supabase.rpc("save_site_config", {
-        pwd: authPassword,
-        payload: payload as never,
-      });
-      if (error) throw error;
-    } catch (e) {
-      console.error("[admin] saveRemote falhou", e);
-      throw e instanceof Error ? e : new Error("Falha ao salvar no servidor");
-    }
+    const { saveSiteConfig } = await import("@/lib/site-config.functions");
+    await saveSiteConfig({ data: { password: authPassword, data: JSON.stringify(payload) } });
     notify();
   },
   setNamespace,
