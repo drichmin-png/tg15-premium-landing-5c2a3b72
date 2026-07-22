@@ -728,7 +728,7 @@ function OrdersPanel() {
     setLoading(true);
     setErr(null);
     try {
-      const rows = listLocalOrders();
+      const rows = listAllLocalOrders();
       setOrders(rows);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Erro ao carregar pedidos");
