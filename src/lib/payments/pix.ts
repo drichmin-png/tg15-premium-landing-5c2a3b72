@@ -41,17 +41,22 @@ export function buildPixPayload({ key, amount, merchantName, merchantCity, txid 
   const keyField = tlv("01", key.trim());
   const merchantAccountInfo = tlv("26", gui + keyField);
 
+  const name = sanitize(merchantName, 25) || "RECEBEDOR";
+  const city = sanitize(merchantCity, 15) || "SAO PAULO";
+  const txidClean = sanitize(txid, 25) || "***";
+  const amountStr = Number(amount).toFixed(2);
+
   const payload =
     tlv("00", "01") +                                                // Payload Format Indicator
-    tlv("01", "12") +                                                // Point of Initiation (dinâmico p/ 1 uso; use 11 p/ reutilizável)
+    tlv("01", "11") +                                                // Point of Initiation (estático / copia-e-cola)
     merchantAccountInfo +                                            // 26 — Merchant Account Info
     tlv("52", "0000") +                                              // MCC
     tlv("53", "986") +                                               // Moeda BRL
-    tlv("54", amount.toFixed(2)) +                                   // Valor
+    tlv("54", amountStr) +                                           // Valor
     tlv("58", "BR") +                                                // País
-    tlv("59", sanitize(merchantName, 25) || "RECEBEDOR") +           // Nome
-    tlv("60", sanitize(merchantCity, 15) || "SAO PAULO") +           // Cidade
-    tlv("62", tlv("05", sanitize(txid, 25) || "***")) +              // Additional data — txid
+    tlv("59", name) +                                                // Nome
+    tlv("60", city) +                                                // Cidade
+    tlv("62", tlv("05", txidClean)) +                                // Additional data — txid
     "6304";                                                          // CRC placeholder
 
   return payload + crc16(payload);
