@@ -891,7 +891,9 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
       )}
 
       <p className="mt-6 text-sm text-muted-foreground max-w-md mx-auto">
-        {showPix
+        {highValue
+          ? "Pedidos acima de R$ 499,00 exigem verificação de estoque. Continue no WhatsApp com nossa equipe para confirmar a disponibilidade e receber as instruções de pagamento."
+          : showPix
           ? "Após o pagamento, envie o comprovante pelo WhatsApp para liberarmos o envio."
           : "Para concluir a compra e receber as instruções de pagamento, finalize o atendimento pelo WhatsApp com nossa equipe."}
       </p>
@@ -903,9 +905,10 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
           rel="noreferrer"
           className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-8 py-4 text-base font-bold text-white shadow-xl shadow-[#25D366]/40 hover:brightness-110"
         >
-          <MessageCircle className="h-5 w-5" /> {showPix ? "Enviar comprovante no WhatsApp" : "Concluir compra no WhatsApp"}
+          <MessageCircle className="h-5 w-5" /> {highValue ? "Verificar estoque no WhatsApp" : showPix ? "Enviar comprovante no WhatsApp" : "Concluir compra no WhatsApp"}
         </a>
       </div>
+
 
       <div className="mt-8 flex flex-wrap justify-center gap-3">
         {admin.support.whatsappGroupLink && (
