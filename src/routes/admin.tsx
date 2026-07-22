@@ -108,7 +108,7 @@ function LoginScreen() {
   );
 }
 
-type Tab = "pedidos" | "relatorio" | "produtos" | "blocos" | "hero" | "tracking" | "gateway" | "pix" | "suporte" | "seguranca";
+type Tab = "pedidos" | "relatorio" | "produtos" | "blocos" | "hero" | "tracking" | "gateway" | "pix" | "suporte" | "operadores" | "seguranca";
 
 export function Dashboard() {
   const [tab, setTab] = useState<Tab>("pedidos");
@@ -124,8 +124,10 @@ export function Dashboard() {
     { id: "pix", label: "Pagamento Pix" },
     { id: "gateway", label: "Gateway de Pagamento" },
     { id: "suporte", label: "Suporte / WhatsApp" },
+    { id: "operadores", label: "Operadores" },
     { id: "seguranca", label: "Segurança" },
   ];
+
 
 
   return (
