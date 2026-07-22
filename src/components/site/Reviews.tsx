@@ -200,6 +200,23 @@ export function Reviews() {
           </button>
         </div>
       )}
+
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setLightbox(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightbox(null)}
+            className="absolute top-4 right-4 grid h-10 w-10 place-items-center rounded-full bg-white/10 text-white hover:bg-white/20"
+            aria-label="Fechar"
+          >
+            <X className="h-5 w-5" />
+          </button>
+          <img src={lightbox} alt="Foto do pedido" className="max-h-[90vh] max-w-[95vw] rounded-xl object-contain" />
+        </div>
+      )}
     </section>
   );
 }
