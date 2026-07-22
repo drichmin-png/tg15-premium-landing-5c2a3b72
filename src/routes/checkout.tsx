@@ -438,6 +438,41 @@ function StepPayment({ state, onNext, total }: { state: ReturnType<typeof useCar
   );
 }
 
+type RegionalEta = { region: string; range: string; center: string };
+const REGIONAL_ETA: Record<string, RegionalEta> = {
+  SP: { region: "São Paulo", range: "No mesmo dia ou até 2 dias úteis", center: "São Paulo (SP)" },
+  RJ: { region: "Sudeste", range: "1 a 3 dias úteis", center: "Rio de Janeiro (RJ)" },
+  MG: { region: "Sudeste", range: "1 a 3 dias úteis", center: "Belo Horizonte (MG)" },
+  ES: { region: "Sudeste", range: "1 a 3 dias úteis", center: "Rio de Janeiro (RJ)" },
+  PR: { region: "Sul", range: "1 a 3 dias úteis", center: "Curitiba (PR)" },
+  SC: { region: "Sul", range: "1 a 3 dias úteis", center: "Curitiba (PR)" },
+  RS: { region: "Sul", range: "1 a 3 dias úteis", center: "Porto Alegre (RS)" },
+  DF: { region: "Centro-Oeste", range: "2 a 5 dias úteis", center: "Brasília (DF)" },
+  GO: { region: "Centro-Oeste", range: "2 a 5 dias úteis", center: "Brasília (DF)" },
+  MT: { region: "Centro-Oeste", range: "2 a 5 dias úteis", center: "Brasília (DF)" },
+  MS: { region: "Centro-Oeste", range: "2 a 5 dias úteis", center: "Brasília (DF)" },
+  BA: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Salvador (BA)" },
+  SE: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Salvador (BA)" },
+  AL: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Recife (PE)" },
+  PE: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Recife (PE)" },
+  PB: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Recife (PE)" },
+  RN: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Recife (PE)" },
+  CE: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Fortaleza (CE)" },
+  PI: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Fortaleza (CE)" },
+  MA: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Fortaleza (CE)" },
+  PA: { region: "Norte", range: "5 a 10 dias úteis", center: "Fortaleza (CE)" },
+  AP: { region: "Norte", range: "5 a 10 dias úteis", center: "Fortaleza (CE)" },
+  AM: { region: "Norte", range: "5 a 10 dias úteis", center: "Fortaleza (CE)" },
+  RR: { region: "Norte", range: "5 a 10 dias úteis", center: "Fortaleza (CE)" },
+  RO: { region: "Norte", range: "5 a 10 dias úteis", center: "Brasília (DF)" },
+  AC: { region: "Norte", range: "5 a 10 dias úteis", center: "Brasília (DF)" },
+  TO: { region: "Norte", range: "5 a 10 dias úteis", center: "Brasília (DF)" },
+};
+function getRegionalEta(uf: string): RegionalEta {
+  const key = (uf || "").toUpperCase();
+  return REGIONAL_ETA[key] || { region: "Brasil", range: "3 a 7 dias úteis", center: "São Paulo (SP)" };
+}
+
 function StepConfirm({ orderId, trackingCode, total, state }: { orderId: string; trackingCode: string; total: number; state: ReturnType<typeof useCart> }) {
   const admin = useAdmin();
   const savedOrder = useRef(false);
