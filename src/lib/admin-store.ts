@@ -388,22 +388,12 @@ export const admin = {
     ensureHydrated();
     const pwd = password.trim();
     if (!pwd) throw new Error("Informe a senha");
-    try {
-      const { verifyAdminPassword } = await import("@/lib/site-config.functions");
-      await verifyAdminPassword({ data: { password: pwd } });
-    } catch (err) {
-      const msg = err instanceof Error ? err.message : String(err);
-      // Fallback local quando o servidor não está configurado (deploy sem Supabase env vars).
-      const serverUnavailable =
-        /Missing Supabase environment|Failed to fetch|NetworkError|ECONNREFUSED|500|502|503|504/i.test(msg);
-      if (!serverUnavailable) throw err;
-      const expected =
-        (import.meta.env.VITE_ADMIN_PASSWORD_HASH as string | undefined)?.trim() ||
-        "efd04cebc62748d90abe9c5b244559cd07da568af5118ff935c4ed0d51c6abc4";
-      const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pwd));
-      const hex = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
-      if (hex !== expected.toLowerCase()) throw new Error("Senha incorreta");
-    }
+    const expected =
+      (import.meta.env.VITE_ADMIN_PASSWORD_HASH as string | undefined)?.trim() ||
+      "efd04cebc62748d90abe9c5b244559cd07da568af5118ff935c4ed0d51c6abc4";
+    const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pwd));
+    const hex = Array.from(new Uint8Array(buf)).map((b) => b.toString(16).padStart(2, "0")).join("");
+    if (hex !== expected.toLowerCase()) throw new Error("Senha incorreta");
     authPassword = pwd;
     state = { ...state, authed: true, password: pwd };
     persist(state);
