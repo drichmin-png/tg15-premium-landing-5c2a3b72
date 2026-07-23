@@ -263,9 +263,7 @@ function publicStorefrontPayload(): PublicStorefrontPayload {
 
 function buildStorefrontUrl(slug: string, origin: string) {
   const cleanSlug = slug.trim().toLowerCase();
-  const baseUrl = `${origin}/loja/${cleanSlug}`;
-  const token = encodeStorefrontPayload(publicStorefrontPayload());
-  return token ? `${baseUrl}?store=${encodeURIComponent(token)}` : baseUrl;
+  return `${origin}/loja/${cleanSlug}`;
 }
 
 function importStorefrontConfig(slug: string, token: string) {
