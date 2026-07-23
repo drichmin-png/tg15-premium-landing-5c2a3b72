@@ -306,12 +306,13 @@ function applyRemoteData(remote: Record<string, unknown> | null | undefined) {
   notify();
 }
 
-async function hydrateRemote() {
+async function hydrateRemote(explicitNamespace?: string | null) {
   ensureHydrated();
   if (typeof window === "undefined") return;
   try {
     const { getSiteConfig } = await import("@/lib/site-config.functions");
-    const res = await getSiteConfig();
+    const ns = explicitNamespace !== undefined ? explicitNamespace : namespace;
+    const res = await getSiteConfig({ data: { namespace: ns ?? null } });
     if (!res?.data) return;
     const parsed = JSON.parse(res.data) as Record<string, unknown>;
     applyRemoteData(parsed);
