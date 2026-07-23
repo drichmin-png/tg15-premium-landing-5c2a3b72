@@ -228,16 +228,6 @@ const PUBLIC_STOREFRONT_KEYS: (keyof PublicStorefrontPayload)[] = [
   "support",
 ];
 
-function encodeStorefrontPayload(payload: PublicStorefrontPayload) {
-  try {
-    const json = JSON.stringify(payload);
-    if (typeof btoa === "function") return btoa(unescape(encodeURIComponent(json)));
-  } catch {
-    return "";
-  }
-  return "";
-}
-
 function decodeStorefrontPayload(token: string): Partial<PublicStorefrontPayload> | null {
   try {
     if (typeof atob !== "function") return null;
@@ -247,18 +237,6 @@ function decodeStorefrontPayload(token: string): Partial<PublicStorefrontPayload
   } catch {
     return null;
   }
-}
-
-function publicStorefrontPayload(): PublicStorefrontPayload {
-  ensureHydrated();
-  return {
-    hero: state.hero,
-    products: state.products,
-    blocks: state.blocks,
-    tracking: state.tracking,
-    pix: state.pix,
-    support: state.support,
-  };
 }
 
 function buildStorefrontUrl(slug: string, origin: string) {
