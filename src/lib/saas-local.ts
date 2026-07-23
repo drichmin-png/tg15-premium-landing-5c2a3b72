@@ -241,6 +241,7 @@ export function importLocalTenantFromAccessToken(token: string) {
     ...(existing ?? {
       id: makeId("tenant"),
       slug,
+      shortcode: ensureShortcode(tenants),
       responsible_name: "",
       contact_email: "",
       contact_phone: "",
