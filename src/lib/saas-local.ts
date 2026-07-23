@@ -148,15 +148,36 @@ function defaultTenants(): LocalTenant[] {
 }
 
 export function listLocalTenants(): LocalTenant[] {
-  const tenants = readJson<LocalTenant[]>(TENANTS_KEY, []);
-  if (tenants.length) return tenants.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
-  const seeded = defaultTenants();
-  writeJson(TENANTS_KEY, seeded);
-  return seeded;
+  const raw = readJson<LocalTenant[]>(TENANTS_KEY, []);
+  if (!raw.length) {
+    const seeded = defaultTenants();
+    writeJson(TENANTS_KEY, seeded);
+    return seeded;
+  }
+  // Backfill shortcode for legacy tenants persisted before the field existed.
+  let mutated = false;
+  const used = new Set<string>();
+  const withCodes = raw.map((t) => {
+    if (t.shortcode && !used.has(t.shortcode)) {
+      used.add(t.shortcode);
+      return t;
+    }
+    mutated = true;
+    const code = ensureShortcode(raw.filter((x) => x.shortcode && !used.has(x.shortcode)));
+    used.add(code);
+    return { ...t, shortcode: code };
+  });
+  if (mutated) writeJson(TENANTS_KEY, withCodes);
+  return withCodes.sort((a, b) => +new Date(b.created_at) - +new Date(a.created_at));
 }
 
 export function getLocalTenantBySlug(slug: string) {
   return listLocalTenants().find((tenant) => tenant.slug === slug.trim().toLowerCase()) ?? null;
+}
+
+export function getLocalTenantByShortcode(code: string) {
+  const c = code.trim().toLowerCase();
+  return listLocalTenants().find((tenant) => tenant.shortcode === c) ?? null;
 }
 
 export function getLocalTenantById(id: string) {
