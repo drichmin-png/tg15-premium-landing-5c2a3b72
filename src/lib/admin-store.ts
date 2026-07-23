@@ -228,16 +228,6 @@ const PUBLIC_STOREFRONT_KEYS: (keyof PublicStorefrontPayload)[] = [
   "support",
 ];
 
-function encodeStorefrontPayload(payload: PublicStorefrontPayload) {
-  try {
-    const json = JSON.stringify(payload);
-    if (typeof btoa === "function") return btoa(unescape(encodeURIComponent(json)));
-  } catch {
-    return "";
-  }
-  return "";
-}
-
 function decodeStorefrontPayload(token: string): Partial<PublicStorefrontPayload> | null {
   try {
     if (typeof atob !== "function") return null;
@@ -249,23 +239,9 @@ function decodeStorefrontPayload(token: string): Partial<PublicStorefrontPayload
   }
 }
 
-function publicStorefrontPayload(): PublicStorefrontPayload {
-  ensureHydrated();
-  return {
-    hero: state.hero,
-    products: state.products,
-    blocks: state.blocks,
-    tracking: state.tracking,
-    pix: state.pix,
-    support: state.support,
-  };
-}
-
 function buildStorefrontUrl(slug: string, origin: string) {
   const cleanSlug = slug.trim().toLowerCase();
-  const baseUrl = `${origin}/loja/${cleanSlug}`;
-  const token = encodeStorefrontPayload(publicStorefrontPayload());
-  return token ? `${baseUrl}?store=${encodeURIComponent(token)}` : baseUrl;
+  return `${origin}/loja/${cleanSlug}`;
 }
 
 function importStorefrontConfig(slug: string, token: string) {
@@ -308,12 +284,13 @@ function applyRemoteData(remote: Record<string, unknown> | null | undefined) {
   notify();
 }
 
-async function hydrateRemote() {
+async function hydrateRemote(explicitNamespace?: string | null) {
   ensureHydrated();
   if (typeof window === "undefined") return;
   try {
     const { getSiteConfig } = await import("@/lib/site-config.functions");
-    const res = await getSiteConfig();
+    const ns = explicitNamespace !== undefined ? explicitNamespace : namespace;
+    const res = await getSiteConfig({ data: { namespace: ns ?? null } });
     if (!res?.data) return;
     const parsed = JSON.parse(res.data) as Record<string, unknown>;
     applyRemoteData(parsed);
@@ -449,10 +426,22 @@ export const admin = {
       const payload: Record<string, unknown> = {};
       for (const k of REMOTE_KEYS) payload[k as string] = state[k];
       const { saveSiteConfig } = await import("@/lib/site-config.functions");
-      await saveSiteConfig({ data: { password: pwd, data: JSON.stringify(payload) } });
+      await saveSiteConfig({ data: { password: pwd, data: JSON.stringify(payload), namespace: namespace ?? null } });
     } catch {
       // silencioso: continua funcionando localmente
     }
+  },
+  publishStorefrontAs: async (slug: string) => {
+    ensureHydrated();
+    const pwd = authPassword;
+    if (!pwd) throw new Error("Faça login no painel admin novamente");
+    const cleanSlug = slug.trim().toLowerCase();
+    if (!cleanSlug) throw new Error("Slug do operador inválido");
+    const payload: Record<string, unknown> = {};
+    for (const k of REMOTE_KEYS) payload[k as string] = state[k];
+    const { saveSiteConfig } = await import("@/lib/site-config.functions");
+    await saveSiteConfig({ data: { password: pwd, data: JSON.stringify(payload), namespace: cleanSlug } });
+    return true;
   },
   setNamespace,
   markAuthed,

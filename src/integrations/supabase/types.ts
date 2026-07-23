@@ -456,6 +456,7 @@ export type Database = {
         Row: {
           data: Json
           id: string
+          namespace: string | null
           singleton: boolean
           tenant_id: string | null
           updated_at: string
@@ -463,6 +464,7 @@ export type Database = {
         Insert: {
           data?: Json
           id?: string
+          namespace?: string | null
           singleton?: boolean
           tenant_id?: string | null
           updated_at?: string
@@ -470,6 +472,7 @@ export type Database = {
         Update: {
           data?: Json
           id?: string
+          namespace?: string | null
           singleton?: boolean
           tenant_id?: string | null
           updated_at?: string
@@ -612,7 +615,10 @@ export type Database = {
         }
         Returns: boolean
       }
-      save_site_config: { Args: { payload: Json; pwd: string }; Returns: Json }
+      read_site_config: { Args: { ns?: string }; Returns: Json }
+      save_site_config:
+        | { Args: { payload: Json; pwd: string }; Returns: Json }
+        | { Args: { ns?: string; payload: Json; pwd: string }; Returns: Json }
       set_admin_password: {
         Args: { current_pwd: string; new_pwd: string }
         Returns: boolean

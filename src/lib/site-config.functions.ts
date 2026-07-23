@@ -22,19 +22,27 @@ function stripSensitive<T>(input: T): T {
   return input;
 }
 
-export const getSiteConfig = createServerFn({ method: "GET" }).handler(async () => {
-  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-  const { data, error } = await supabaseAdmin
-    .from("site_config")
-    .select("data, updated_at")
-    .eq("singleton", true)
-    .maybeSingle();
-  if (error) throw new Error(error.message);
-  return {
-    data: JSON.stringify(data?.data ?? {}),
-    updated_at: data?.updated_at ?? null,
-  };
-});
+function normalizeNamespace(input: unknown): string | null {
+  if (typeof input !== "string") return null;
+  const trimmed = input.trim().toLowerCase();
+  return trimmed || null;
+}
+
+export const getSiteConfig = createServerFn({ method: "GET" })
+  .inputValidator((input: { namespace?: string | null } | undefined) => input ?? {})
+  .handler(async ({ data }) => {
+    const ns = normalizeNamespace(data?.namespace);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const query = supabaseAdmin.from("site_config").select("data, updated_at");
+    const { data: row, error } = ns
+      ? await query.eq("namespace", ns).maybeSingle()
+      : await query.eq("singleton", true).maybeSingle();
+    if (error) throw new Error(error.message);
+    return {
+      data: JSON.stringify(row?.data ?? {}),
+      updated_at: row?.updated_at ?? null,
+    };
+  });
 
 export const verifyAdminPassword = createServerFn({ method: "POST" })
   .inputValidator((input: { password: string }) => input)
@@ -54,7 +62,7 @@ export const changeAdminPassword = createServerFn({ method: "POST" })
   });
 
 export const saveSiteConfig = createServerFn({ method: "POST" })
-  .inputValidator((input: { password: string; data: string }) => input)
+  .inputValidator((input: { password: string; data: string; namespace?: string | null }) => input)
   .handler(async ({ data }) => {
     const { verifyAdminPasswordValue } = await import("@/lib/admin-auth.server");
     await verifyAdminPasswordValue(data.password);
@@ -65,11 +73,13 @@ export const saveSiteConfig = createServerFn({ method: "POST" })
       throw new Error("Payload inválido");
     }
     const clean = stripSensitive(parsed);
+    const ns = normalizeNamespace(data.namespace);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin
-      .from("site_config")
-      .update({ data: clean as never })
-      .eq("singleton", true);
+    const { error } = await supabaseAdmin.rpc("save_site_config", {
+      pwd: data.password,
+      payload: clean as never,
+      ns,
+    });
     if (error) throw new Error(error.message);
     return { ok: true, updated_at: new Date().toISOString() };
   });
