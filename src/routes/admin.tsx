@@ -1602,6 +1602,20 @@ function OperadoresPanel() {
                       </button>
                       <button
                         onClick={async () => {
+                          try {
+                            await admin.publishStorefrontAs(t.slug);
+                            window.alert(`Loja publicada em ${shortUrl}. Agora esse link mostra as configurações atuais em qualquer dispositivo.`);
+                          } catch (e) {
+                            window.alert(e instanceof Error ? e.message : "Erro ao publicar loja do operador");
+                          }
+                        }}
+                        title="Publicar configuração atual como loja deste operador"
+                        className="rounded-md p-2 text-slate-600 hover:bg-slate-100 hover:text-ink"
+                      >
+                        <Upload className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={async () => {
                           const shareText = `Seu painel de operador está pronto ✅\n\nAcesso: ${setupUrl}\nUsuário: ${t.owner_username}`;
                           try {
                             await navigator.clipboard.writeText(shareText);
