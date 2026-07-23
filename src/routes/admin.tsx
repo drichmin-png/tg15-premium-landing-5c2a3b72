@@ -120,6 +120,7 @@ type Tab = "pedidos" | "relatorio" | "produtos" | "blocos" | "hero" | "tracking"
 export function Dashboard() {
   const [tab, setTab] = useState<Tab>("pedidos");
   const s = useAdmin();
+  const isOperator = Boolean(admin.getNamespace());
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "pedidos", label: "Pedidos" },
@@ -131,9 +132,10 @@ export function Dashboard() {
     { id: "pix", label: "Pagamento Pix" },
     { id: "gateway", label: "Gateway de Pagamento" },
     { id: "suporte", label: "Suporte / WhatsApp" },
-    { id: "operadores", label: "Operadores" },
+    ...(!isOperator ? [{ id: "operadores" as Tab, label: "Operadores" }] : []),
     { id: "seguranca", label: "Segurança" },
   ];
+
 
 
 
