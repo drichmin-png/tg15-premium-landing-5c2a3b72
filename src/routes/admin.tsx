@@ -1445,181 +1445,222 @@ function OperadoresPanel() {
 
   const origin = typeof window !== "undefined" ? window.location.origin : "";
 
+  const activeCount = tenants.filter((t) => t.status === "active").length;
+
   return (
-    <section className="rounded-2xl border border-border bg-card p-5 shadow-sm">
+    <section className="rounded-2xl border border-border bg-card p-4 shadow-sm sm:p-5">
       <header className="flex flex-wrap items-center gap-3">
         <div className="flex items-center gap-2">
-          <div className="rounded-full bg-primary/10 p-2 text-primary">
-            <Users className="h-4 w-4" />
-          </div>
-          <div>
-            <h2 className="text-sm font-bold text-ink">Operadores</h2>
-            <p className="text-xs text-muted-foreground">
-              Crie contas de acesso individuais e envie o link exclusivo para cada operador.
-            </p>
-          </div>
+          <h2 className="text-lg font-bold text-ink">Operadores</h2>
+          <span className="inline-flex h-6 min-w-6 items-center justify-center rounded-full bg-slate-100 px-2 text-[11px] font-bold text-slate-700">
+            {tenants.length}
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+            {activeCount} online
+          </span>
         </div>
         <div className="ml-auto flex items-center gap-2">
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            placeholder="Buscar por nome ou slug..."
-            className="w-56 rounded-lg border border-border bg-background px-3 py-1.5 text-sm outline-none focus:border-primary"
-          />
+          <button
+            onClick={refresh}
+            title="Atualizar"
+            className="rounded-full border border-border bg-white p-2 text-slate-600 hover:border-primary/40 hover:text-primary"
+          >
+            <RefreshCw className="h-4 w-4" />
+          </button>
           <button
             onClick={() => setShowCreate(true)}
-            className="inline-flex items-center gap-1.5 rounded-full gradient-brand px-3 py-1.5 text-xs font-bold text-white shadow-md shadow-primary/30"
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-sm font-bold text-white shadow-md shadow-primary/30 hover:brightness-110"
           >
-            + Novo operador
+            <UserPlus className="h-4 w-4" />
+            Novo
           </button>
         </div>
       </header>
 
-      <div className="mt-4 overflow-hidden rounded-xl border border-border">
+      <div className="mt-3">
+        <input
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+          placeholder="Buscar por nome ou slug..."
+          className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+        />
+      </div>
+
+      <div className="mt-4 space-y-3">
         {filtered.length === 0 ? (
-          <div className="p-8 text-center text-sm text-muted-foreground">
+          <div className="rounded-xl border border-dashed border-border p-8 text-center text-sm text-muted-foreground">
             {tenants.length === 0
-              ? "Nenhum operador cadastrado ainda. Clique em “+ Novo operador” para começar."
+              ? "Nenhum operador cadastrado ainda. Clique em “Novo” para começar."
               : "Nenhum operador encontrado para essa busca."}
           </div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-sand text-[11px] uppercase tracking-wide text-muted-foreground">
-                <tr>
-                  <th className="px-4 py-3 text-left">Operador</th>
-                  <th className="px-4 py-3 text-left">Link de acesso</th>
-                  <th className="px-4 py-3 text-left">Status</th>
-                  <th className="px-4 py-3 text-left">Último login</th>
-                  <th className="px-4 py-3 text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {filtered.map((t) => {
-                  const password = (t as LocalTenant & { owner_password?: string }).owner_password || "";
-                  const accessUrl = buildLocalTenantAccessUrl(
-                    {
-                      slug: t.slug,
-                      company_name: t.company_name,
-                      owner_username: t.owner_username,
-                      owner_password: password,
-                      plan: t.plan,
-                    },
-                    origin,
-                  );
-                  const shareText = `Seu painel de operador está pronto ✅\n\nAcesso: ${accessUrl}\nUsuário: ${t.owner_username}`;
-                  return (
-                    <tr key={t.id} className="align-top hover:bg-sand/60">
-                      <td className="px-4 py-3">
-                        <div className="font-semibold text-ink">{t.company_name}</div>
-                        <div className="text-[11px] text-muted-foreground">
-                          Usuário: <span className="font-mono text-ink">{t.owner_username}</span>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="font-mono text-[11px] text-muted-foreground">/app/{t.slug}</div>
-                        <div className="mt-1 flex items-center gap-1">
-                          <input
-                            readOnly
-                            value={accessUrl}
-                            onFocus={(e) => e.currentTarget.select()}
-                            className="w-56 rounded-md border border-border bg-background px-2 py-1 font-mono text-[11px] text-ink"
-                          />
-                          <button
-                            onClick={async () => {
-                              try {
-                                await navigator.clipboard.writeText(accessUrl);
-                              } catch {
-                                /* ignore */
-                              }
-                            }}
-                            title="Copiar link"
-                            className="rounded-md border border-border bg-white px-2 py-1 text-[11px] hover:border-primary/40"
-                          >
-                            <Copy className="h-3 w-3" />
-                          </button>
-                          <a
-                            href={`https://wa.me/?text=${encodeURIComponent(shareText)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="rounded-md bg-emerald-600 px-2 py-1 text-[11px] font-bold text-white hover:bg-emerald-700"
-                          >
-                            WhatsApp
-                          </a>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        <span
-                          className={
-                            "inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-bold " +
-                            (t.status === "active"
-                              ? "bg-emerald-100 text-emerald-800"
-                              : t.status === "blocked"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-slate-200 text-slate-700")
+          filtered.map((t) => {
+            const password = (t as LocalTenant & { owner_password?: string }).owner_password || "";
+            const shortUrl = buildLocalTenantShortUrl(t, origin);
+            const setupUrl = buildLocalTenantAccessUrl(
+              {
+                slug: t.slug,
+                company_name: t.company_name,
+                owner_username: t.owner_username,
+                owner_password: password,
+                plan: t.plan,
+              },
+              origin,
+            );
+            const isActive = t.status === "active";
+            const isBlocked = t.status === "blocked";
+            const roleLabel = t.plan === "owner" ? "Administrador" : "Operador";
+            const initial = (t.company_name || t.owner_username || "?").trim().charAt(0).toUpperCase();
+
+            return (
+              <article
+                key={t.id}
+                className="rounded-2xl border border-border bg-white p-4 shadow-sm"
+              >
+                {/* Head */}
+                <div className="flex items-start gap-3">
+                  <div className="relative">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-full bg-primary/10 text-lg font-bold text-primary">
+                      {initial}
+                    </div>
+                    {isActive && (
+                      <span className="absolute -bottom-0.5 -right-0.5 h-3 w-3 rounded-full border-2 border-white bg-emerald-500" />
+                    )}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-1.5">
+                      <div className="truncate text-base font-bold text-ink">{t.company_name}</div>
+                      {t.plan === "owner" && (
+                        <ShieldCheck className="h-4 w-4 flex-none text-primary" />
+                      )}
+                    </div>
+                    <div className="text-xs text-muted-foreground">{roleLabel}</div>
+                  </div>
+                  <span
+                    className={
+                      "flex-none rounded-full px-2.5 py-0.5 text-[11px] font-bold " +
+                      (isActive
+                        ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200"
+                        : isBlocked
+                          ? "bg-red-50 text-red-700 ring-1 ring-red-200"
+                          : "bg-slate-100 text-slate-600 ring-1 ring-slate-200")
+                    }
+                  >
+                    {isActive ? "Ativo" : isBlocked ? "Bloqueado" : "Inativo"}
+                  </span>
+                </div>
+
+                {/* Short URL */}
+                <div className="mt-3 flex items-center gap-2 rounded-xl border border-border bg-sand/60 px-3 py-2">
+                  <input
+                    readOnly
+                    value={shortUrl}
+                    onFocus={(e) => e.currentTarget.select()}
+                    className="min-w-0 flex-1 truncate bg-transparent font-mono text-[12px] text-ink outline-none"
+                  />
+                  <button
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(shortUrl);
+                      } catch {
+                        /* ignore */
+                      }
+                    }}
+                    title="Copiar link curto"
+                    className="rounded-md p-1 text-slate-500 hover:text-primary"
+                  >
+                    <Copy className="h-4 w-4" />
+                  </button>
+                </div>
+
+                <div className="mt-3 border-t border-border/70 pt-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div className="text-[11px] text-muted-foreground">
+                      Último acesso:{" "}
+                      <span className="font-semibold text-ink">
+                        {t.last_login_at
+                          ? new Date(t.last_login_at).toLocaleString("pt-BR", {
+                              dateStyle: "short",
+                              timeStyle: "short",
+                            })
+                          : "—"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => {
+                          const r = impersonateLocalTenant(t.id);
+                          window.location.href = `/app/${r.slug}/dashboard`;
+                        }}
+                        title="Entrar como operador"
+                        className="rounded-md p-2 text-slate-600 hover:bg-slate-100 hover:text-ink"
+                      >
+                        <LogIn className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const shareText = `Seu painel de operador está pronto ✅\n\nAcesso: ${setupUrl}\nUsuário: ${t.owner_username}`;
+                          try {
+                            await navigator.clipboard.writeText(shareText);
+                            window.alert("Credenciais copiadas para compartilhar.");
+                          } catch {
+                            /* ignore */
                           }
-                        >
-                          {t.status}
-                        </span>
-                      </td>
-                      <td className="px-4 py-3 text-[11px] text-muted-foreground">
-                        {t.last_login_at ? new Date(t.last_login_at).toLocaleString("pt-BR") : "—"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-wrap justify-end gap-1.5">
-                          <button
-                            onClick={() => {
-                              const r = impersonateLocalTenant(t.id);
-                              window.location.href = `/app/${r.slug}/dashboard`;
-                            }}
-                            className="rounded-md bg-ink px-2.5 py-1 text-[11px] font-bold text-white hover:opacity-90"
-                          >
-                            Entrar
-                          </button>
-                          <button
-                            onClick={() => {
-                              const pwd = window.prompt("Nova senha do operador:");
-                              if (!pwd) return;
-                              try {
-                                resetLocalTenantPassword(t.id, pwd);
-                                window.alert("Senha atualizada.");
-                                refresh();
-                              } catch (e) {
-                                window.alert(e instanceof Error ? e.message : "Erro");
-                              }
-                            }}
-                            className="rounded-md border border-border bg-white px-2.5 py-1 text-[11px] font-semibold hover:border-primary/40"
-                          >
-                            Reset senha
-                          </button>
-                          <button
-                            onClick={() => {
-                              const next = t.status === "blocked" ? "active" : "blocked";
-                              setLocalTenantStatus(t.id, next);
-                              refresh();
-                            }}
-                            className="rounded-md border border-border bg-white px-2.5 py-1 text-[11px] font-semibold hover:border-primary/40"
-                          >
-                            {t.status === "blocked" ? "Liberar" : "Bloquear"}
-                          </button>
-                          <button
-                            onClick={() => {
-                              if (!window.confirm(`Excluir ${t.company_name}? Todos os dados serão removidos.`)) return;
-                              deleteLocalTenant(t.id);
-                              refresh();
-                            }}
-                            className="rounded-md border border-red-200 bg-white px-2.5 py-1 text-[11px] font-semibold text-red-700 hover:bg-red-50"
-                          >
-                            Excluir
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        }}
+                        title="Copiar credenciais de acesso"
+                        className="rounded-md p-2 text-slate-600 hover:bg-slate-100 hover:text-ink"
+                      >
+                        <Share2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          const next = isBlocked ? "active" : "blocked";
+                          setLocalTenantStatus(t.id, next);
+                          refresh();
+                        }}
+                        title={isBlocked ? "Liberar acesso" : "Bloquear acesso"}
+                        className={
+                          "rounded-md p-2 hover:bg-slate-100 " +
+                          (isBlocked ? "text-emerald-600" : "text-red-500")
+                        }
+                      >
+                        <Ban className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          const pwd = window.prompt("Nova senha do operador:");
+                          if (!pwd) return;
+                          try {
+                            resetLocalTenantPassword(t.id, pwd);
+                            window.alert("Senha atualizada.");
+                            refresh();
+                          } catch (e) {
+                            window.alert(e instanceof Error ? e.message : "Erro");
+                          }
+                        }}
+                        title="Resetar senha"
+                        className="rounded-md p-2 text-slate-600 hover:bg-slate-100 hover:text-ink"
+                      >
+                        <KeyRound className="h-4 w-4" />
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (!window.confirm(`Excluir ${t.company_name}? Todos os dados serão removidos.`)) return;
+                          deleteLocalTenant(t.id);
+                          refresh();
+                        }}
+                        title="Excluir operador"
+                        className="rounded-md p-2 text-red-500 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            );
+          })
         )}
       </div>
 
