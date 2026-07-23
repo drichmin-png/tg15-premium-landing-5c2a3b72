@@ -218,7 +218,7 @@ export function createLocalTenant(payload: CreateLocalTenantPayload) {
 }
 
 export function buildLocalTenantShortUrl(tenant: Pick<LocalTenant, "shortcode">, origin: string) {
-  return `${origin}/o/${tenant.shortcode}`;
+  return `${origin}/${tenant.shortcode}`;
 }
 
 export function buildLocalTenantAccessUrl(payload: LocalTenantAccessPayload, origin: string) {
