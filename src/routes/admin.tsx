@@ -39,6 +39,7 @@ import {
 } from "@/lib/local-db";
 import {
   buildLocalTenantAccessUrl,
+  buildLocalTenantShortUrl,
   createLocalTenant,
   deleteLocalTenant,
   impersonateLocalTenant,
