@@ -21,6 +21,7 @@ import {
   ShieldCheck,
   Sparkles,
   Trash2,
+  Upload,
   UserPlus,
 } from "lucide-react";
 
