@@ -34,17 +34,20 @@ export function StorefrontPage({ operatorSlug }: { operatorSlug?: string }) {
     if (operatorSlug) {
       const slug = operatorSlug.trim().toLowerCase();
       const setupToken = new URLSearchParams(window.location.search).get("store");
-      if (setupToken) admin.importStorefrontConfig(slug, setupToken);
-      else admin.setNamespace(slug);
+      admin.setNamespace(slug);
       window.sessionStorage.setItem(ACTIVE_OPERATOR_KEY, slug);
-      setReady(true);
+      if (setupToken) {
+        admin.importStorefrontConfig(slug, setupToken);
+        setReady(true);
+      } else {
+        admin.hydrateRemote(slug).finally(() => setReady(true));
+      }
       return;
     }
 
     admin.setNamespace(null);
     window.sessionStorage.removeItem(ACTIVE_OPERATOR_KEY);
-    admin.hydrateRemote();
-    setReady(true);
+    admin.hydrateRemote(null).finally(() => setReady(true));
   }, [operatorSlug]);
 
   const s = useAdmin();
