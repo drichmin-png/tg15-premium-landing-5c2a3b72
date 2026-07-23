@@ -448,10 +448,22 @@ export const admin = {
       const payload: Record<string, unknown> = {};
       for (const k of REMOTE_KEYS) payload[k as string] = state[k];
       const { saveSiteConfig } = await import("@/lib/site-config.functions");
-      await saveSiteConfig({ data: { password: pwd, data: JSON.stringify(payload) } });
+      await saveSiteConfig({ data: { password: pwd, data: JSON.stringify(payload), namespace: namespace ?? null } });
     } catch {
       // silencioso: continua funcionando localmente
     }
+  },
+  publishStorefrontAs: async (slug: string) => {
+    ensureHydrated();
+    const pwd = authPassword;
+    if (!pwd) throw new Error("Faça login no painel admin novamente");
+    const cleanSlug = slug.trim().toLowerCase();
+    if (!cleanSlug) throw new Error("Slug do operador inválido");
+    const payload: Record<string, unknown> = {};
+    for (const k of REMOTE_KEYS) payload[k as string] = state[k];
+    const { saveSiteConfig } = await import("@/lib/site-config.functions");
+    await saveSiteConfig({ data: { password: pwd, data: JSON.stringify(payload), namespace: cleanSlug } });
+    return true;
   },
   setNamespace,
   markAuthed,
