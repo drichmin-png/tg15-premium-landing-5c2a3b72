@@ -22,7 +22,6 @@ import {
   Sparkles,
   Trash2,
   UserPlus,
-  Users,
 } from "lucide-react";
 
 import { admin, useAdmin, type BlockId } from "@/lib/admin-store";
