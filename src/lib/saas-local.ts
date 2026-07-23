@@ -108,6 +108,25 @@ function makeId(prefix: string) {
   return `${prefix}_${Date.now()}_${Math.random().toString(16).slice(2)}`;
 }
 
+function makeShortcode() {
+  if (typeof crypto !== "undefined" && "getRandomValues" in crypto) {
+    const buf = new Uint8Array(3);
+    crypto.getRandomValues(buf);
+    return Array.from(buf).map((b) => b.toString(16).padStart(2, "0")).join("");
+  }
+  return Math.random().toString(16).slice(2, 8).padEnd(6, "0");
+}
+
+function ensureShortcode(tenants: LocalTenant[], existing?: string) {
+  if (existing && /^[a-z0-9]{4,10}$/.test(existing)) return existing;
+  const used = new Set(tenants.map((t) => t.shortcode).filter(Boolean));
+  for (let i = 0; i < 20; i++) {
+    const code = makeShortcode();
+    if (!used.has(code)) return code;
+  }
+  return makeShortcode();
+}
+
 function readJson<T>(key: string, fallback: T): T {
   if (!canUseStorage()) return fallback;
   try {
