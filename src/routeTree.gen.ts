@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as CodeRouteImport } from './routes/$code'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MasterIndexRouteImport } from './routes/master.index'
 import { Route as OCodeRouteImport } from './routes/o.$code'
@@ -38,6 +39,11 @@ const CheckoutRoute = CheckoutRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CodeRoute = CodeRouteImport.update({
+  id: '/$code',
+  path: '/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -104,6 +110,7 @@ const ApiPublicHooksTickOrdersRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/$code': typeof CodeRoute
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/$code': typeof CodeRoute
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -139,6 +147,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/$code': typeof CodeRoute
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/$code'
     | '/admin'
     | '/checkout'
     | '/sitemap.xml'
@@ -175,6 +185,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/$code'
     | '/admin'
     | '/checkout'
     | '/sitemap.xml'
@@ -192,6 +203,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/$code'
     | '/admin'
     | '/checkout'
     | '/sitemap.xml'
@@ -210,6 +222,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CodeRoute: typeof CodeRoute
   AdminRoute: typeof AdminRoute
   CheckoutRoute: typeof CheckoutRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
@@ -247,6 +260,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/$code': {
+      id: '/$code'
+      path: '/$code'
+      fullPath: '/$code'
+      preLoaderRoute: typeof CodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -338,6 +358,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CodeRoute: CodeRoute,
   AdminRoute: AdminRoute,
   CheckoutRoute: CheckoutRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
