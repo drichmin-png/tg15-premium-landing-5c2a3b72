@@ -14,6 +14,7 @@ import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MasterIndexRouteImport } from './routes/master.index'
+import { Route as OCodeRouteImport } from './routes/o.$code'
 import { Route as MasterTenantsRouteImport } from './routes/master.tenants'
 import { Route as MasterOrdersRouteImport } from './routes/master.orders'
 import { Route as MasterLoginRouteImport } from './routes/master.login'
@@ -47,6 +48,11 @@ const IndexRoute = IndexRouteImport.update({
 const MasterIndexRoute = MasterIndexRouteImport.update({
   id: '/master/',
   path: '/master/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OCodeRoute = OCodeRouteImport.update({
+  id: '/o/$code',
+  path: '/o/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MasterTenantsRoute = MasterTenantsRouteImport.update({
@@ -105,6 +111,7 @@ export interface FileRoutesByFullPath {
   '/master/login': typeof MasterLoginRoute
   '/master/orders': typeof MasterOrdersRoute
   '/master/tenants': typeof MasterTenantsRoute
+  '/o/$code': typeof OCodeRoute
   '/master/': typeof MasterIndexRoute
   '/app/$slug/dashboard': typeof AppSlugDashboardRoute
   '/app/$slug/login': typeof AppSlugLoginRoute
@@ -121,6 +128,7 @@ export interface FileRoutesByTo {
   '/master/login': typeof MasterLoginRoute
   '/master/orders': typeof MasterOrdersRoute
   '/master/tenants': typeof MasterTenantsRoute
+  '/o/$code': typeof OCodeRoute
   '/master': typeof MasterIndexRoute
   '/app/$slug/dashboard': typeof AppSlugDashboardRoute
   '/app/$slug/login': typeof AppSlugLoginRoute
@@ -138,6 +146,7 @@ export interface FileRoutesById {
   '/master/login': typeof MasterLoginRoute
   '/master/orders': typeof MasterOrdersRoute
   '/master/tenants': typeof MasterTenantsRoute
+  '/o/$code': typeof OCodeRoute
   '/master/': typeof MasterIndexRoute
   '/app/$slug/dashboard': typeof AppSlugDashboardRoute
   '/app/$slug/login': typeof AppSlugLoginRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/master/login'
     | '/master/orders'
     | '/master/tenants'
+    | '/o/$code'
     | '/master/'
     | '/app/$slug/dashboard'
     | '/app/$slug/login'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/master/login'
     | '/master/orders'
     | '/master/tenants'
+    | '/o/$code'
     | '/master'
     | '/app/$slug/dashboard'
     | '/app/$slug/login'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/master/login'
     | '/master/orders'
     | '/master/tenants'
+    | '/o/$code'
     | '/master/'
     | '/app/$slug/dashboard'
     | '/app/$slug/login'
@@ -205,6 +217,7 @@ export interface RootRouteChildren {
   MasterLoginRoute: typeof MasterLoginRoute
   MasterOrdersRoute: typeof MasterOrdersRoute
   MasterTenantsRoute: typeof MasterTenantsRoute
+  OCodeRoute: typeof OCodeRoute
   MasterIndexRoute: typeof MasterIndexRoute
   AppSlugDashboardRoute: typeof AppSlugDashboardRoute
   AppSlugLoginRoute: typeof AppSlugLoginRoute
@@ -248,6 +261,13 @@ declare module '@tanstack/react-router' {
       path: '/master'
       fullPath: '/master/'
       preLoaderRoute: typeof MasterIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/o/$code': {
+      id: '/o/$code'
+      path: '/o/$code'
+      fullPath: '/o/$code'
+      preLoaderRoute: typeof OCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/master/tenants': {
@@ -325,6 +345,7 @@ const rootRouteChildren: RootRouteChildren = {
   MasterLoginRoute: MasterLoginRoute,
   MasterOrdersRoute: MasterOrdersRoute,
   MasterTenantsRoute: MasterTenantsRoute,
+  OCodeRoute: OCodeRoute,
   MasterIndexRoute: MasterIndexRoute,
   AppSlugDashboardRoute: AppSlugDashboardRoute,
   AppSlugLoginRoute: AppSlugLoginRoute,

@@ -4,11 +4,14 @@ import {
   ArrowDown,
   ArrowUp,
   BarChart3,
+  Ban,
   Check,
   Copy,
   ExternalLink,
   Eye,
   EyeOff,
+  KeyRound,
+  LogIn,
   LogOut,
   Package,
   RefreshCw,
@@ -17,6 +20,8 @@ import {
   Share2,
   ShieldCheck,
   Sparkles,
+  Trash2,
+  UserPlus,
   Users,
 } from "lucide-react";
 
