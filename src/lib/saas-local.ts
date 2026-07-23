@@ -197,6 +197,7 @@ export function createLocalTenant(payload: CreateLocalTenantPayload) {
   const tenant: LocalTenant = {
     id: makeId("tenant"),
     slug,
+    shortcode: ensureShortcode(tenants),
     company_name: payload.company_name.trim(),
     responsible_name: payload.responsible_name.trim(),
     contact_email: payload.contact_email.trim(),
@@ -214,6 +215,10 @@ export function createLocalTenant(payload: CreateLocalTenantPayload) {
   };
   writeJson(TENANTS_KEY, [tenant, ...tenants]);
   return tenant;
+}
+
+export function buildLocalTenantShortUrl(tenant: Pick<LocalTenant, "shortcode">, origin: string) {
+  return `${origin}/o/${tenant.shortcode}`;
 }
 
 export function buildLocalTenantAccessUrl(payload: LocalTenantAccessPayload, origin: string) {
