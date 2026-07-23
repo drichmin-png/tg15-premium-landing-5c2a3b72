@@ -3,6 +3,7 @@ export type LocalSaasRole = "master" | "owner" | "staff";
 export type LocalTenant = {
   id: string;
   slug: string;
+  shortcode: string;
   company_name: string;
   responsible_name: string;
   contact_email: string;
