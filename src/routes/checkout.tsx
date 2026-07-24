@@ -597,18 +597,26 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
 
   const showPix = !highValue && state.payment === "pix" && hasPixConfigured;
 
-  const pixPayload = showPix
-    ? manualPix
-      ? manualPix
-      : buildPixPayload({
+  let pixPayload = "";
+  let pixError = "";
+  if (showPix) {
+    if (manualPix) {
+      pixPayload = manualPix;
+    } else {
+      try {
+        pixPayload = buildPixPayload({
           key: admin.pix.key,
           keyType: admin.pix.keyType,
           amount: total,
           merchantName: admin.pix.merchantName || "TG15 ONLINE",
           merchantCity: admin.pix.merchantCity || "SAO PAULO",
           txid: "***",
-        })
-    : "";
+        });
+      } catch (e) {
+        pixError = e instanceof Error ? e.message : "Não foi possível gerar o Pix.";
+      }
+    }
+  }
 
   const [copied, setCopied] = useState(false);
   const copyPix = async () => {
