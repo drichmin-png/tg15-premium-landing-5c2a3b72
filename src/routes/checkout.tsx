@@ -162,7 +162,6 @@ function Checkout() {
                     <div className="text-xs text-muted-foreground">15mg/0,5mL · {v.units} {v.units > 1 ? "ampolas" : "ampola"}</div>
                     <div className="mt-1 text-xs text-muted-foreground">Qtd: {state.qty}</div>
                   </div>
-                  <div className="text-sm font-bold text-ink whitespace-nowrap">{formatBRL(subtotal)}</div>
                 </div>
 
                 <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
