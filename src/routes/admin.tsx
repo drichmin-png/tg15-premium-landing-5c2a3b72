@@ -1616,7 +1616,7 @@ function OperadoresPanel() {
                       </button>
                       <button
                         onClick={async () => {
-                          const shareText = `Seu painel de operador está pronto ✅\n\nAcesso: ${setupUrl}\nUsuário: ${t.owner_username}`;
+                          const shareText = `Seu painel de operador está pronto ✅\n\nAcesso: ${shortUrl}\nUsuário: ${t.owner_username}\nSenha: ${password}`;
                           try {
                             await navigator.clipboard.writeText(shareText);
                             window.alert("Credenciais copiadas para compartilhar.");
