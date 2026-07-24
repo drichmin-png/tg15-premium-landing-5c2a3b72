@@ -217,8 +217,10 @@ export function createLocalTenant(payload: CreateLocalTenantPayload) {
   return tenant;
 }
 
-export function buildLocalTenantShortUrl(tenant: Pick<LocalTenant, "shortcode">, origin: string) {
-  return `${origin}/${tenant.shortcode}`;
+export function buildLocalTenantShortUrl(tenant: Pick<LocalTenant, "shortcode" | "slug">, origin: string) {
+  // Use slug so the link resolves on any device via the server-hydrated storefront.
+  // The shortcode-based `/{code}` route only works on the master's device (local map).
+  return `${origin}/loja/${tenant.slug}`;
 }
 
 export function buildLocalTenantAccessUrl(payload: LocalTenantAccessPayload, origin: string) {

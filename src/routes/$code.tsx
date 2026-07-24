@@ -17,15 +17,11 @@ export const Route = createFileRoute("/$code")({
 function OperatorShortRoute() {
   const { code } = Route.useParams();
   const [slug, setSlug] = useState<string | null>(null);
-  const [notFoundState, setNotFoundState] = useState(false);
 
   useEffect(() => {
+    const search = typeof window !== "undefined" ? window.location.search : "";
     const tenant = getLocalTenantByShortcode(code);
     if (tenant) {
-      // If a setup token is attached, this is an operator opening their
-      // management link on a new device — send them to the login flow so the
-      // token can seed credentials, then they land on their admin panel.
-      const search = typeof window !== "undefined" ? window.location.search : "";
       if (search.includes("setup=")) {
         window.location.replace(`/app/${tenant.slug}/login${search}`);
         return;
@@ -33,10 +29,17 @@ function OperatorShortRoute() {
       setSlug(tenant.slug);
       return;
     }
-    setNotFoundState(true);
+    // Fallback: unknown shortcode on this device — treat the code as a slug and
+    // let the storefront hydrate remotely from the server-side namespaced config.
+    // Valid slug shape (a-z0-9-, 1-40 chars) covers all operator slugs we accept.
+    if (/^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/i.test(code)) {
+      setSlug(code.toLowerCase());
+      return;
+    }
+    setSlug("__invalid__");
   }, [code]);
 
-  if (notFoundState) {
+  if (slug === "__invalid__") {
     return (
       <main className="mx-auto flex min-h-[60vh] max-w-md flex-col items-center justify-center gap-3 p-6 text-center">
         <div className="text-sm font-semibold text-ink">

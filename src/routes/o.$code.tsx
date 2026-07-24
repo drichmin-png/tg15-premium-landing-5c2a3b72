@@ -12,12 +12,15 @@ function OperatorShortRedirect() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Preserve any ?setup= token attached to the short URL so that the operator can
-    // bootstrap credentials on a fresh device the first time they open the link.
     const search = typeof window !== "undefined" ? window.location.search : "";
     const tenant = getLocalTenantByShortcode(code);
     if (tenant) {
       window.location.replace(`/app/${tenant.slug}/login${search}`);
+      return;
+    }
+    // Fallback: shortcode não existe neste dispositivo — tenta usar o código como slug.
+    if (/^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/i.test(code)) {
+      window.location.replace(`/app/${code.toLowerCase()}/login${search}`);
       return;
     }
     setError("Link inválido ou operador não encontrado neste dispositivo.");
