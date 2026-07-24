@@ -218,9 +218,9 @@ export function createLocalTenant(payload: CreateLocalTenantPayload) {
 }
 
 export function buildLocalTenantShortUrl(tenant: Pick<LocalTenant, "shortcode" | "slug">, origin: string) {
-  // Use slug so the link resolves on any device via the server-hydrated storefront.
-  // The shortcode-based `/{code}` route only works on the master's device (local map).
-  return `${origin}/loja/${tenant.slug}`;
+  // Link entregue ao operador: leva ao painel de acesso dele.
+  // Dentro do painel, o operador copia o link público da própria loja (/loja/{slug}).
+  return `${origin}/app/${tenant.slug}/login`;
 }
 
 export function buildLocalTenantAccessUrl(payload: LocalTenantAccessPayload, origin: string) {
