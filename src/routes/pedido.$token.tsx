@@ -66,6 +66,7 @@ function PedidoConclusao() {
   }, [token]);
 
   const total = order ? order.total_cents / 100 : 0;
+  const trackingCode = order ? `BR${order.public_token.replace(/[^A-Z0-9]/gi, "").toUpperCase().padEnd(9, "0").slice(0, 9)}TG` : "";
 
   const pixPayload = useMemo(() => {
     if (customPix.trim()) return customPix.trim();
