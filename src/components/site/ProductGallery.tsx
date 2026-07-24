@@ -1,13 +1,20 @@
 import { useState } from "react";
 import { ZoomIn } from "lucide-react";
 import { media } from "@/lib/product";
+import caixasEmpilhadas from "@/assets/produto-caixas-empilhadas.webp.asset.json";
+import novaApresentacao from "@/assets/produto-nova-apresentacao.jpeg.asset.json";
+import beneficios from "@/assets/produto-beneficios.jpg.asset.json";
+import caixaUnica from "@/assets/produto-caixa-unica.jpg.asset.json";
+import { assetUrl } from "@/lib/asset-url";
 
 type Slide = { kind: "image"; src: string; alt: string };
 
 const slides: Slide[] = [
-  { kind: "image", src: media.caixa, alt: "Caixa T.G.15 com 4 ampolas" },
+  { kind: "image", src: assetUrl(novaApresentacao.url), alt: "T.G.15 — Nova apresentação: caixa com 4 frascos-ampola" },
+  { kind: "image", src: assetUrl(caixasEmpilhadas.url), alt: "Caixas T.G.15 empilhadas com ampolas" },
+  { kind: "image", src: assetUrl(caixaUnica.url), alt: "Caixa T.G.15 Tirzepatida 15mg/0,5mL" },
+  { kind: "image", src: assetUrl(beneficios.url), alt: "Benefícios da Tirzepatida T.G.15" },
   { kind: "image", src: media.ampola, alt: "Ampola T.G.15 Tirzepatida 15mg/0,5mL" },
-  { kind: "image", src: media.hero, alt: "Detalhes do produto T.G.15" },
 ];
 
 export function ProductGallery() {
