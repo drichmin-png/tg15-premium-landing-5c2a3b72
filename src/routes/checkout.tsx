@@ -695,9 +695,8 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
               </div>
               <div className="mt-3 space-y-3 text-sm">
                 <p className="text-muted-foreground leading-relaxed">
-                  Seu pedido será despachado a partir do nosso Centro de Distribuição localizado em{" "}
-                  <span className="font-semibold text-ink">{regionalEta.center}</span>, com prazo estimado de entrega de{" "}
-                  <span className="font-semibold text-ink">{regionalEta.range}</span>.
+                  Seu pedido será despachado a partir do nosso Centro de Distribuição em{" "}
+                  <span className="font-semibold text-ink">{regionalEta.center}</span>. Contamos com centros de distribuição em <span className="font-semibold text-ink">todas as capitais do Brasil</span>, garantindo agilidade no envio.
                 </p>
 
                 <div className="rounded-xl border border-border bg-sand/40 p-4">
