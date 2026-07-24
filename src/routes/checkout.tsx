@@ -447,38 +447,39 @@ function StepPayment({ state, onNext, total }: { state: ReturnType<typeof useCar
 }
 
 type RegionalEta = { region: string; range: string; center: string };
+// Centros de distribuição em todas as capitais do Brasil
 const REGIONAL_ETA: Record<string, RegionalEta> = {
-  SP: { region: "São Paulo", range: "No mesmo dia ou até 2 dias úteis", center: "São Paulo (SP)" },
-  RJ: { region: "Sudeste", range: "1 a 3 dias úteis", center: "Rio de Janeiro (RJ)" },
-  MG: { region: "Sudeste", range: "1 a 3 dias úteis", center: "Belo Horizonte (MG)" },
-  ES: { region: "Sudeste", range: "1 a 3 dias úteis", center: "Rio de Janeiro (RJ)" },
-  PR: { region: "Sul", range: "1 a 3 dias úteis", center: "Curitiba (PR)" },
-  SC: { region: "Sul", range: "1 a 3 dias úteis", center: "Curitiba (PR)" },
-  RS: { region: "Sul", range: "1 a 3 dias úteis", center: "Porto Alegre (RS)" },
-  DF: { region: "Centro-Oeste", range: "2 a 5 dias úteis", center: "Brasília (DF)" },
-  GO: { region: "Centro-Oeste", range: "2 a 5 dias úteis", center: "Brasília (DF)" },
-  MT: { region: "Centro-Oeste", range: "2 a 5 dias úteis", center: "Brasília (DF)" },
-  MS: { region: "Centro-Oeste", range: "2 a 5 dias úteis", center: "Brasília (DF)" },
-  BA: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Salvador (BA)" },
-  SE: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Salvador (BA)" },
-  AL: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Recife (PE)" },
-  PE: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Recife (PE)" },
-  PB: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Recife (PE)" },
-  RN: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Recife (PE)" },
-  CE: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Fortaleza (CE)" },
-  PI: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Fortaleza (CE)" },
-  MA: { region: "Nordeste", range: "3 a 7 dias úteis", center: "Fortaleza (CE)" },
-  PA: { region: "Norte", range: "5 a 10 dias úteis", center: "Fortaleza (CE)" },
-  AP: { region: "Norte", range: "5 a 10 dias úteis", center: "Fortaleza (CE)" },
-  AM: { region: "Norte", range: "5 a 10 dias úteis", center: "Fortaleza (CE)" },
-  RR: { region: "Norte", range: "5 a 10 dias úteis", center: "Fortaleza (CE)" },
-  RO: { region: "Norte", range: "5 a 10 dias úteis", center: "Brasília (DF)" },
-  AC: { region: "Norte", range: "5 a 10 dias úteis", center: "Brasília (DF)" },
-  TO: { region: "Norte", range: "5 a 10 dias úteis", center: "Brasília (DF)" },
+  SP: { region: "São Paulo", range: "1 a 2 dias úteis", center: "São Paulo (SP)" },
+  RJ: { region: "Sudeste", range: "1 a 2 dias úteis", center: "Rio de Janeiro (RJ)" },
+  MG: { region: "Sudeste", range: "1 a 2 dias úteis", center: "Belo Horizonte (MG)" },
+  ES: { region: "Sudeste", range: "1 a 2 dias úteis", center: "Vitória (ES)" },
+  PR: { region: "Sul", range: "1 a 2 dias úteis", center: "Curitiba (PR)" },
+  SC: { region: "Sul", range: "1 a 2 dias úteis", center: "Florianópolis (SC)" },
+  RS: { region: "Sul", range: "1 a 2 dias úteis", center: "Porto Alegre (RS)" },
+  DF: { region: "Centro-Oeste", range: "1 a 2 dias úteis", center: "Brasília (DF)" },
+  GO: { region: "Centro-Oeste", range: "1 a 2 dias úteis", center: "Goiânia (GO)" },
+  MT: { region: "Centro-Oeste", range: "1 a 2 dias úteis", center: "Cuiabá (MT)" },
+  MS: { region: "Centro-Oeste", range: "1 a 2 dias úteis", center: "Campo Grande (MS)" },
+  BA: { region: "Nordeste", range: "1 a 2 dias úteis", center: "Salvador (BA)" },
+  SE: { region: "Nordeste", range: "1 a 2 dias úteis", center: "Aracaju (SE)" },
+  AL: { region: "Nordeste", range: "1 a 2 dias úteis", center: "Maceió (AL)" },
+  PE: { region: "Nordeste", range: "1 a 2 dias úteis", center: "Recife (PE)" },
+  PB: { region: "Nordeste", range: "1 a 2 dias úteis", center: "João Pessoa (PB)" },
+  RN: { region: "Nordeste", range: "1 a 2 dias úteis", center: "Natal (RN)" },
+  CE: { region: "Nordeste", range: "1 a 2 dias úteis", center: "Fortaleza (CE)" },
+  PI: { region: "Nordeste", range: "1 a 2 dias úteis", center: "Teresina (PI)" },
+  MA: { region: "Nordeste", range: "1 a 2 dias úteis", center: "São Luís (MA)" },
+  PA: { region: "Norte", range: "1 a 2 dias úteis", center: "Belém (PA)" },
+  AP: { region: "Norte", range: "1 a 2 dias úteis", center: "Macapá (AP)" },
+  AM: { region: "Norte", range: "1 a 2 dias úteis", center: "Manaus (AM)" },
+  RR: { region: "Norte", range: "1 a 2 dias úteis", center: "Boa Vista (RR)" },
+  RO: { region: "Norte", range: "1 a 2 dias úteis", center: "Porto Velho (RO)" },
+  AC: { region: "Norte", range: "1 a 2 dias úteis", center: "Rio Branco (AC)" },
+  TO: { region: "Norte", range: "1 a 2 dias úteis", center: "Palmas (TO)" },
 };
 function getRegionalEta(uf: string): RegionalEta {
   const key = (uf || "").toUpperCase();
-  return REGIONAL_ETA[key] || { region: "Brasil", range: "3 a 7 dias úteis", center: "São Paulo (SP)" };
+  return REGIONAL_ETA[key] || { region: "Brasil", range: "1 a 2 dias úteis", center: "capital mais próxima" };
 }
 
 function StepConfirm({ orderId, trackingCode, total, state }: { orderId: string; trackingCode: string; total: number; state: ReturnType<typeof useCart> }) {
@@ -694,9 +695,8 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
               </div>
               <div className="mt-3 space-y-3 text-sm">
                 <p className="text-muted-foreground leading-relaxed">
-                  Seu pedido será despachado a partir do nosso Centro de Distribuição localizado em{" "}
-                  <span className="font-semibold text-ink">{regionalEta.center}</span>, com prazo estimado de entrega de{" "}
-                  <span className="font-semibold text-ink">{regionalEta.range}</span>.
+                  Seu pedido será despachado a partir do nosso Centro de Distribuição em{" "}
+                  <span className="font-semibold text-ink">{regionalEta.center}</span>. Contamos com centros de distribuição em <span className="font-semibold text-ink">todas as capitais do Brasil</span>, garantindo agilidade no envio.
                 </p>
 
                 <div className="rounded-xl border border-border bg-sand/40 p-4">
@@ -804,44 +804,6 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
 
             <div className="h-px bg-border" />
 
-            {/* Prazo por região */}
-            <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
-                <Truck className="h-3.5 w-3.5" /> Prazo de entrega — {regionalEta.region}
-              </div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg bg-primary/[0.05] border border-primary/15 p-3">
-                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Estimativa para sua região</div>
-                  <div className="mt-1 text-sm font-bold text-ink">{regionalEta.range}</div>
-                </div>
-                <div className="rounded-lg bg-sand/60 border border-border p-3">
-                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Centro de distribuição mais próximo</div>
-                  <div className="mt-1 text-sm font-bold text-ink">{regionalEta.center}</div>
-                </div>
-              </div>
-              <details className="mt-3 text-xs text-muted-foreground">
-                <summary className="cursor-pointer font-semibold text-foreground/80">Ver prazos por região e centros de distribuição</summary>
-                <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                  <ul className="space-y-1 list-disc pl-4">
-                    <li>São Paulo (capital e interior): mesmo dia ou até 2 dias úteis.</li>
-                    <li>Sul e Sudeste: 1 a 3 dias úteis.</li>
-                    <li>Centro-Oeste: 2 a 5 dias úteis.</li>
-                    <li>Nordeste: 3 a 7 dias úteis.</li>
-                    <li>Norte: 5 a 10 dias úteis (pode variar em cidades afastadas).</li>
-                  </ul>
-                  <ul className="space-y-1 list-disc pl-4">
-                    <li>São Paulo (SP) — hub logístico principal.</li>
-                    <li>Rio de Janeiro (RJ) — Sudeste.</li>
-                    <li>Belo Horizonte (MG) — Minas / Centro-Sul.</li>
-                    <li>Brasília (DF) — Centro-Oeste.</li>
-                    <li>Curitiba (PR) e Porto Alegre (RS) — Sul.</li>
-                    <li>Salvador (BA), Recife (PE) e Fortaleza (CE) — Nordeste e Norte.</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <div className="h-px bg-border" />
 
             {/* Empresa */}
             <div>
