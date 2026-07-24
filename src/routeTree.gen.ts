@@ -15,6 +15,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as CodeRouteImport } from './routes/$code'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MasterIndexRouteImport } from './routes/master.index'
+import { Route as PedidoTokenRouteImport } from './routes/pedido.$token'
 import { Route as OCodeRouteImport } from './routes/o.$code'
 import { Route as MasterTenantsRouteImport } from './routes/master.tenants'
 import { Route as MasterOrdersRouteImport } from './routes/master.orders'
@@ -54,6 +55,11 @@ const IndexRoute = IndexRouteImport.update({
 const MasterIndexRoute = MasterIndexRouteImport.update({
   id: '/master/',
   path: '/master/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PedidoTokenRoute = PedidoTokenRouteImport.update({
+  id: '/pedido/$token',
+  path: '/pedido/$token',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OCodeRoute = OCodeRouteImport.update({
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/master/orders': typeof MasterOrdersRoute
   '/master/tenants': typeof MasterTenantsRoute
   '/o/$code': typeof OCodeRoute
+  '/pedido/$token': typeof PedidoTokenRoute
   '/master/': typeof MasterIndexRoute
   '/app/$slug/dashboard': typeof AppSlugDashboardRoute
   '/app/$slug/login': typeof AppSlugLoginRoute
@@ -137,6 +144,7 @@ export interface FileRoutesByTo {
   '/master/orders': typeof MasterOrdersRoute
   '/master/tenants': typeof MasterTenantsRoute
   '/o/$code': typeof OCodeRoute
+  '/pedido/$token': typeof PedidoTokenRoute
   '/master': typeof MasterIndexRoute
   '/app/$slug/dashboard': typeof AppSlugDashboardRoute
   '/app/$slug/login': typeof AppSlugLoginRoute
@@ -156,6 +164,7 @@ export interface FileRoutesById {
   '/master/orders': typeof MasterOrdersRoute
   '/master/tenants': typeof MasterTenantsRoute
   '/o/$code': typeof OCodeRoute
+  '/pedido/$token': typeof PedidoTokenRoute
   '/master/': typeof MasterIndexRoute
   '/app/$slug/dashboard': typeof AppSlugDashboardRoute
   '/app/$slug/login': typeof AppSlugLoginRoute
@@ -176,6 +185,7 @@ export interface FileRouteTypes {
     | '/master/orders'
     | '/master/tenants'
     | '/o/$code'
+    | '/pedido/$token'
     | '/master/'
     | '/app/$slug/dashboard'
     | '/app/$slug/login'
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/master/orders'
     | '/master/tenants'
     | '/o/$code'
+    | '/pedido/$token'
     | '/master'
     | '/app/$slug/dashboard'
     | '/app/$slug/login'
@@ -212,6 +223,7 @@ export interface FileRouteTypes {
     | '/master/orders'
     | '/master/tenants'
     | '/o/$code'
+    | '/pedido/$token'
     | '/master/'
     | '/app/$slug/dashboard'
     | '/app/$slug/login'
@@ -231,6 +243,7 @@ export interface RootRouteChildren {
   MasterOrdersRoute: typeof MasterOrdersRoute
   MasterTenantsRoute: typeof MasterTenantsRoute
   OCodeRoute: typeof OCodeRoute
+  PedidoTokenRoute: typeof PedidoTokenRoute
   MasterIndexRoute: typeof MasterIndexRoute
   AppSlugDashboardRoute: typeof AppSlugDashboardRoute
   AppSlugLoginRoute: typeof AppSlugLoginRoute
@@ -281,6 +294,13 @@ declare module '@tanstack/react-router' {
       path: '/master'
       fullPath: '/master/'
       preLoaderRoute: typeof MasterIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pedido/$token': {
+      id: '/pedido/$token'
+      path: '/pedido/$token'
+      fullPath: '/pedido/$token'
+      preLoaderRoute: typeof PedidoTokenRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/o/$code': {
@@ -367,6 +387,7 @@ const rootRouteChildren: RootRouteChildren = {
   MasterOrdersRoute: MasterOrdersRoute,
   MasterTenantsRoute: MasterTenantsRoute,
   OCodeRoute: OCodeRoute,
+  PedidoTokenRoute: PedidoTokenRoute,
   MasterIndexRoute: MasterIndexRoute,
   AppSlugDashboardRoute: AppSlugDashboardRoute,
   AppSlugLoginRoute: AppSlugLoginRoute,
@@ -377,13 +398,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

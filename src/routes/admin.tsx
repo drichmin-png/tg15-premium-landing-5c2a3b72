@@ -977,6 +977,8 @@ function OrdersPanel() {
                       </div>
                     </div>
 
+                    <OrderCompletionLink order={o} />
+
                     <div className="text-[11px] text-muted-foreground">
                       ID: {o.id} · Token público: {o.public_token}
                       {o.invoice_url && (
