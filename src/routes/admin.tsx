@@ -1013,10 +1013,11 @@ function PixPanel({ s }: { s: ReturnType<typeof useAdmin> }) {
         title="Modo de geração do QR Code Pix"
         description="Escolha se o QR Code é gerado automaticamente a partir de uma chave Pix, ou delegado ao gateway configurado."
       >
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-3">
           {(
             [
               { id: "key", title: "Chave Pix (automático)", desc: "Gera o QR Code na hora usando a chave abaixo. Ideal para receber direto na sua conta." },
+              { id: "manual", title: "Copia-e-Cola (manual)", desc: "Cole qualquer código Pix copia-e-cola pronto (BR Code) e ele será exibido no checkout." },
               { id: "gateway", title: "Gateway", desc: "O QR Code será gerado pelo gateway de pagamento (aba Gateway)." },
             ] as const
           ).map((opt) => {
@@ -1037,6 +1038,7 @@ function PixPanel({ s }: { s: ReturnType<typeof useAdmin> }) {
           })}
         </div>
       </Card>
+
 
       {s.pix.mode === "key" && (
         <Card
