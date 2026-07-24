@@ -110,6 +110,9 @@ function Checkout() {
         </div>
       </header>
 
+      {packing && <PackingOverlay />}
+
+
       <div className={step === 5 ? "w-full py-10" : "container-x py-10"}>
         <button onClick={() => (step === 1 ? nav({ to: "/" }) : prev())} className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary">
           <ChevronLeft className="h-4 w-4" />
