@@ -82,7 +82,18 @@ function Checkout() {
     );
   }, [step]);
 
-  const next = () => setStep((s) => Math.min(5, s + 1));
+  const [packing, setPacking] = useState(false);
+  const next = () => {
+    if (step === 4) {
+      setPacking(true);
+      window.setTimeout(() => {
+        setPacking(false);
+        setStep(5);
+      }, 2400);
+      return;
+    }
+    setStep((s) => Math.min(5, s + 1));
+  };
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
   return (
@@ -98,6 +109,9 @@ function Checkout() {
           </div>
         </div>
       </header>
+
+      {packing && <PackingOverlay />}
+
 
       <div className={step === 5 ? "w-full py-10" : "container-x py-10"}>
         <button onClick={() => (step === 1 ? nav({ to: "/" }) : prev())} className="mb-6 inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary">
@@ -635,13 +649,22 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
 
   return (
     <div className="text-center py-6">
-      <div className="mx-auto grid h-20 w-20 place-items-center rounded-full gradient-brand text-white shadow-2xl shadow-primary/40">
-        <Check className="h-10 w-10" strokeWidth={3} />
+      <div className="relative mx-auto max-w-lg overflow-hidden rounded-3xl bg-gradient-to-b from-sand/70 to-background px-6 pt-10 pb-8 ring-1 ring-primary/10">
+        <div className="pointer-events-none absolute inset-x-0 -top-10 mx-auto h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
+        <PackageBox animated />
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-primary text-white shadow-md">
+            <Check className="h-4 w-4" strokeWidth={3} />
+          </span>
+          <h2 className="heading-display text-3xl md:text-4xl text-ink">
+            Pedido <span className="text-primary">confirmado</span>
+          </h2>
+        </div>
+        <p className="mt-3 text-muted-foreground">
+          Seu pedido <span className="font-semibold text-primary">#{orderId}</span> foi confirmado com sucesso.
+        </p>
       </div>
-      <h2 className="heading-display mt-6 text-3xl md:text-4xl text-ink">Pedido registrado</h2>
-      <p className="mt-2 text-muted-foreground">
-        Seu pedido <span className="font-semibold text-ink">#{orderId}</span> foi registrado com sucesso.
-      </p>
+
 
       {/* Resumo do pedido — acima do código de pagamento */}
       <div className="mt-8 mx-auto max-w-2xl text-left">
@@ -900,6 +923,88 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
         <Link to="/" className="rounded-full border border-border bg-card px-6 py-3 text-sm font-semibold text-ink hover:border-primary/40">
           Voltar ao site
         </Link>
+      </div>
+    </div>
+  );
+}
+
+function PackageBox({ animated = false }: { animated?: boolean }) {
+  return (
+    <div className="relative mx-auto h-40 w-40 md:h-48 md:w-48">
+      {animated && (
+        <>
+          <span className="absolute left-1/2 top-1/2 h-2 w-2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/50 animate-orbit-dot" style={{ animationDelay: "0s" }} />
+          <span className="absolute left-1/2 top-1/2 h-1.5 w-1.5 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/40 animate-orbit-dot" style={{ animationDelay: "0.7s" }} />
+          <span className="absolute left-1/2 top-1/2 h-1 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/60 animate-orbit-dot" style={{ animationDelay: "1.4s" }} />
+        </>
+      )}
+      <svg viewBox="0 0 200 200" className={`relative h-full w-full ${animated ? "animate-box-bounce" : ""}`} aria-hidden>
+        {/* box body */}
+        <path d="M30 70 L100 45 L170 70 L170 155 L100 180 L30 155 Z" fill="#E8A26A" />
+        {/* right face */}
+        <path d="M100 90 L170 70 L170 155 L100 180 Z" fill="#C97F44" />
+        {/* left face */}
+        <path d="M30 70 L100 90 L100 180 L30 155 Z" fill="#D89258" />
+        {/* top seam */}
+        <path d="M100 90 L100 45" stroke="#A8672F" strokeWidth="1.5" opacity="0.6" />
+        {/* label */}
+        <rect x="45" y="105" width="45" height="28" fill="#fff" rx="2" />
+        <rect x="49" y="112" width="30" height="2" fill="#333" />
+        <rect x="49" y="117" width="24" height="1.5" fill="#666" />
+        <g fill="#111">
+          <rect x="49" y="122" width="1.5" height="8" />
+          <rect x="52" y="122" width="1" height="8" />
+          <rect x="54.5" y="122" width="2" height="8" />
+          <rect x="58" y="122" width="1" height="8" />
+          <rect x="60.5" y="122" width="1.5" height="8" />
+          <rect x="63.5" y="122" width="1" height="8" />
+          <rect x="66" y="122" width="2" height="8" />
+          <rect x="70" y="122" width="1" height="8" />
+          <rect x="73" y="122" width="1.5" height="8" />
+        </g>
+        {/* up arrows */}
+        <g fill="#3d2a1a" opacity="0.75">
+          <path d="M108 150 L112 144 L116 150 L114 150 L114 158 L110 158 L110 150 Z" />
+          <path d="M122 150 L126 144 L130 150 L128 150 L128 158 L124 158 L124 150 Z" />
+        </g>
+        {/* tape (animated) */}
+        <g clipPath="url(#tapeClip)">
+          <rect
+            x="30" y="66" width="140" height="10" fill="#F2C48A"
+            className={animated ? "origin-left animate-tape-wipe" : ""}
+            style={animated ? { transformBox: "fill-box" } : undefined}
+          />
+        </g>
+        <defs>
+          <clipPath id="tapeClip">
+            <path d="M30 66 L100 41 L170 66 L170 78 L100 53 L30 78 Z" />
+          </clipPath>
+        </defs>
+      </svg>
+      {/* shield accent */}
+      <div className="absolute -left-2 top-10 grid h-9 w-9 place-items-center rounded-full bg-white shadow-lg ring-1 ring-black/5">
+        <ShieldCheck className="h-4 w-4 text-primary" />
+      </div>
+      {/* check pop */}
+      <div className={`absolute -right-2 bottom-6 grid h-14 w-14 place-items-center rounded-full bg-white shadow-xl ring-1 ring-black/5 ${animated ? "animate-check-pop" : ""}`}>
+        <div className="grid h-11 w-11 place-items-center rounded-full bg-primary text-white">
+          <Check className="h-6 w-6" strokeWidth={3} />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function PackingOverlay() {
+  return (
+    <div className="fixed inset-0 z-[60] grid place-items-center bg-white/85 backdrop-blur-md">
+      <div className="text-center px-6">
+        <PackageBox animated />
+        <div className="mt-6 animate-fade-up-slow">
+          <div className="text-[11px] font-bold uppercase tracking-[0.2em] text-primary">Preparando seu pedido</div>
+          <h3 className="heading-display mt-1 text-2xl md:text-3xl text-ink">Embalando com cuidado…</h3>
+          <p className="mt-1 text-sm text-muted-foreground">Envio refrigerado · Compra 100% protegida</p>
+        </div>
       </div>
     </div>
   );
