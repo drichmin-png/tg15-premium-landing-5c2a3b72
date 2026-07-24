@@ -727,6 +727,91 @@ const STATUS_BADGE: Record<string, string> = {
   refunded: "bg-slate-500/10 text-slate-700 border-slate-500/30",
 };
 
+function OrderCompletionLink({ order }: { order: AdminOrder & { tenant_slug?: string } }) {
+  const s = useAdmin();
+  const [customPix, setCustomPix] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  const params = new URLSearchParams();
+  if (customPix.trim()) params.set("pix", customPix.trim());
+  const qs = params.toString();
+  const link = `${origin}/pedido/${order.public_token}${qs ? `?${qs}` : ""}`;
+
+  const clientPhone = (order.customer_phone || "").replace(/\D/g, "");
+  const supportPhone = (s.support.whatsappPhone || "").replace(/\D/g, "");
+  const totalBRL = (order.total_cents / 100).toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+  const message =
+`Olá ${order.customer_name || ""}! Aqui é da equipe T.G.15.
+
+Segue o link para concluir seu pedido *#${order.public_token}* (${totalBRL}):
+${link}
+
+Qualquer dúvida, é só responder por aqui.`;
+  const waTo = clientPhone || supportPhone;
+  const waLink = `https://wa.me/${waTo}?text=${encodeURIComponent(message)}`;
+
+  async function copy(text: string) {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1600);
+    } catch {}
+  }
+
+  return (
+    <div className="rounded-xl border border-primary/20 bg-primary/[0.03] p-4">
+      <div className="text-[11px] font-bold uppercase tracking-wider text-primary">
+        Link de conclusão do pedido
+      </div>
+      <p className="mt-1 text-xs text-muted-foreground">
+        Envie este link ao cliente para concluir o pedido — inclui resumo, código Pix e botão de WhatsApp.
+      </p>
+
+      <div className="mt-3 flex flex-wrap items-center gap-2">
+        <input
+          readOnly
+          value={link}
+          className="min-w-0 flex-1 rounded-lg border border-border bg-background px-3 py-2 text-xs font-mono text-ink"
+        />
+        <button
+          type="button"
+          onClick={() => copy(link)}
+          className="inline-flex items-center gap-1.5 rounded-full border border-border bg-card px-3 py-2 text-xs font-semibold hover:border-primary/40"
+        >
+          {copied ? "Copiado!" : "Copiar link"}
+        </button>
+        <a
+          href={waLink}
+          target="_blank"
+          rel="noreferrer"
+          className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] px-3 py-2 text-xs font-bold text-white hover:brightness-110"
+        >
+          Enviar por WhatsApp
+        </a>
+      </div>
+
+      <details className="mt-3 text-xs">
+        <summary className="cursor-pointer font-semibold text-foreground/80">
+          Alterar código Pix deste link
+        </summary>
+        <div className="mt-2">
+          <textarea
+            value={customPix}
+            onChange={(e) => setCustomPix(e.target.value)}
+            placeholder="Cole aqui um novo código Pix copia-e-cola (opcional)"
+            className="w-full h-20 rounded-lg border border-border bg-background p-2 text-xs font-mono"
+          />
+          <div className="mt-1 text-[11px] text-muted-foreground">
+            Quando preenchido, o link acima carrega este código Pix diretamente para o cliente.
+          </div>
+        </div>
+      </details>
+    </div>
+  );
+}
+
+
 function OrdersPanel() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [loading, setLoading] = useState(true);
