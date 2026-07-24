@@ -122,7 +122,9 @@ const DEFAULTS: AdminState = {
     keyType: "cpf",
     merchantName: "TG15 ONLINE",
     merchantCity: "SAO PAULO",
+    manualCode: "",
   },
+
   support: {
     whatsappGroupLink: "https://chat.whatsapp.com/G99cJv3p2D2GC34J5kZpVz?s=sw&p=i&ilr=0",
     whatsappPhone: "",
