@@ -59,12 +59,14 @@ export type AdminState = {
 
   // pix — configuração do QR Code na tela de confirmação
   pix: {
-    mode: "key" | "gateway"; // "key" = gera QR local a partir da chave; "gateway" = usa o gateway configurado
+    mode: "key" | "manual" | "gateway"; // "key" = gera QR local a partir da chave; "manual" = usa código copia-e-cola colado; "gateway" = usa o gateway configurado
     key: string;
     keyType: "cpf" | "cnpj" | "email" | "telefone" | "aleatoria";
     merchantName: string;
     merchantCity: string;
+    manualCode: string; // BR Code EMV completo (copia-e-cola) colado manualmente
   };
+
 
   // suporte / whatsapp
   support: {
@@ -120,7 +122,9 @@ const DEFAULTS: AdminState = {
     keyType: "cpf",
     merchantName: "TG15 ONLINE",
     merchantCity: "SAO PAULO",
+    manualCode: "",
   },
+
   support: {
     whatsappGroupLink: "https://chat.whatsapp.com/G99cJv3p2D2GC34J5kZpVz?s=sw&p=i&ilr=0",
     whatsappPhone: "",

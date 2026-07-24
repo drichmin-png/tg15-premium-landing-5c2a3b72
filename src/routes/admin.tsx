@@ -1013,10 +1013,11 @@ function PixPanel({ s }: { s: ReturnType<typeof useAdmin> }) {
         title="Modo de geração do QR Code Pix"
         description="Escolha se o QR Code é gerado automaticamente a partir de uma chave Pix, ou delegado ao gateway configurado."
       >
-        <div className="grid gap-3 md:grid-cols-2">
+        <div className="grid gap-3 md:grid-cols-3">
           {(
             [
               { id: "key", title: "Chave Pix (automático)", desc: "Gera o QR Code na hora usando a chave abaixo. Ideal para receber direto na sua conta." },
+              { id: "manual", title: "Copia-e-Cola (manual)", desc: "Cole qualquer código Pix copia-e-cola pronto (BR Code) e ele será exibido no checkout." },
               { id: "gateway", title: "Gateway", desc: "O QR Code será gerado pelo gateway de pagamento (aba Gateway)." },
             ] as const
           ).map((opt) => {
@@ -1037,6 +1038,7 @@ function PixPanel({ s }: { s: ReturnType<typeof useAdmin> }) {
           })}
         </div>
       </Card>
+
 
       {s.pix.mode === "key" && (
         <Card
@@ -1083,9 +1085,65 @@ function PixPanel({ s }: { s: ReturnType<typeof useAdmin> }) {
           <PixPreview s={s} />
         </Card>
       )}
+
+      {s.pix.mode === "manual" && (
+        <Card
+          title="Código Pix Copia-e-Cola"
+          description="Cole aqui um código Pix (BR Code EMV) gerado no seu banco ou em outro sistema. Ele será exibido diretamente na tela de confirmação do cliente."
+        >
+          <label className="block">
+            <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Código copia-e-cola
+            </span>
+            <textarea
+              value={s.pix.manualCode}
+              onChange={(e) => admin.update("pix", { manualCode: e.target.value })}
+              placeholder="00020126...5204000053039865802BR5913..."
+              className="mt-1 w-full h-32 rounded-lg border border-border bg-background p-3 text-[12px] font-mono outline-none focus:border-primary"
+            />
+          </label>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const txt = await navigator.clipboard.readText();
+                  if (txt) admin.update("pix", { manualCode: txt.trim() });
+                } catch {}
+              }}
+              className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold hover:border-primary hover:text-primary"
+            >
+              Colar da área de transferência
+            </button>
+            <button
+              type="button"
+              onClick={() => admin.update("pix", { manualCode: "" })}
+              className="rounded-lg border border-border px-3 py-1.5 text-xs font-semibold hover:border-destructive hover:text-destructive"
+            >
+              Limpar
+            </button>
+          </div>
+          <div className="mt-4 rounded-lg bg-primary/5 p-3 text-xs text-primary-deep">
+            Atenção: o valor embutido no código colado é fixo. Se o código for estático (sem valor), o cliente digitará o valor no app do banco.
+          </div>
+          {s.pix.manualCode.trim() && (
+            <div className="mt-6 grid gap-4 md:grid-cols-[220px_1fr] items-start rounded-xl border border-border p-4 bg-muted/20">
+              <img
+                src={pixQrImageUrl(s.pix.manualCode.trim(), 220)}
+                alt="QR Code Pix (código colado)"
+                className="w-[220px] h-[220px] rounded-lg bg-white p-2"
+              />
+              <div className="min-w-0 text-xs text-muted-foreground">
+                Preview do QR Code gerado a partir do código colado. Se o QR não abrir no app bancário, verifique se o código é válido.
+              </div>
+            </div>
+          )}
+        </Card>
+      )}
     </div>
   );
 }
+
 
 function PixPreview({ s }: { s: ReturnType<typeof useAdmin> }) {
   const key = s.pix.key.trim();
