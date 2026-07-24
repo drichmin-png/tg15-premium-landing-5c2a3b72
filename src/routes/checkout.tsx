@@ -570,8 +570,11 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
     ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
     : `https://wa.me/?text=${encodeURIComponent(message)}`;
 
+  const manualPix = admin.pix.mode === "manual" ? admin.pix.manualCode.trim() : "";
+  const hasPixConfigured = manualPix.length > 0 || (admin.pix.mode === "key" && admin.pix.key.trim().length > 0);
+
   useEffect(() => {
-    if (!highValue && state.payment === "pix" && admin.pix.key.trim()) return; // deixa o cliente pagar primeiro
+    if (!highValue && state.payment === "pix" && hasPixConfigured) return; // deixa o cliente pagar primeiro
     const t = setTimeout(() => {
       window.open(waLink, "_blank", "noopener,noreferrer");
     }, 1200);
@@ -579,18 +582,21 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const showPix = !highValue && state.payment === "pix" && admin.pix.key.trim().length > 0;
+  const showPix = !highValue && state.payment === "pix" && hasPixConfigured;
 
   const pixPayload = showPix
-    ? buildPixPayload({
-        key: admin.pix.key,
-        keyType: admin.pix.keyType,
-        amount: total,
-        merchantName: admin.pix.merchantName || "TG15 ONLINE",
-        merchantCity: admin.pix.merchantCity || "SAO PAULO",
-        txid: "***",
-      })
+    ? manualPix
+      ? manualPix
+      : buildPixPayload({
+          key: admin.pix.key,
+          keyType: admin.pix.keyType,
+          amount: total,
+          merchantName: admin.pix.merchantName || "TG15 ONLINE",
+          merchantCity: admin.pix.merchantCity || "SAO PAULO",
+          txid: "***",
+        })
     : "";
+
   const [copied, setCopied] = useState(false);
   const copyPix = async () => {
     try {
