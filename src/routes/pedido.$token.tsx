@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Check, Copy, MessageCircle, QrCode, ShieldCheck, Truck, FileText, Lock } from "lucide-react";
+import { Check, Copy, MessageCircle, QrCode, ShieldCheck, Truck, FileText, Lock, Building2 } from "lucide-react";
 import { admin, useAdmin } from "@/lib/admin-store";
 import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
 import { listAllLocalOrders, type AdminOrder } from "@/lib/local-db";
