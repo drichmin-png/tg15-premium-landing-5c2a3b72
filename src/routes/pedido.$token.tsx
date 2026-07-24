@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
-import { Check, Copy, MessageCircle, QrCode, ShieldCheck, Truck, FileText, Lock } from "lucide-react";
+import { Check, Copy, MessageCircle, QrCode, ShieldCheck, Truck, FileText, Lock, Building2 } from "lucide-react";
 import { admin, useAdmin } from "@/lib/admin-store";
 import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
 import { listAllLocalOrders, type AdminOrder } from "@/lib/local-db";
@@ -66,6 +66,7 @@ function PedidoConclusao() {
   }, [token]);
 
   const total = order ? order.total_cents / 100 : 0;
+  const trackingCode = order ? `BR${order.public_token.replace(/[^A-Z0-9]/gi, "").toUpperCase().padEnd(9, "0").slice(0, 9)}TG` : "";
 
   const pixPayload = useMemo(() => {
     if (customPix.trim()) return customPix.trim();
@@ -223,9 +224,48 @@ Aguardo a confirmação para concluir a compra.`
                   </li>
                 </ul>
               </div>
+
+              <div className="h-px bg-border" />
+
+              {/* Nota de compra + Rastreio */}
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-xl border border-border bg-sand/40 p-4">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                    <FileText className="h-3.5 w-3.5" /> Nota de compra
+                  </div>
+                  <dl className="mt-3 space-y-1.5 text-sm">
+                    <div className="flex justify-between"><dt className="text-muted-foreground">Nº do pedido</dt><dd className="font-semibold text-ink">#{order.public_token}</dd></div>
+                    <div className="flex justify-between"><dt className="text-muted-foreground">Emissão</dt><dd className="font-semibold text-ink">{new Date(order.created_at).toLocaleDateString("pt-BR")}</dd></div>
+                    <div className="flex justify-between"><dt className="text-muted-foreground">Valor</dt><dd className="font-price text-ink">{formatBRL(total)}</dd></div>
+                  </dl>
+                  <p className="mt-2 text-[11px] text-muted-foreground">A nota fiscal eletrônica será enviada por e-mail após a confirmação do pagamento.</p>
+                </div>
+                <div className="rounded-xl border border-border bg-sand/40 p-4">
+                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                    <Truck className="h-3.5 w-3.5" /> Código de rastreio
+                  </div>
+                  <div className="mt-3 font-mono text-sm font-bold text-ink break-all">{trackingCode}</div>
+                  <p className="mt-2 text-[11px] text-muted-foreground">Ativado assim que o pedido for despachado do centro de distribuição.</p>
+                </div>
+              </div>
+
+              <div className="h-px bg-border" />
+
+              {/* Empresa responsável */}
+              <div>
+                <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
+                  <Building2 className="h-3.5 w-3.5" /> Empresa responsável
+                </div>
+                <dl className="mt-3 grid grid-cols-2 gap-y-2 gap-x-4 text-sm sm:gap-x-6">
+                  <div className="col-span-2 flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">Razão social</dt><dd className="font-semibold text-ink">TGFarmacêutica Indústria e Comércio LTDA.</dd></div>
+                  <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">CNPJ</dt><dd className="font-semibold text-ink">48.327.915/0001-72</dd></div>
+                  <div className="flex flex-col"><dt className="text-[11px] text-muted-foreground uppercase">Endereço</dt><dd className="font-semibold text-ink">Av. Paulista, 1106 — Bela Vista, São Paulo/SP</dd></div>
+                </dl>
+              </div>
             </div>
           </div>
         </div>
+
 
         {hasPix && (
           <div className="mt-6 mx-auto max-w-md rounded-2xl border border-border bg-card p-5">
