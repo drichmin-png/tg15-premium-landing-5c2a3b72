@@ -649,13 +649,22 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
 
   return (
     <div className="text-center py-6">
-      <div className="mx-auto grid h-20 w-20 place-items-center rounded-full gradient-brand text-white shadow-2xl shadow-primary/40">
-        <Check className="h-10 w-10" strokeWidth={3} />
+      <div className="relative mx-auto max-w-lg overflow-hidden rounded-3xl bg-gradient-to-b from-sand/70 to-background px-6 pt-10 pb-8 ring-1 ring-primary/10">
+        <div className="pointer-events-none absolute inset-x-0 -top-10 mx-auto h-40 w-40 rounded-full bg-primary/10 blur-3xl" />
+        <PackageBox animated />
+        <div className="mt-6 flex items-center justify-center gap-3">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-primary text-white shadow-md">
+            <Check className="h-4 w-4" strokeWidth={3} />
+          </span>
+          <h2 className="heading-display text-3xl md:text-4xl text-ink">
+            Pedido <span className="text-primary">confirmado</span>
+          </h2>
+        </div>
+        <p className="mt-3 text-muted-foreground">
+          Seu pedido <span className="font-semibold text-primary">#{orderId}</span> foi confirmado com sucesso.
+        </p>
       </div>
-      <h2 className="heading-display mt-6 text-3xl md:text-4xl text-ink">Pedido registrado</h2>
-      <p className="mt-2 text-muted-foreground">
-        Seu pedido <span className="font-semibold text-ink">#{orderId}</span> foi registrado com sucesso.
-      </p>
+
 
       {/* Resumo do pedido — acima do código de pagamento */}
       <div className="mt-8 mx-auto max-w-2xl text-left">
