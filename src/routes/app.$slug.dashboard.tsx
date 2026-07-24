@@ -76,12 +76,34 @@ function TenantPanel() {
       )}
 
       <div className="bg-slate-950 text-white">
-        <div className="max-w-6xl mx-auto px-4 py-2 flex items-center justify-between text-xs">
+        <div className="max-w-6xl mx-auto px-4 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
           <div>
             Operador: <strong>{session.tenant?.company_name ?? slug}</strong>{" "}
             <span className="text-slate-400">· /{slug}</span>
           </div>
           <div className="flex items-center gap-3">
+            <a
+              href={`/loja/${slug}`}
+              target="_blank"
+              rel="noreferrer"
+              className="rounded-md bg-primary/90 text-white px-3 py-1.5 font-semibold hover:bg-primary"
+            >
+              Abrir minha loja →
+            </a>
+            <button
+              onClick={async () => {
+                const url = `${window.location.origin}/loja/${slug}`;
+                try {
+                  await navigator.clipboard.writeText(url);
+                  window.alert(`Link da sua loja copiado:\n${url}`);
+                } catch {
+                  window.prompt("Copie o link da sua loja:", url);
+                }
+              }}
+              className="text-slate-300 hover:text-white"
+            >
+              Copiar link
+            </button>
             <Link to="/app/$slug/orders" params={{ slug }} className="text-slate-300 hover:text-white">
               Pedidos brutos
             </Link>
@@ -98,6 +120,7 @@ function TenantPanel() {
           </div>
         </div>
       </div>
+
 
       <AdminDashboard />
     </div>
