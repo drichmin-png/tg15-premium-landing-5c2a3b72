@@ -479,7 +479,7 @@ const REGIONAL_ETA: Record<string, RegionalEta> = {
 };
 function getRegionalEta(uf: string): RegionalEta {
   const key = (uf || "").toUpperCase();
-  return REGIONAL_ETA[key] || { region: "Brasil", range: "3 a 7 dias úteis", center: "São Paulo (SP)" };
+  return REGIONAL_ETA[key] || { region: "Brasil", range: "1 a 2 dias úteis", center: "capital mais próxima" };
 }
 
 function StepConfirm({ orderId, trackingCode, total, state }: { orderId: string; trackingCode: string; total: number; state: ReturnType<typeof useCart> }) {
