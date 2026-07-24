@@ -804,44 +804,6 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
 
             <div className="h-px bg-border" />
 
-            {/* Prazo por região */}
-            <div>
-              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary">
-                <Truck className="h-3.5 w-3.5" /> Prazo de entrega — {regionalEta.region}
-              </div>
-              <div className="mt-3 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-lg bg-primary/[0.05] border border-primary/15 p-3">
-                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Estimativa para sua região</div>
-                  <div className="mt-1 text-sm font-bold text-ink">{regionalEta.range}</div>
-                </div>
-                <div className="rounded-lg bg-sand/60 border border-border p-3">
-                  <div className="text-[11px] uppercase tracking-wider text-muted-foreground">Centro de distribuição mais próximo</div>
-                  <div className="mt-1 text-sm font-bold text-ink">{regionalEta.center}</div>
-                </div>
-              </div>
-              <details className="mt-3 text-xs text-muted-foreground">
-                <summary className="cursor-pointer font-semibold text-foreground/80">Ver prazos por região e centros de distribuição</summary>
-                <div className="mt-2 grid gap-2 sm:grid-cols-2">
-                  <ul className="space-y-1 list-disc pl-4">
-                    <li>São Paulo (capital e interior): mesmo dia ou até 2 dias úteis.</li>
-                    <li>Sul e Sudeste: 1 a 3 dias úteis.</li>
-                    <li>Centro-Oeste: 2 a 5 dias úteis.</li>
-                    <li>Nordeste: 3 a 7 dias úteis.</li>
-                    <li>Norte: 5 a 10 dias úteis (pode variar em cidades afastadas).</li>
-                  </ul>
-                  <ul className="space-y-1 list-disc pl-4">
-                    <li>São Paulo (SP) — hub logístico principal.</li>
-                    <li>Rio de Janeiro (RJ) — Sudeste.</li>
-                    <li>Belo Horizonte (MG) — Minas / Centro-Sul.</li>
-                    <li>Brasília (DF) — Centro-Oeste.</li>
-                    <li>Curitiba (PR) e Porto Alegre (RS) — Sul.</li>
-                    <li>Salvador (BA), Recife (PE) e Fortaleza (CE) — Nordeste e Norte.</li>
-                  </ul>
-                </div>
-              </details>
-            </div>
-
-            <div className="h-px bg-border" />
 
             {/* Empresa */}
             <div>
