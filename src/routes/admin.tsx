@@ -1841,16 +1841,7 @@ function CreateOperadorModal({
               slug: t.slug,
               username: t.owner_username,
               password: form.password,
-              url: buildLocalTenantAccessUrl(
-                {
-                  slug: t.slug,
-                  company_name: t.company_name,
-                  owner_username: t.owner_username,
-                  owner_password: form.password,
-                  plan,
-                },
-                origin,
-              ),
+              url: buildLocalTenantShortUrl(t, origin),
             });
           } catch (err) {
             setError(err instanceof Error ? err.message : "Erro ao criar operador");
