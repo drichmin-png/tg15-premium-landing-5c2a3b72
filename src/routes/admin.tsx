@@ -1140,9 +1140,10 @@ function PixPanel({ s }: { s: ReturnType<typeof useAdmin> }) {
           )}
         </Card>
       )}
-
+    </div>
   );
 }
+
 
 function PixPreview({ s }: { s: ReturnType<typeof useAdmin> }) {
   const key = s.pix.key.trim();
