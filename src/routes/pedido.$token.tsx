@@ -264,9 +264,7 @@ Aguardo a confirmação para concluir a compra.`
             </div>
           </div>
         </div>
-            </div>
-          </div>
-        </div>
+
 
         {hasPix && (
           <div className="mt-6 mx-auto max-w-md rounded-2xl border border-border bg-card p-5">
