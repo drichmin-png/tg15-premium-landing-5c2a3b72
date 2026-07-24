@@ -74,9 +74,9 @@ export function StorefrontPage({ operatorSlug }: { operatorSlug?: string }) {
     produto: () => (
       <>
         <section id="produto" className="container-x mt-16">
-          <div className="grid gap-10 lg:grid-cols-[1.1fr_1fr]">
-            <ProductGallery />
-            <BuyPanel />
+          <div className="grid gap-10 grid-cols-1 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+            <div className="min-w-0"><ProductGallery /></div>
+            <div className="min-w-0"><BuyPanel /></div>
           </div>
         </section>
         <Reviews />
