@@ -82,7 +82,18 @@ function Checkout() {
     );
   }, [step]);
 
-  const next = () => setStep((s) => Math.min(5, s + 1));
+  const [packing, setPacking] = useState(false);
+  const next = () => {
+    if (step === 4) {
+      setPacking(true);
+      window.setTimeout(() => {
+        setPacking(false);
+        setStep(5);
+      }, 2400);
+      return;
+    }
+    setStep((s) => Math.min(5, s + 1));
+  };
   const prev = () => setStep((s) => Math.max(1, s - 1));
 
   return (
