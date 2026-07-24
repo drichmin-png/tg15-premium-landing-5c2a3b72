@@ -165,6 +165,10 @@ function Checkout() {
                   <div className="text-sm font-bold text-ink whitespace-nowrap">{formatBRL(subtotal)}</div>
                 </div>
 
+                <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
+                  Tirzepatida de alta pureza para emagrecimento eficaz, melhora do controle glicêmico, do perfil lipídico e do bem-estar. Formulação subcutânea de aplicação semanal.
+                </p>
+
                 <div className="mt-6 space-y-2 text-sm">
                   <Row label="Subtotal" value={formatBRL(subtotal)} />
                   <Row
@@ -180,11 +184,6 @@ function Checkout() {
                   <div className="font-price text-2xl text-ink">{formatBRL(total)}</div>
                 </div>
 
-                <div className="mt-6 grid gap-2 text-[11px] text-muted-foreground">
-                  <div className="flex items-center gap-2"><ShieldCheck className="h-3.5 w-3.5 text-primary" /> Compra 100% protegida</div>
-                  <div className="flex items-center gap-2"><Truck className="h-3.5 w-3.5 text-primary" /> Envio refrigerado</div>
-                  <div className="flex items-center gap-2"><Lock className="h-3.5 w-3.5 text-primary" /> Dados criptografados</div>
-                </div>
               </div>
             </div>
           </aside>
