@@ -1,4 +1,4 @@
-import { ShieldCheck } from "lucide-react";
+import { Flame, ShieldCheck } from "lucide-react";
 import { media } from "@/lib/product";
 import { useAdmin } from "@/lib/admin-store";
 
@@ -12,8 +12,15 @@ export function Hero() {
       </div>
       <div className="container-x grid gap-10 py-10 md:py-16 lg:grid-cols-[1.1fr_1fr] items-center">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/[0.06] px-4 py-1.5 text-xs font-semibold text-primary-deep">
-            <ShieldCheck className="h-3.5 w-3.5" /> {hero.eyebrow}
+          <div className="group inline-flex w-full max-w-full items-center gap-2.5 rounded-full border border-primary/30 bg-gradient-to-r from-primary/[0.12] via-primary/[0.06] to-primary/[0.12] px-4 py-2.5 text-sm font-bold text-primary-deep shadow-[0_0_0_1px_rgba(var(--color-primary),0.12)_inset,0_8px_24px_-10px_rgba(var(--color-primary),0.4)] backdrop-blur-sm animate-badge-glow sm:w-auto">
+            <ShieldCheck className="h-4 w-4 shrink-0 text-primary/90" />
+            <span className="relative flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-primary-deep text-white shadow-md shadow-primary/30">
+              <Flame className="h-3.5 w-3.5 animate-flame-flicker" />
+            </span>
+            <span className="relative min-w-0">
+              <span className="absolute -inset-1 rounded-full bg-primary/10 blur-md opacity-0 transition-opacity group-hover:opacity-100" />
+              <span className="relative">{hero.eyebrow}</span>
+            </span>
           </div>
           <h1 className="heading-display mt-6 text-4xl md:text-5xl lg:text-6xl text-ink">
             {hero.titleLine1}

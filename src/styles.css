@@ -153,6 +153,20 @@
 }
 @utility animate-float { animation: float-slow 6s ease-in-out infinite; }
 
+@keyframes badge-glow {
+  0%, 100% { box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-primary) 20%, transparent) inset, 0 6px 20px -10px color-mix(in oklab, var(--color-primary) 35%, transparent); }
+  50% { box-shadow: 0 0 0 1px color-mix(in oklab, var(--color-primary) 35%, transparent) inset, 0 8px 28px -8px color-mix(in oklab, var(--color-primary) 55%, transparent); }
+}
+@utility animate-badge-glow { animation: badge-glow 3s ease-in-out infinite; }
+
+@keyframes flame-flicker {
+  0%, 100% { transform: scale(1) rotate(-2deg); opacity: 1; }
+  25% { transform: scale(1.1) rotate(2deg); opacity: 0.9; }
+  50% { transform: scale(0.95) rotate(-1deg); opacity: 1; }
+  75% { transform: scale(1.05) rotate(1deg); opacity: 0.95; }
+}
+@utility animate-flame-flicker { animation: flame-flicker 1.2s ease-in-out infinite; transform-origin: center bottom; }
+
 @keyframes shine {
   0% { transform: translateX(-120%) skewX(-20deg); }
   100% { transform: translateX(220%) skewX(-20deg); }
