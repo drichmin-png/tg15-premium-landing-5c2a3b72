@@ -1,4 +1,4 @@
-import { Flame, ShieldCheck } from "lucide-react";
+import { Flame } from "lucide-react";
 import { media } from "@/lib/product";
 import { useAdmin } from "@/lib/admin-store";
 
