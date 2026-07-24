@@ -68,10 +68,10 @@ function normalizePixKey(key: string, keyType?: PixParams["keyType"]) {
   }
 
   if (keyType === "aleatoria") {
-    const evp = raw.toLowerCase();
-    if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(evp)) {
-      throw new Error("A chave aleatória Pix deve estar no formato UUID informado pelo banco.");
-    }
+    // Chave aleatória Pix — normalmente UUID, mas aceitamos qualquer string
+    // não vazia para não quebrar o checkout se o usuário colar em outro formato.
+    const evp = raw.toLowerCase().replace(/\s+/g, "");
+    if (!evp) throw new Error("Informe a chave aleatória Pix.");
     return evp;
   }
 

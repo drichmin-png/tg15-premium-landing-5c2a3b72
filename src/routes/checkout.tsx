@@ -597,18 +597,26 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
 
   const showPix = !highValue && state.payment === "pix" && hasPixConfigured;
 
-  const pixPayload = showPix
-    ? manualPix
-      ? manualPix
-      : buildPixPayload({
+  let pixPayload = "";
+  let pixError = "";
+  if (showPix) {
+    if (manualPix) {
+      pixPayload = manualPix;
+    } else {
+      try {
+        pixPayload = buildPixPayload({
           key: admin.pix.key,
           keyType: admin.pix.keyType,
           amount: total,
           merchantName: admin.pix.merchantName || "TG15 ONLINE",
           merchantCity: admin.pix.merchantCity || "SAO PAULO",
           txid: "***",
-        })
-    : "";
+        });
+      } catch (e) {
+        pixError = e instanceof Error ? e.message : "Não foi possível gerar o Pix.";
+      }
+    }
+  }
 
   const [copied, setCopied] = useState(false);
   const copyPix = async () => {
@@ -858,7 +866,7 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
         </div>
       </div>
 
-      {showPix && (
+      {showPix && pixPayload && (
         <div className="mt-8 mx-auto max-w-md rounded-2xl border border-border bg-card p-5 text-left">
           <div className="flex items-center gap-2 text-sm font-bold text-ink">
             <QrCode className="h-4 w-4 text-primary" /> Pague com Pix — {formatBRL(total)}
@@ -884,6 +892,12 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
               <Copy className="h-4 w-4" /> {copied ? "Copiado!" : "Copiar código Pix"}
             </button>
           </div>
+        </div>
+      )}
+
+      {showPix && pixError && (
+        <div className="mt-8 mx-auto max-w-md rounded-2xl border border-destructive/30 bg-destructive/5 p-4 text-left text-sm text-destructive">
+          Não conseguimos gerar o Pix automaticamente ({pixError}). Finalize o pagamento pelo WhatsApp abaixo.
         </div>
       )}
 
