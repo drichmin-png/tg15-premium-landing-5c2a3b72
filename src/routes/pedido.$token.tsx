@@ -1,8 +1,9 @@
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { Check, Copy, MessageCircle, QrCode, ShieldCheck, Truck, FileText, Lock, Building2 } from "lucide-react";
 import { admin, useAdmin } from "@/lib/admin-store";
-import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
+import { buildPixPayload } from "@/lib/payments/pix";
 import { listAllLocalOrders, type AdminOrder } from "@/lib/local-db";
 import { formatBRL } from "@/lib/product";
 
@@ -72,14 +73,18 @@ function PedidoConclusao() {
     if (customPix.trim()) return customPix.trim();
     if (adminState.pix.mode === "manual") return adminState.pix.manualCode.trim();
     if (adminState.pix.mode === "key" && adminState.pix.key.trim()) {
-      return buildPixPayload({
-        key: adminState.pix.key,
-        keyType: adminState.pix.keyType,
-        amount: total,
-        merchantName: adminState.pix.merchantName || "TG15 ONLINE",
-        merchantCity: adminState.pix.merchantCity || "SAO PAULO",
-        txid: "***",
-      });
+      try {
+        return buildPixPayload({
+          key: adminState.pix.key,
+          keyType: adminState.pix.keyType,
+          amount: total,
+          merchantName: adminState.pix.merchantName || "TG15 ONLINE",
+          merchantCity: adminState.pix.merchantCity || "SAO PAULO",
+          txid: "***",
+        });
+      } catch {
+        return "";
+      }
     }
     return "";
   }, [customPix, adminState.pix, total]);
@@ -302,11 +307,9 @@ Aguardo a confirmação para concluir a compra.`
             )}
 
             <div className="mt-4 grid place-items-center">
-              <img
-                src={pixQrImageUrl(pixPayload, 240)}
-                alt="QR Code Pix"
-                className="h-60 w-60 rounded-xl border border-border bg-white p-2"
-              />
+              <div className="grid h-60 w-60 place-items-center rounded-xl border border-border bg-white p-2" aria-label="QR Code Pix">
+                <QRCodeSVG value={pixPayload} size={216} level="M" bgColor="#FFFFFF" fgColor="#111827" />
+              </div>
             </div>
             <div className="mt-4">
               <div className="rounded-lg border border-border bg-sand/50 p-3 text-[11px] font-mono break-all text-ink/80 max-h-24 overflow-auto">
