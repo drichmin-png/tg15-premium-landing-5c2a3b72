@@ -71,11 +71,13 @@ function PedidoConclusao() {
 
   const pixPayload = useMemo(() => {
     if (customPix.trim()) return customPix.trim();
-    if (adminState.pix.mode === "manual") return adminState.pix.manualCode.trim();
-    if (adminState.pix.mode === "key" && adminState.pix.key.trim()) {
+    const manualPix = adminState.pix.manualCode.trim();
+    const pixKey = adminState.pix.key.trim();
+    if (manualPix) return manualPix;
+    if (pixKey) {
       try {
         return buildPixPayload({
-          key: adminState.pix.key,
+          key: pixKey,
           keyType: adminState.pix.keyType,
           amount: total,
           merchantName: adminState.pix.merchantName || "TG15 ONLINE",
