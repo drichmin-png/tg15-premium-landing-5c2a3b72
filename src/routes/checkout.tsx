@@ -879,7 +879,7 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
           </p>
           <div className="mt-4 grid place-items-center">
             <div className="grid h-60 w-60 place-items-center rounded-xl border border-border bg-white p-2" aria-label="QR Code Pix">
-              <QRCodeSVG value={pixPayload} size={216} level="M" bgColor="#FFFFFF" fgColor="#111827" />
+              <QRCodeSVG value={pixPayload} size={216} level="M" />
             </div>
           </div>
           <div className="mt-4">
@@ -903,10 +903,10 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
       )}
 
       <p className="mt-6 text-sm text-muted-foreground max-w-md mx-auto">
-        {highValue
-          ? "Pedidos acima de R$ 499,00 exigem verificação de estoque. Continue no WhatsApp com nossa equipe para confirmar a disponibilidade e receber as instruções de pagamento."
-          : showPix
+        {showPix
           ? "Após o pagamento, envie o comprovante pelo WhatsApp para liberarmos o envio."
+          : highValue
+          ? "Pedidos acima de R$ 499,00 exigem verificação de estoque. Continue no WhatsApp com nossa equipe para confirmar a disponibilidade e receber as instruções de pagamento."
           : "Para concluir a compra e receber as instruções de pagamento, finalize o atendimento pelo WhatsApp com nossa equipe."}
       </p>
 
