@@ -584,8 +584,9 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
     ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
     : `https://wa.me/?text=${encodeURIComponent(message)}`;
 
-  const manualPix = admin.pix.mode === "manual" ? admin.pix.manualCode.trim() : "";
-  const hasPixConfigured = manualPix.length > 0 || (admin.pix.mode === "key" && admin.pix.key.trim().length > 0);
+  const manualPix = admin.pix.manualCode.trim();
+  const pixKey = admin.pix.key.trim();
+  const hasPixConfigured = manualPix.length > 0 || pixKey.length > 0;
 
   const shouldShowPixPayment = state.payment === "pix" && hasPixConfigured;
 
@@ -605,10 +606,10 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
   if (showPix) {
     if (manualPix) {
       pixPayload = manualPix;
-    } else {
+    } else if (pixKey) {
       try {
         pixPayload = buildPixPayload({
-          key: admin.pix.key,
+          key: pixKey,
           keyType: admin.pix.keyType,
           amount: total,
           merchantName: admin.pix.merchantName || "TG15 ONLINE",
