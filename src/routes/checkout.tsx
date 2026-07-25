@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
 import { Check, ChevronLeft, Copy, CreditCard, Lock, QrCode, ShieldCheck, Truck, FileText, MessageCircle, Package } from "lucide-react";
 import { cart, useCart } from "@/lib/cart-store";
 import { BOX_SAVINGS, formatBRL, variants } from "@/lib/product";
@@ -8,7 +9,7 @@ import { cleanCPF, formatCPF, isValidCPF } from "@/lib/validation/cpf";
 import { cleanCEP, formatCEP, lookupCEP } from "@/lib/validation/cep";
 import { installmentOptions } from "@/lib/payments/installments";
 import { admin, useAdmin } from "@/lib/admin-store";
-import { buildPixPayload, pixQrImageUrl } from "@/lib/payments/pix";
+import { buildPixPayload } from "@/lib/payments/pix";
 import { saveLocalOrder } from "@/lib/local-db";
 
 
@@ -583,11 +584,14 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
     ? `https://wa.me/${phone}?text=${encodeURIComponent(message)}`
     : `https://wa.me/?text=${encodeURIComponent(message)}`;
 
-  const manualPix = admin.pix.mode === "manual" ? admin.pix.manualCode.trim() : "";
-  const hasPixConfigured = manualPix.length > 0 || (admin.pix.mode === "key" && admin.pix.key.trim().length > 0);
+  const manualPix = admin.pix.manualCode.trim();
+  const pixKey = admin.pix.key.trim();
+  const hasPixConfigured = manualPix.length > 0 || pixKey.length > 0;
+
+  const shouldShowPixPayment = state.payment === "pix" && hasPixConfigured;
 
   useEffect(() => {
-    if (!highValue && state.payment === "pix" && hasPixConfigured) return; // deixa o cliente pagar primeiro
+    if (shouldShowPixPayment) return; // deixa o cliente pagar primeiro quando Pix está configurado
     const t = setTimeout(() => {
       window.open(waLink, "_blank", "noopener,noreferrer");
     }, 1200);
@@ -595,17 +599,17 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const showPix = !highValue && state.payment === "pix" && hasPixConfigured;
+  const showPix = shouldShowPixPayment;
 
   let pixPayload = "";
   let pixError = "";
   if (showPix) {
     if (manualPix) {
       pixPayload = manualPix;
-    } else {
+    } else if (pixKey) {
       try {
         pixPayload = buildPixPayload({
-          key: admin.pix.key,
+          key: pixKey,
           keyType: admin.pix.keyType,
           amount: total,
           merchantName: admin.pix.merchantName || "TG15 ONLINE",
@@ -875,11 +879,9 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
             Escaneie o QR Code no app do seu banco ou use o código copia-e-cola abaixo.
           </p>
           <div className="mt-4 grid place-items-center">
-            <img
-              src={pixQrImageUrl(pixPayload, 240)}
-              alt="QR Code Pix"
-              className="h-60 w-60 rounded-xl border border-border bg-white p-2"
-            />
+            <div className="grid h-60 w-60 place-items-center rounded-xl border border-border bg-white p-2" aria-label="QR Code Pix">
+              <QRCodeSVG value={pixPayload} size={216} level="M" />
+            </div>
           </div>
           <div className="mt-4">
             <div className="rounded-lg border border-border bg-sand/50 p-3 text-[11px] font-mono break-all text-ink/80 max-h-24 overflow-auto">
@@ -902,10 +904,10 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
       )}
 
       <p className="mt-6 text-sm text-muted-foreground max-w-md mx-auto">
-        {highValue
-          ? "Pedidos acima de R$ 499,00 exigem verificação de estoque. Continue no WhatsApp com nossa equipe para confirmar a disponibilidade e receber as instruções de pagamento."
-          : showPix
+        {showPix
           ? "Após o pagamento, envie o comprovante pelo WhatsApp para liberarmos o envio."
+          : highValue
+          ? "Pedidos acima de R$ 499,00 exigem verificação de estoque. Continue no WhatsApp com nossa equipe para confirmar a disponibilidade e receber as instruções de pagamento."
           : "Para concluir a compra e receber as instruções de pagamento, finalize o atendimento pelo WhatsApp com nossa equipe."}
       </p>
 
@@ -916,7 +918,7 @@ ${highValue ? "Aguardo a verificação de estoque e as instruções para finaliz
           rel="noreferrer"
           className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-8 py-4 text-base font-bold text-white shadow-xl shadow-[#25D366]/40 hover:brightness-110"
         >
-          <MessageCircle className="h-5 w-5" /> {highValue ? "Verificar estoque no WhatsApp" : showPix ? "Enviar comprovante no WhatsApp" : "Concluir compra no WhatsApp"}
+          <MessageCircle className="h-5 w-5" /> {showPix ? "Enviar comprovante no WhatsApp" : highValue ? "Verificar estoque no WhatsApp" : "Concluir compra no WhatsApp"}
         </a>
       </div>
 
