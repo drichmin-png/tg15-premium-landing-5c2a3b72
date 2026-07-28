@@ -28,7 +28,7 @@ export function BuyPanel() {
   const BOX_PRICE = dynPrice.box;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <div>
         <div className="eyebrow">Uso Subcutâneo • Uso Adulto</div>
         <h1 className="heading-display mt-3 text-4xl md:text-5xl text-ink">
@@ -68,7 +68,7 @@ export function BuyPanel() {
             <button
               key={id}
               onClick={() => cart.setVariant(id)}
-              className={`relative flex items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
+              className={`relative flex items-center gap-3 rounded-2xl border-2 p-3.5 text-left transition-all ${
                 selected
                   ? "border-primary bg-primary/[0.04] shadow-lg shadow-primary/10"
                   : "border-border bg-card hover:border-primary/40"
@@ -79,7 +79,7 @@ export function BuyPanel() {
                   {badge}
                 </span>
               )}
-              <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-sand">
+              <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-sand">
                 <img src={variant.image} alt="" className="h-full w-full object-contain p-1" />
               </div>
               <div className="flex-1 min-w-0">
@@ -111,7 +111,7 @@ export function BuyPanel() {
       </div>
 
       {state.variant === "box" && (
-        <div className="card-premium relative overflow-hidden p-5">
+        <div className="card-premium relative overflow-hidden p-4">
           <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
           <div className="relative">
             <div className="eyebrow">Economia Real</div>
@@ -161,7 +161,7 @@ export function BuyPanel() {
       </div>
 
       <div className="card-premium overflow-hidden p-0">
-        <div className="relative bg-gradient-to-br from-primary/[0.06] to-transparent p-5">
+        <div className="relative bg-gradient-to-br from-primary/[0.06] to-transparent p-3.5">
           <div className="flex items-end justify-between gap-4">
             <div>
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -194,26 +194,26 @@ export function BuyPanel() {
             });
             nav({ to: "/checkout" });
           }}
-          className="btn-shine mt-4 flex w-full items-center justify-center gap-2 rounded-full gradient-brand px-6 py-4 text-base font-bold text-white shadow-xl shadow-primary/30 transition-transform hover:scale-[1.01] active:scale-[0.99]"
+          className="btn-shine mt-3 flex w-full items-center justify-center gap-2 rounded-full gradient-brand px-5 py-2.5 text-sm font-bold text-white shadow-xl shadow-primary/30 transition-transform hover:scale-[1.01] active:scale-[0.99]"
         >
           <span className="btn-shine-inner" />
           <span className="relative">Comprar Agora</span>
         </button>
 
-        <div className="mt-3 flex flex-wrap gap-3 text-[11px] text-muted-foreground justify-center">
+        <div className="mt-2.5 flex flex-wrap gap-2 text-[10px] text-muted-foreground justify-center">
           <span>Pix</span>·<span>Cartão até 12x</span>·<span>Boleto</span>·<span>Compra 100% segura</span>
         </div>
 
         {(waLink || groupLink) && (
-          <div className="mt-5 flex flex-wrap gap-3 justify-center">
+          <div className="mt-4 flex flex-wrap gap-2.5 justify-center">
             {waLink && (
               <a
                 href={waLink}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-3 text-sm font-bold text-white shadow-lg shadow-[#25D366]/30 hover:brightness-110"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-[#25D366]/30 hover:brightness-110"
               >
-                <MessageCircle className="h-4 w-4" /> Atendimento rápido
+                <MessageCircle className="h-3.5 w-3.5" /> Atendimento rápido
               </a>
             )}
             {groupLink && (
@@ -221,9 +221,9 @@ export function BuyPanel() {
                 href={groupLink}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-5 py-3 text-sm font-bold text-[#128C7E] hover:bg-[#25D366]/15"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-3.5 py-2 text-xs font-bold text-[#128C7E] hover:bg-[#25D366]/15"
               >
-                <Users className="h-4 w-4" /> Grupo de promoções
+                <Users className="h-3.5 w-3.5" /> Grupo de promoções
               </a>
             )}
           </div>
