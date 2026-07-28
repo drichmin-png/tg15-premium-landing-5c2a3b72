@@ -161,7 +161,7 @@ export function BuyPanel() {
       </div>
 
       <div className="card-premium overflow-hidden p-0">
-        <div className="relative bg-gradient-to-br from-primary/[0.06] to-transparent p-4">
+        <div className="relative bg-gradient-to-br from-primary/[0.06] to-transparent p-3.5">
           <div className="flex items-end justify-between gap-4">
             <div>
               <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -194,7 +194,7 @@ export function BuyPanel() {
             });
             nav({ to: "/checkout" });
           }}
-          className="btn-shine mt-3 flex w-full items-center justify-center gap-2 rounded-full gradient-brand px-5 py-3 text-sm font-bold text-white shadow-xl shadow-primary/30 transition-transform hover:scale-[1.01] active:scale-[0.99]"
+          className="btn-shine mt-3 flex w-full items-center justify-center gap-2 rounded-full gradient-brand px-5 py-2.5 text-sm font-bold text-white shadow-xl shadow-primary/30 transition-transform hover:scale-[1.01] active:scale-[0.99]"
         >
           <span className="btn-shine-inner" />
           <span className="relative">Comprar Agora</span>
@@ -211,7 +211,7 @@ export function BuyPanel() {
                 href={waLink}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full bg-[#25D366] px-4 py-2.5 text-xs font-bold text-white shadow-lg shadow-[#25D366]/30 hover:brightness-110"
+                className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-[#25D366]/30 hover:brightness-110"
               >
                 <MessageCircle className="h-4 w-4" /> Atendimento rápido
               </a>
@@ -221,7 +221,7 @@ export function BuyPanel() {
                 href={groupLink}
                 target="_blank"
                 rel="noreferrer"
-                className="inline-flex items-center gap-2 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-4 py-2.5 text-xs font-bold text-[#128C7E] hover:bg-[#25D366]/15"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-3.5 py-2 text-xs font-bold text-[#128C7E] hover:bg-[#25D366]/15"
               >
                 <Users className="h-4 w-4" /> Grupo de promoções
               </a>
