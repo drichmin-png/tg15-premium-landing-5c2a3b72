@@ -213,7 +213,7 @@ export function BuyPanel() {
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-full bg-[#25D366] px-3.5 py-2 text-xs font-bold text-white shadow-lg shadow-[#25D366]/30 hover:brightness-110"
               >
-                <MessageCircle className="h-4 w-4" /> Atendimento rápido
+                <MessageCircle className="h-3.5 w-3.5" /> Atendimento rápido
               </a>
             )}
             {groupLink && (
@@ -223,7 +223,7 @@ export function BuyPanel() {
                 rel="noreferrer"
                 className="inline-flex items-center gap-1.5 rounded-full border border-[#25D366]/40 bg-[#25D366]/10 px-3.5 py-2 text-xs font-bold text-[#128C7E] hover:bg-[#25D366]/15"
               >
-                <Users className="h-4 w-4" /> Grupo de promoções
+                <Users className="h-3.5 w-3.5" /> Grupo de promoções
               </a>
             )}
           </div>
