@@ -28,7 +28,7 @@ export function BuyPanel() {
   const BOX_PRICE = dynPrice.box;
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-4">
       <div>
         <div className="eyebrow">Uso Subcutâneo • Uso Adulto</div>
         <h1 className="heading-display mt-3 text-4xl md:text-5xl text-ink">
@@ -68,7 +68,7 @@ export function BuyPanel() {
             <button
               key={id}
               onClick={() => cart.setVariant(id)}
-              className={`relative flex items-center gap-4 rounded-2xl border-2 p-4 text-left transition-all ${
+              className={`relative flex items-center gap-3 rounded-2xl border-2 p-3.5 text-left transition-all ${
                 selected
                   ? "border-primary bg-primary/[0.04] shadow-lg shadow-primary/10"
                   : "border-border bg-card hover:border-primary/40"
@@ -79,7 +79,7 @@ export function BuyPanel() {
                   {badge}
                 </span>
               )}
-              <div className="grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-xl bg-sand">
+              <div className="grid h-14 w-14 shrink-0 place-items-center overflow-hidden rounded-xl bg-sand">
                 <img src={variant.image} alt="" className="h-full w-full object-contain p-1" />
               </div>
               <div className="flex-1 min-w-0">
@@ -111,7 +111,7 @@ export function BuyPanel() {
       </div>
 
       {state.variant === "box" && (
-        <div className="card-premium relative overflow-hidden p-5">
+        <div className="card-premium relative overflow-hidden p-4">
           <div className="absolute -right-8 -top-8 h-32 w-32 rounded-full bg-primary/10 blur-2xl" />
           <div className="relative">
             <div className="eyebrow">Economia Real</div>
