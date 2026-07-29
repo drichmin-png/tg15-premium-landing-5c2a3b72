@@ -12,18 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as AdminRouteImport } from './routes/admin'
-import { Route as CodeRouteImport } from './routes/$code'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as MasterIndexRouteImport } from './routes/master.index'
 import { Route as PedidoTokenRouteImport } from './routes/pedido.$token'
-import { Route as OCodeRouteImport } from './routes/o.$code'
-import { Route as MasterTenantsRouteImport } from './routes/master.tenants'
-import { Route as MasterOrdersRouteImport } from './routes/master.orders'
-import { Route as MasterLoginRouteImport } from './routes/master.login'
-import { Route as LojaSlugRouteImport } from './routes/loja.$slug'
-import { Route as AppSlugOrdersRouteImport } from './routes/app.$slug.orders'
-import { Route as AppSlugLoginRouteImport } from './routes/app.$slug.login'
-import { Route as AppSlugDashboardRouteImport } from './routes/app.$slug.dashboard'
 import { Route as ApiPublicWebhookGatewayRouteImport } from './routes/api/public/webhook.$gateway'
 import { Route as ApiPublicHooksTickOrdersRouteImport } from './routes/api/public/hooks/tick-orders'
 
@@ -42,64 +32,14 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CodeRoute = CodeRouteImport.update({
-  id: '/$code',
-  path: '/$code',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MasterIndexRoute = MasterIndexRouteImport.update({
-  id: '/master/',
-  path: '/master/',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PedidoTokenRoute = PedidoTokenRouteImport.update({
   id: '/pedido/$token',
   path: '/pedido/$token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OCodeRoute = OCodeRouteImport.update({
-  id: '/o/$code',
-  path: '/o/$code',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MasterTenantsRoute = MasterTenantsRouteImport.update({
-  id: '/master/tenants',
-  path: '/master/tenants',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MasterOrdersRoute = MasterOrdersRouteImport.update({
-  id: '/master/orders',
-  path: '/master/orders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MasterLoginRoute = MasterLoginRouteImport.update({
-  id: '/master/login',
-  path: '/master/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LojaSlugRoute = LojaSlugRouteImport.update({
-  id: '/loja/$slug',
-  path: '/loja/$slug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppSlugOrdersRoute = AppSlugOrdersRouteImport.update({
-  id: '/app/$slug/orders',
-  path: '/app/$slug/orders',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppSlugLoginRoute = AppSlugLoginRouteImport.update({
-  id: '/app/$slug/login',
-  path: '/app/$slug/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppSlugDashboardRoute = AppSlugDashboardRouteImport.update({
-  id: '/app/$slug/dashboard',
-  path: '/app/$slug/dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiPublicWebhookGatewayRoute = ApiPublicWebhookGatewayRouteImport.update({
@@ -116,59 +56,29 @@ const ApiPublicHooksTickOrdersRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/$code': typeof CodeRoute
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/loja/$slug': typeof LojaSlugRoute
-  '/master/login': typeof MasterLoginRoute
-  '/master/orders': typeof MasterOrdersRoute
-  '/master/tenants': typeof MasterTenantsRoute
-  '/o/$code': typeof OCodeRoute
   '/pedido/$token': typeof PedidoTokenRoute
-  '/master/': typeof MasterIndexRoute
-  '/app/$slug/dashboard': typeof AppSlugDashboardRoute
-  '/app/$slug/login': typeof AppSlugLoginRoute
-  '/app/$slug/orders': typeof AppSlugOrdersRoute
   '/api/public/hooks/tick-orders': typeof ApiPublicHooksTickOrdersRoute
   '/api/public/webhook/$gateway': typeof ApiPublicWebhookGatewayRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/$code': typeof CodeRoute
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/loja/$slug': typeof LojaSlugRoute
-  '/master/login': typeof MasterLoginRoute
-  '/master/orders': typeof MasterOrdersRoute
-  '/master/tenants': typeof MasterTenantsRoute
-  '/o/$code': typeof OCodeRoute
   '/pedido/$token': typeof PedidoTokenRoute
-  '/master': typeof MasterIndexRoute
-  '/app/$slug/dashboard': typeof AppSlugDashboardRoute
-  '/app/$slug/login': typeof AppSlugLoginRoute
-  '/app/$slug/orders': typeof AppSlugOrdersRoute
   '/api/public/hooks/tick-orders': typeof ApiPublicHooksTickOrdersRoute
   '/api/public/webhook/$gateway': typeof ApiPublicWebhookGatewayRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/$code': typeof CodeRoute
   '/admin': typeof AdminRoute
   '/checkout': typeof CheckoutRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
-  '/loja/$slug': typeof LojaSlugRoute
-  '/master/login': typeof MasterLoginRoute
-  '/master/orders': typeof MasterOrdersRoute
-  '/master/tenants': typeof MasterTenantsRoute
-  '/o/$code': typeof OCodeRoute
   '/pedido/$token': typeof PedidoTokenRoute
-  '/master/': typeof MasterIndexRoute
-  '/app/$slug/dashboard': typeof AppSlugDashboardRoute
-  '/app/$slug/login': typeof AppSlugLoginRoute
-  '/app/$slug/orders': typeof AppSlugOrdersRoute
   '/api/public/hooks/tick-orders': typeof ApiPublicHooksTickOrdersRoute
   '/api/public/webhook/$gateway': typeof ApiPublicWebhookGatewayRoute
 }
@@ -176,78 +86,38 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
-    | '/$code'
     | '/admin'
     | '/checkout'
     | '/sitemap.xml'
-    | '/loja/$slug'
-    | '/master/login'
-    | '/master/orders'
-    | '/master/tenants'
-    | '/o/$code'
     | '/pedido/$token'
-    | '/master/'
-    | '/app/$slug/dashboard'
-    | '/app/$slug/login'
-    | '/app/$slug/orders'
     | '/api/public/hooks/tick-orders'
     | '/api/public/webhook/$gateway'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/$code'
     | '/admin'
     | '/checkout'
     | '/sitemap.xml'
-    | '/loja/$slug'
-    | '/master/login'
-    | '/master/orders'
-    | '/master/tenants'
-    | '/o/$code'
     | '/pedido/$token'
-    | '/master'
-    | '/app/$slug/dashboard'
-    | '/app/$slug/login'
-    | '/app/$slug/orders'
     | '/api/public/hooks/tick-orders'
     | '/api/public/webhook/$gateway'
   id:
     | '__root__'
     | '/'
-    | '/$code'
     | '/admin'
     | '/checkout'
     | '/sitemap.xml'
-    | '/loja/$slug'
-    | '/master/login'
-    | '/master/orders'
-    | '/master/tenants'
-    | '/o/$code'
     | '/pedido/$token'
-    | '/master/'
-    | '/app/$slug/dashboard'
-    | '/app/$slug/login'
-    | '/app/$slug/orders'
     | '/api/public/hooks/tick-orders'
     | '/api/public/webhook/$gateway'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  CodeRoute: typeof CodeRoute
   AdminRoute: typeof AdminRoute
   CheckoutRoute: typeof CheckoutRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
-  LojaSlugRoute: typeof LojaSlugRoute
-  MasterLoginRoute: typeof MasterLoginRoute
-  MasterOrdersRoute: typeof MasterOrdersRoute
-  MasterTenantsRoute: typeof MasterTenantsRoute
-  OCodeRoute: typeof OCodeRoute
   PedidoTokenRoute: typeof PedidoTokenRoute
-  MasterIndexRoute: typeof MasterIndexRoute
-  AppSlugDashboardRoute: typeof AppSlugDashboardRoute
-  AppSlugLoginRoute: typeof AppSlugLoginRoute
-  AppSlugOrdersRoute: typeof AppSlugOrdersRoute
   ApiPublicHooksTickOrdersRoute: typeof ApiPublicHooksTickOrdersRoute
   ApiPublicWebhookGatewayRoute: typeof ApiPublicWebhookGatewayRoute
 }
@@ -275,13 +145,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/$code': {
-      id: '/$code'
-      path: '/$code'
-      fullPath: '/$code'
-      preLoaderRoute: typeof CodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
@@ -289,74 +152,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/master/': {
-      id: '/master/'
-      path: '/master'
-      fullPath: '/master/'
-      preLoaderRoute: typeof MasterIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/pedido/$token': {
       id: '/pedido/$token'
       path: '/pedido/$token'
       fullPath: '/pedido/$token'
       preLoaderRoute: typeof PedidoTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/o/$code': {
-      id: '/o/$code'
-      path: '/o/$code'
-      fullPath: '/o/$code'
-      preLoaderRoute: typeof OCodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/master/tenants': {
-      id: '/master/tenants'
-      path: '/master/tenants'
-      fullPath: '/master/tenants'
-      preLoaderRoute: typeof MasterTenantsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/master/orders': {
-      id: '/master/orders'
-      path: '/master/orders'
-      fullPath: '/master/orders'
-      preLoaderRoute: typeof MasterOrdersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/master/login': {
-      id: '/master/login'
-      path: '/master/login'
-      fullPath: '/master/login'
-      preLoaderRoute: typeof MasterLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/loja/$slug': {
-      id: '/loja/$slug'
-      path: '/loja/$slug'
-      fullPath: '/loja/$slug'
-      preLoaderRoute: typeof LojaSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/$slug/orders': {
-      id: '/app/$slug/orders'
-      path: '/app/$slug/orders'
-      fullPath: '/app/$slug/orders'
-      preLoaderRoute: typeof AppSlugOrdersRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/$slug/login': {
-      id: '/app/$slug/login'
-      path: '/app/$slug/login'
-      fullPath: '/app/$slug/login'
-      preLoaderRoute: typeof AppSlugLoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app/$slug/dashboard': {
-      id: '/app/$slug/dashboard'
-      path: '/app/$slug/dashboard'
-      fullPath: '/app/$slug/dashboard'
-      preLoaderRoute: typeof AppSlugDashboardRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/public/webhook/$gateway': {
@@ -378,33 +178,13 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  CodeRoute: CodeRoute,
   AdminRoute: AdminRoute,
   CheckoutRoute: CheckoutRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
-  LojaSlugRoute: LojaSlugRoute,
-  MasterLoginRoute: MasterLoginRoute,
-  MasterOrdersRoute: MasterOrdersRoute,
-  MasterTenantsRoute: MasterTenantsRoute,
-  OCodeRoute: OCodeRoute,
   PedidoTokenRoute: PedidoTokenRoute,
-  MasterIndexRoute: MasterIndexRoute,
-  AppSlugDashboardRoute: AppSlugDashboardRoute,
-  AppSlugLoginRoute: AppSlugLoginRoute,
-  AppSlugOrdersRoute: AppSlugOrdersRoute,
   ApiPublicHooksTickOrdersRoute: ApiPublicHooksTickOrdersRoute,
   ApiPublicWebhookGatewayRoute: ApiPublicWebhookGatewayRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
