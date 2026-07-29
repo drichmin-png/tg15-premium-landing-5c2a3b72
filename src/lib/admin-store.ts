@@ -348,6 +348,7 @@ export const admin = {
     state = { ...state, blocks };
     persist(state);
     notify();
+    void admin.saveRemote();
   },
   toggleBlock: (id: BlockId) => {
     state = {
@@ -356,6 +357,7 @@ export const admin = {
     };
     persist(state);
     notify();
+    void admin.saveRemote();
   },
   moveBlock: (id: BlockId, dir: -1 | 1) => {
     const idx = state.blocks.findIndex((b) => b.id === id);
@@ -368,6 +370,7 @@ export const admin = {
     state = { ...state, blocks: arr };
     persist(state);
     notify();
+    void admin.saveRemote();
   },
   login: (_password: string) => {
     // Client-side password check removed — only server-verified logins are accepted.
