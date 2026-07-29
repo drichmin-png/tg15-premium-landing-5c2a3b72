@@ -190,7 +190,6 @@ export function Dashboard() {
           {tab === "gateway" && <GatewayPanel s={s} />}
           {tab === "suporte" && <SupportPanel s={s} />}
           {tab === "seguranca" && <SecurityPanel />}
-          {tab === "seguranca" && <SecurityPanel />}
 
         </main>
 
