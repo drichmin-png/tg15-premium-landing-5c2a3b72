@@ -194,7 +194,7 @@ export function BuyPanel() {
             });
             nav({ to: "/checkout" });
           }}
-          className="btn-shine mt-3 flex w-full items-center justify-center gap-2 rounded-full gradient-brand px-5 py-2.5 text-sm font-bold text-white shadow-xl shadow-primary/30 transition-transform hover:scale-[1.01] active:scale-[0.99]"
+          className="btn-shine mt-3 mx-auto flex w-full max-w-[16rem] items-center justify-center gap-2 rounded-full gradient-brand px-4 py-2 text-sm font-bold text-white shadow-xl shadow-primary/30 transition-transform hover:scale-[1.01] active:scale-[0.99]"
         >
           <span className="btn-shine-inner" />
           <span className="relative">Comprar Agora</span>
