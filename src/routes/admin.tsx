@@ -37,17 +37,6 @@ import {
   getLocalAnalyticsSuggestions,
   type AnalyticsReport,
 } from "@/lib/local-db";
-import {
-  buildLocalTenantAccessUrl,
-  buildLocalTenantShortUrl,
-  createLocalTenant,
-  deleteLocalTenant,
-  impersonateLocalTenant,
-  listLocalTenants,
-  resetLocalTenantPassword,
-  setLocalTenantStatus,
-  type LocalTenant,
-} from "@/lib/saas-local";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({ meta: [{ title: "Painel T.G.15 — Administração" }, { name: "robots", content: "noindex" }] }),
