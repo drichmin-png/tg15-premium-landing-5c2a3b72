@@ -348,7 +348,7 @@ export const admin = {
     state = { ...state, blocks };
     persist(state);
     notify();
-    void admin.saveRemote();
+    void admin.saveRemote().catch(() => {});
   },
   toggleBlock: (id: BlockId) => {
     state = {
@@ -357,7 +357,7 @@ export const admin = {
     };
     persist(state);
     notify();
-    void admin.saveRemote();
+    void admin.saveRemote().catch(() => {});
   },
   moveBlock: (id: BlockId, dir: -1 | 1) => {
     const idx = state.blocks.findIndex((b) => b.id === id);
@@ -370,7 +370,7 @@ export const admin = {
     state = { ...state, blocks: arr };
     persist(state);
     notify();
-    void admin.saveRemote();
+    void admin.saveRemote().catch(() => {});
   },
   login: (_password: string) => {
     // Client-side password check removed — only server-verified logins are accepted.
@@ -428,16 +428,14 @@ export const admin = {
     persist(state);
     notify();
     const pwd = authPassword;
-    if (!pwd) return;
-    try {
-      const payload: Record<string, unknown> = {};
-      for (const k of REMOTE_KEYS) payload[k as string] = state[k];
-      const { saveSiteConfig } = await import("@/lib/site-config.functions");
-      await saveSiteConfig({ data: { password: pwd, data: JSON.stringify(payload), namespace: namespace ?? null } });
-    } catch {
-      // silencioso: continua funcionando localmente
-    }
+    if (!pwd) throw new Error("Faça login no painel admin novamente para publicar as alterações");
+    const payload: Record<string, unknown> = {};
+    for (const k of REMOTE_KEYS) payload[k as string] = state[k];
+    const { saveSiteConfig } = await import("@/lib/site-config.functions");
+    await saveSiteConfig({ data: { password: pwd, data: JSON.stringify(payload), namespace: namespace ?? null } });
+    return true;
   },
+
   publishStorefrontAs: async (slug: string) => {
     ensureHydrated();
     const pwd = authPassword;

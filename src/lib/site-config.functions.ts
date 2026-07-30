@@ -75,11 +75,30 @@ export const saveSiteConfig = createServerFn({ method: "POST" })
     const clean = stripSensitive(parsed);
     const ns = normalizeNamespace(data.namespace);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { error } = await supabaseAdmin.rpc("save_site_config", {
-      pwd: data.password,
-      payload: clean as never,
-      ns,
-    });
-    if (error) throw new Error(error.message);
-    return { ok: true, updated_at: new Date().toISOString() };
+
+    const finder = supabaseAdmin.from("site_config").select("id");
+    const { data: existing, error: findError } = ns
+      ? await finder.eq("namespace", ns).maybeSingle()
+      : await finder.eq("singleton", true).maybeSingle();
+    if (findError) throw new Error(findError.message);
+
+    const updated_at = new Date().toISOString();
+    if (existing?.id) {
+      const { error } = await supabaseAdmin
+        .from("site_config")
+        .update({ data: clean as never, updated_at })
+        .eq("id", existing.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await supabaseAdmin.from("site_config").insert({
+        singleton: !ns,
+        namespace: ns,
+        data: clean as never,
+        updated_at,
+      });
+      if (error) throw new Error(error.message);
+    }
+
+    return { ok: true, updated_at };
   });
+
