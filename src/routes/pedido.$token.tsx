@@ -46,12 +46,26 @@ function PedidoConclusao() {
   const adminState = useAdmin();
 
   useEffect(() => {
+    let active = true;
     admin.hydrateRemote();
     const rows = listAllLocalOrders();
     const found = rows.find((o) => o.public_token === token || o.id === token);
     if (!found) {
-      setNotFound(true);
-      return;
+      // fallback: busca no servidor (pedido feito em outro aparelho)
+      void (async () => {
+        try {
+          const { getOrderByToken } = await import("@/lib/orders-public.functions");
+          const remote = await getOrderByToken({ data: { token } });
+          if (!active) return;
+          if (remote) setOrder({ ...(remote as unknown as AdminOrder), tenant_slug: "principal" });
+          else setNotFound(true);
+        } catch {
+          if (active) setNotFound(true);
+        }
+      })();
+      return () => {
+        active = false;
+      };
     }
     // aplicar namespace do operador correspondente para carregar as configs certas (pix / whatsapp)
     if (typeof window !== "undefined") {
@@ -64,7 +78,11 @@ function PedidoConclusao() {
       }
     }
     setOrder(found);
+    return () => {
+      active = false;
+    };
   }, [token]);
+
 
   const total = order ? order.total_cents / 100 : 0;
   const trackingCode = order ? `BR${order.public_token.replace(/[^A-Z0-9]/gi, "").toUpperCase().padEnd(9, "0").slice(0, 9)}TG` : "";
