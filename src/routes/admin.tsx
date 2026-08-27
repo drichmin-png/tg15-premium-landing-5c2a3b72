@@ -800,17 +800,43 @@ Qualquer dúvida, é só responder por aqui.`;
 
 function OrdersPanel() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
+  const [remoteIds, setRemoteIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
+  const [warn, setWarn] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
   const [filter, setFilter] = useState<"all" | "pending" | "paid" | "cancelled">("all");
 
   async function reload() {
     setLoading(true);
     setErr(null);
+    setWarn(null);
     try {
-      const rows = listAllLocalOrders();
-      setOrders(rows);
+      const local = listAllLocalOrders() as AdminOrder[];
+      let remote: AdminOrder[] = [];
+      const pwd = admin.getAuthPassword();
+      if (pwd) {
+        try {
+          const { listOrdersAdmin } = await import("@/lib/orders-admin.functions");
+          remote = (await listOrdersAdmin({ data: { password: pwd } })) as unknown as AdminOrder[];
+        } catch (e) {
+          setWarn(
+            e instanceof Error
+              ? `Pedidos do servidor não carregaram: ${e.message}`
+              : "Pedidos do servidor não carregaram",
+          );
+        }
+      }
+      const ids = new Set(remote.map((o) => o.id));
+      setRemoteIds(ids);
+      const byToken = new Map<string, AdminOrder>();
+      for (const o of remote) byToken.set(o.public_token, o);
+      for (const o of local) if (!byToken.has(o.public_token)) byToken.set(o.public_token, o);
+      setOrders(
+        [...byToken.values()].sort(
+          (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+        ),
+      );
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Erro ao carregar pedidos");
     } finally {
@@ -823,22 +849,30 @@ function OrdersPanel() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  async function setStatus(id: string, payment_status: string) {
+  async function patchOrder(
+    id: string,
+    patch: { payment_status?: string; delivery_status_override?: string | null },
+  ) {
     try {
-      updateLocalOrder(id, { payment_status });
+      updateLocalOrder(id, patch);
+      const pwd = admin.getAuthPassword();
+      if (pwd && remoteIds.has(id)) {
+        const { updateOrderStatusAdmin } = await import("@/lib/orders-admin.functions");
+        await updateOrderStatusAdmin({ data: { password: pwd, orderId: id, ...patch } });
+      }
       await reload();
     } catch (e) {
       alert(e instanceof Error ? e.message : "Erro");
     }
+  }
+
+  async function setStatus(id: string, payment_status: string) {
+    await patchOrder(id, { payment_status });
   }
   async function setDelivery(id: string, delivery_status_override: string | null) {
-    try {
-      updateLocalOrder(id, { delivery_status_override });
-      await reload();
-    } catch (e) {
-      alert(e instanceof Error ? e.message : "Erro");
-    }
+    await patchOrder(id, { delivery_status_override });
   }
+
 
   const filtered = orders.filter((o) => filter === "all" || o.payment_status === filter);
   const totalPaidCents = orders
