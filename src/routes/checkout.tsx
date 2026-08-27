@@ -541,7 +541,45 @@ function StepConfirm({ orderId, trackingCode, total, state }: { orderId: string;
           },
         ],
       });
+
+      // Registra também no servidor, para o pedido aparecer no painel de qualquer aparelho
+      void (async () => {
+        try {
+          const { createOrderPublic } = await import("@/lib/orders-public.functions");
+          await createOrderPublic({
+            data: {
+              public_token: orderId,
+              payment_method: state.payment || "pix",
+              card_installments: state.cardInstallments,
+              total_cents: Math.round(total * 100),
+              customer_name: state.customer.fullName,
+              customer_email: state.customer.email,
+              customer_phone: state.customer.phone,
+              customer_cpf: state.customer.cpf,
+              address_zip: state.address.zip,
+              address_street: state.address.street,
+              address_number: state.address.number,
+              address_complement: state.address.complement,
+              address_district: state.address.district,
+              address_city: state.address.city,
+              address_state: state.address.state,
+              notes: state.address.reference,
+              items: [
+                {
+                  variant_id: state.variant,
+                  variant_name: state.variant === "box" ? admin.products.box.name : admin.products.single.name,
+                  quantity: state.qty,
+                  unit_price_cents: Math.round(unitPrice * 100),
+                },
+              ],
+            },
+          });
+        } catch {
+          /* falha silenciosa: pedido segue salvo localmente */
+        }
+      })();
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
