@@ -802,6 +802,8 @@ function OrdersPanel() {
   const [orders, setOrders] = useState<AdminOrder[]>([]);
   const [remoteIds, setRemoteIds] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(true);
+  const [syncing, setSyncing] = useState(false);
+
   const [err, setErr] = useState<string | null>(null);
   const [warn, setWarn] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
