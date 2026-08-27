@@ -873,6 +873,60 @@ function OrdersPanel() {
     await patchOrder(id, { delivery_status_override });
   }
 
+  /** Envia ao servidor os pedidos antigos que só existem neste aparelho. */
+  async function syncLocalToServer() {
+    setSyncing(true);
+    setWarn(null);
+    try {
+      const { createOrderPublic } = await import("@/lib/orders-public.functions");
+      const local = listAllLocalOrders();
+      let sent = 0;
+      for (const o of local) {
+        try {
+          const res = await createOrderPublic({
+            data: {
+              public_token: o.public_token || o.id,
+              payment_method: o.payment_method || "pix",
+              card_installments: o.card_installments || 1,
+              total_cents: o.total_cents,
+              customer_name: o.customer_name,
+              customer_email: o.customer_email,
+              customer_phone: o.customer_phone,
+              customer_cpf: o.customer_cpf,
+              address_zip: o.address_zip,
+              address_street: o.address_street,
+              address_number: o.address_number,
+              address_complement: o.address_complement || "",
+              address_district: o.address_district || "",
+              address_city: o.address_city,
+              address_state: o.address_state,
+              notes: o.notes || "",
+              items: o.items.map((it) => ({
+                variant_id: it.variant_id,
+                variant_name: it.variant_name,
+                quantity: it.quantity,
+                unit_price_cents: it.unit_price_cents,
+              })),
+            },
+          });
+          if (!res.duplicated) sent += 1;
+        } catch {
+          /* pula pedidos inválidos */
+        }
+      }
+      setWarn(
+        sent > 0
+          ? `${sent} pedido(s) deste aparelho foram enviados ao servidor.`
+          : "Nenhum pedido novo para enviar — todos já estão no servidor.",
+      );
+      await reload();
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+
+
 
   const filtered = orders.filter((o) => filter === "all" || o.payment_status === filter);
   const totalPaidCents = orders
