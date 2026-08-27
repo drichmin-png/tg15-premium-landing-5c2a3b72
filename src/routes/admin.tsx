@@ -922,6 +922,13 @@ function OrdersPanel() {
           </div>
         )}
 
+        {warn && (
+          <div className="mt-4 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm text-amber-800">
+            {warn}
+          </div>
+        )}
+
+
         {loading && orders.length === 0 && (
           <div className="mt-6 text-sm text-muted-foreground">Carregando pedidos…</div>
         )}
