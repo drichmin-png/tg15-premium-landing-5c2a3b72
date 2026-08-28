@@ -178,13 +178,10 @@ export function Dashboard() {
         <main className="min-w-0 space-y-6">
           <ShareSiteLink />
           {tab === "pedidos" && <OrdersPanel />}
-          {tab === "relatorio" && <AnalyticsPanel />}
           {tab === "produtos" && <ProductsPanel s={s} />}
           {tab === "hero" && <HeroPanel s={s} />}
           {tab === "blocos" && <BlocksPanel s={s} />}
-          {tab === "tracking" && <TrackingPanel s={s} />}
           {tab === "pix" && <PixPanel s={s} />}
-          {tab === "gateway" && <GatewayPanel s={s} />}
           {tab === "suporte" && <SupportPanel s={s} />}
           {tab === "seguranca" && <SecurityPanel />}
 
