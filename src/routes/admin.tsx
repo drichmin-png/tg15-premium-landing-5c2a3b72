@@ -105,7 +105,7 @@ function LoginScreen() {
   );
 }
 
-type Tab = "pedidos" | "relatorio" | "produtos" | "blocos" | "hero" | "tracking" | "gateway" | "pix" | "suporte" | "seguranca";
+type Tab = "pedidos" | "produtos" | "blocos" | "hero" | "pix" | "suporte" | "seguranca";
 
 export function Dashboard() {
   const [tab, setTab] = useState<Tab>("pedidos");
@@ -113,13 +113,10 @@ export function Dashboard() {
 
   const tabs: { id: Tab; label: string }[] = [
     { id: "pedidos", label: "Pedidos" },
-    { id: "relatorio", label: "Relatório & IA" },
     { id: "produtos", label: "Produtos e Preços" },
     { id: "hero", label: "Hero / Textos" },
     { id: "blocos", label: "Blocos da Página" },
-    { id: "tracking", label: "Facebook Pixel & Tracking" },
     { id: "pix", label: "Pagamento Pix" },
-    { id: "gateway", label: "Gateway de Pagamento" },
     { id: "suporte", label: "Suporte / WhatsApp" },
     { id: "seguranca", label: "Segurança" },
   ];
